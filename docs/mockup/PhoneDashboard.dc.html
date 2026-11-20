@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot phone dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F5F9}
+a{color:#0F1B33}a:hover{color:#2B3D63}
+button{font:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: #F3F5F9; font-family: Nunito, system-ui, sans-serif; color: #0F1B33; display: flex; flex-direction: column">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 22px 20px 14px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="width: 38px; height: 38px; border-radius: 12px; background: {{accent}}; display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none" stroke="#0F1B33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 13l2 15h10l2-15"></path><path d="M13 13l1 15M19 13l-1 15"></path><circle cx="11" cy="10" r="3"></circle><circle cx="16" cy="8" r="3.2"></circle><circle cx="21" cy="10" r="3"></circle><path d="M3 18l6-2M29 18l-6-2"></path></svg>
+      </span>
+      <span style="font-family: Fredoka, Nunito, sans-serif; font-size: 22px; font-weight: 700">Popcorn Pilot</span>
+    </div>
+    <button aria-label="Lock app" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(15,27,51,0.12)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    </button>
+  </header>
+
+  <main style="flex-grow: 1; display: flex; flex-direction: column; gap: 14px; padding: 0 16px 16px; overflow: hidden">
+
+    <section aria-label="Requests" style="display: flex; flex-direction: column; gap: 10px; background: #0F1B33; color: #FFFFFF; border-radius: 20px; padding: 16px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <h2 style="margin: 0; font-family: Fredoka, Nunito, sans-serif; font-size: 18px; font-weight: 600">2 requests</h2>
+        <a href="#requests" style="color: #FFC94A; font-size: 14px; font-weight: 800; text-decoration: none">See all</a>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: 15px; font-weight: 800">[Kid name] wants 20 more min</span>
+          <span style="font-size: 13px; font-weight: 600; color: #C5CEDF">Living room · 2 min ago</span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <button aria-label="Deny" style="width: 44px; height: 44px; border-radius: 22px; border: 2px solid #4A5878; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+          <button aria-label="Approve" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFC94A; display: flex; align-items: center; justify-content: center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #2B3D63; padding-top: 10px">
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: 15px; font-weight: 800">Task done: Pick up toys</span>
+          <span style="font-size: 13px; font-weight: 600; color: #C5CEDF">Earns 15 min · [Kid name]</span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <button aria-label="Deny" style="width: 44px; height: 44px; border-radius: 22px; border: 2px solid #4A5878; background: transparent; display: flex; align-items: center; justify-content: center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+          <button aria-label="Approve" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #FFC94A; display: flex; align-items: center; justify-content: center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Living room TV" style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border-radius: 20px; padding: 16px; box-shadow: 0 1px 3px rgba(15,27,51,0.1)">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="width: 10px; height: 10px; border-radius: 5px; background: #2E9E6B" aria-hidden="true"></span>
+          <h2 style="margin: 0; font-family: Fredoka, Nunito, sans-serif; font-size: 18px; font-weight: 600">Living room</h2>
+        </div>
+        <span style="font-size: 13px; font-weight: 800; background: #E3F4EC; color: #1F6B49; padding: 4px 10px; border-radius: 10px">Kid mode</span>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center">
+        <div style="width: 64px; height: 64px; border-radius: 14px; background: #8FB3FF; flex-shrink: 0" aria-hidden="true"></div>
+        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+          <span style="font-size: 16px; font-weight: 800">[Show title] · S2 E4</span>
+          <span style="font-size: 13px; font-weight: 700; color: #4A5878">Netflix · Saturday Cartoons · 3 of 6</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #4A5878">
+          <span>[Kid name] · time left today</span>
+          <span style="color: #0F1B33">35 min</span>
+        </div>
+        <div style="height: 10px; border-radius: 5px; background: #E4E9F2; overflow: hidden">
+          <div style="{{barStyle}}"></div>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+        <button style="height: 44px; border-radius: 12px; border: 0; background: #F3F5F9; font-size: 14px; font-weight: 800; color: #0F1B33">Pause</button>
+        <button style="height: 44px; border-radius: 12px; border: 0; background: #F3F5F9; font-size: 14px; font-weight: 800; color: #0F1B33">Remote</button>
+        <button style="height: 44px; border-radius: 12px; border: 0; background: #F3F5F9; font-size: 14px; font-weight: 800; color: #0F1B33">Send to…</button>
+      </div>
+    </section>
+
+    <section aria-label="Guest room TV" style="display: flex; flex-direction: column; gap: 12px; background: #FFFFFF; border-radius: 20px; padding: 16px; box-shadow: 0 1px 3px rgba(15,27,51,0.1)">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <span style="width: 10px; height: 10px; border-radius: 5px; background: #9AA6BD" aria-hidden="true"></span>
+          <h2 style="margin: 0; font-family: Fredoka, Nunito, sans-serif; font-size: 18px; font-weight: 600">Guest room</h2>
+        </div>
+        <span style="font-size: 13px; font-weight: 800; color: #4A5878">Off</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <button style="height: 44px; border-radius: 12px; border: 0; background: {{accent}}; font-size: 14px; font-weight: 800; color: #0F1B33">Turn on</button>
+        <button style="height: 44px; border-radius: 12px; border: 0; background: #F3F5F9; font-size: 14px; font-weight: 800; color: #0F1B33">Start routine</button>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="Main" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: #FFFFFF; border-top: 1px solid #E4E9F2; padding: 8px 8px 22px">
+    <a href="#home" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: #0F1B33; font-size: 12px; font-weight: 800">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9H3z"></path></svg>
+      Home
+    </a>
+    <a href="#browse" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: #4A5878; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+      Browse
+    </a>
+    <a href="#playlists" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: #4A5878; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h12M4 12h12M4 18h8M18 15v6l4-3z"></path></svg>
+      Playlists
+    </a>
+    <a href="#kids" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: #4A5878; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4 4-6 8-6s7 2 8 6"></path></svg>
+      Profiles
+    </a>
+    <a href="#settings" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: #4A5878; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+      Settings
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFC94A","options":["#FFC94A","#FF8A65","#7FC8A9","#8FB3FF"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const pct = 35 / 60;
+    const hue = Math.round(120 * pct);
+    return {
+      accent: this.props.accent ?? '#FFC94A',
+      barStyle: 'width: ' + Math.round(pct * 100) + '%; height: 10px; border-radius: 5px; background: hsl(' + hue + ', 72%, 42%)'
+    };
+  }
+}
+</script>
+</body>
+</html>

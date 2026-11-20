@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot browse titles</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F5F9}
+a{color:#0F1B33}a:hover{color:#2B3D63}
+button{font:inherit;cursor:pointer}
+input{font:inherit}
+</style>
+</helmet>
+<div style="min-height: 1000px; box-sizing: border-box; background: #F3F5F9; font-family: Nunito, system-ui, sans-serif; color: #0F1B33; display: flex; flex-direction: column">
+
+  <header style="background: #0F1B33; color: #FFFFFF">
+    <div style="max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 14px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span style="width: 40px; height: 40px; border-radius: 12px; background: {{accent}}; display: flex; align-items: center; justify-content: center">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#0F1B33" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 13l2 15h10l2-15"></path><path d="M13 13l1 15M19 13l-1 15"></path><circle cx="11" cy="10" r="3"></circle><circle cx="16" cy="8" r="3.2"></circle><circle cx="21" cy="10" r="3"></circle><path d="M3 18l6-2M29 18l-6-2"></path></svg>
+        </span>
+        <span style="font-family: Fredoka, Nunito, sans-serif; font-size: 22px; font-weight: 700">Popcorn Pilot</span>
+      </div>
+      <nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 6px">
+        <a href="#home" style="padding: 10px 16px; border-radius: 12px; color: #D6DDEA; text-decoration: none; font-weight: 700">Home</a>
+        <a href="#browse" style="padding: 10px 16px; border-radius: 12px; background: #2B3D63; color: #FFFFFF; text-decoration: none; font-weight: 800">Browse</a>
+        <a href="#playlists" style="padding: 10px 16px; border-radius: 12px; color: #D6DDEA; text-decoration: none; font-weight: 700">Playlists</a>
+        <a href="#profiles" style="padding: 10px 16px; border-radius: 12px; color: #D6DDEA; text-decoration: none; font-weight: 700">Profiles</a>
+        <a href="#settings" style="padding: 10px 16px; border-radius: 12px; color: #D6DDEA; text-decoration: none; font-weight: 700">Settings</a>
+      </nav>
+      <button aria-label="Lock app" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #2B3D63; display: flex; align-items: center; justify-content: center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div style="max-width: 1440px; width: 100%; margin: 0 auto; box-sizing: border-box; padding: 24px 32px 40px; display: flex; flex-direction: column; gap: 20px">
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px">
+      <div role="tablist" aria-label="Platform" style="display: flex; flex-wrap: wrap; gap: 6px; background: #FFFFFF; padding: 6px; border-radius: 16px; box-shadow: 0 1px 3px rgba(15,27,51,0.1)">
+        <button role="tab" aria-selected="false" style="height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: transparent; font-weight: 700; color: #4A5878">All</button>
+        <button role="tab" aria-selected="true" style="height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: #0F1B33; font-weight: 800; color: #FFFFFF">Netflix</button>
+        <button role="tab" aria-selected="false" style="height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: transparent; font-weight: 700; color: #4A5878">Prime Video</button>
+        <button role="tab" aria-selected="false" style="height: 44px; padding: 0 18px; border-radius: 12px; border: 0; background: transparent; font-weight: 700; color: #4A5878">Hulu</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+        <label style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 14px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(15,27,51,0.1); min-width: 280px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+          <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search titles</span>
+          <input type="search" placeholder="Search Netflix" style="border: 0; outline: none; background: transparent; font-size: 16px; font-weight: 600; color: #0F1B33; flex-grow: 1">
+        </label>
+        <button style="height: 48px; padding: 0 16px; border-radius: 14px; border: 0; background: #FFFFFF; box-shadow: 0 1px 3px rgba(15,27,51,0.1); font-weight: 800; color: #0F1B33">Shows + Movies</button>
+        <button style="height: 48px; padding: 0 16px; border-radius: 14px; border: 0; background: #FFFFFF; box-shadow: 0 1px 3px rgba(15,27,51,0.1); font-weight: 800; color: #0F1B33">Showing for: Family</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+      <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 26px">
+        <sc-for list="{{rows}}" as="row" hint-placeholder-count="2">
+          <section style="display: flex; flex-direction: column; gap: 12px" aria-label="{{row.name}}">
+            <h2 style="margin: 0; font-family: Fredoka, Nunito, sans-serif; font-size: 22px; font-weight: 600">{{row.name}}</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px">
+              <sc-for list="{{row.items}}" as="t" hint-placeholder-count="6">
+                <button style="{{t.style}}">
+                  <div style="aspect-ratio: 2 / 3; background: {{t.color}}; border-radius: 12px; display: flex; align-items: center; justify-content: center; position: relative">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="rgba(15,27,51,0.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M21 16l-5-5-9 8"></path></svg>
+                    <span style="position: absolute; top: 8px; left: 8px; font-size: 12px; font-weight: 800; background: #0F1B33; color: #FFFFFF; padding: 2px 8px; border-radius: 8px">{{t.rating}}</span>
+                  </div>
+                  <span style="font-size: 15px; font-weight: 800; color: #0F1B33; text-align: left">{{t.title}}</span>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </main>
+
+      <aside aria-label="Title details" style="flex: 1 1 380px; max-width: 460px; background: #FFFFFF; border-radius: 22px; box-shadow: 0 1px 3px rgba(15,27,51,0.1); overflow: hidden; display: flex; flex-direction: column">
+        <div style="aspect-ratio: 16 / 9; background: #3A4A6B; display: flex; align-items: center; justify-content: center; position: relative">
+          <button aria-label="Play trailer" style="width: 72px; height: 72px; border-radius: 36px; border: 0; background: {{accent}}; display: flex; align-items: center; justify-content: center">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="#0F1B33" aria-hidden="true"><path d="M8 5l12 7-12 7z"></path></svg>
+          </button>
+          <span style="position: absolute; bottom: 10px; left: 12px; font-size: 13px; font-weight: 800; color: #FFFFFF">Trailer</span>
+        </div>
+        <div style="padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <h2 style="margin: 0; font-family: Fredoka, Nunito, sans-serif; font-size: 26px; font-weight: 600">Rocket Pals</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; color: #4A5878">
+              <span style="background: #0F1B33; color: #FFFFFF; padding: 2px 8px; border-radius: 8px; font-weight: 800">TV-Y</span>
+              <span>Netflix</span><span>·</span><span>2 seasons</span><span>·</span><span>22 min episodes</span>
+            </div>
+            <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #2B3D63">[Description from the platform]</p>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <label style="font-size: 13px; font-weight: 800; color: #4A5878" for="ep">Start from</label>
+            <select id="ep" style="height: 46px; border-radius: 12px; border: 1px solid #D6DDEA; padding: 0 12px; font: inherit; font-weight: 700; color: #0F1B33; background: #FFFFFF">
+              <option>Season 1 · Episode 1</option>
+              <option>Next unwatched episode</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <button style="height: 48px; border-radius: 14px; border: 0; background: {{accent}}; font-weight: 800; color: #0F1B33">Play on Living room</button>
+            <button style="height: 48px; border-radius: 14px; border: 0; background: #0F1B33; font-weight: 800; color: #FFFFFF">Add to playlist</button>
+            <button style="height: 48px; border-radius: 14px; border: 0; background: #F3F5F9; font-weight: 800; color: #0F1B33">Start quick playlist</button>
+            <button style="height: 48px; border-radius: 14px; border: 0; background: #F3F5F9; font-weight: 800; color: #0F1B33">More like this</button>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; border-top: 1px solid #E4E9F2; padding-top: 14px">
+            <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid #D6DDEA; background: #FFFFFF; font-weight: 800; color: #0F1B33; display: flex; align-items: center; gap: 8px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg>
+              Tag as calm
+            </button>
+            <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 1px solid #D6DDEA; background: #FFFFFF; font-weight: 800; color: #0F1B33; display: flex; align-items: center; gap: 8px">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M5.6 5.6l12.8 12.8"></path></svg>
+              Block for kids
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFC94A","options":["#FFC94A","#FF8A65","#7FC8A9","#8FB3FF"]},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#FFC94A';
+    const base = 'display: flex; flex-direction: column; gap: 8px; padding: 6px; border-radius: 16px; background: transparent; ';
+    const selected = base + 'border: 3px solid ' + accent + '; background: #FFFFFF';
+    const idle = base + 'border: 3px solid transparent';
+    const make = (list, selIdx) => list.map((x, i) => ({ title: x[0], rating: x[1], color: x[2], style: i === selIdx ? selected : idle }));
+    return {
+      accent,
+      rows: [
+        { name: 'Kids and family on Netflix', items: make([
+          ['Rocket Pals', 'TV-Y', '#8FB3FF'], ['Ocean Friends', 'TV-Y', '#7FC8A9'], ['Big Truck Town', 'TV-Y7', '#FF8A65'],
+          ['Star Club', 'TV-Y7', '#FFC94A'], ['Garden Bugs', 'TV-Y', '#C9A7F5'], ['Moon Camp', 'TV-G', '#B8C4DA']
+        ], 0) },
+        { name: 'Movies on Netflix', items: make([
+          ['Snow Pups', 'G', '#A8D8F0'], ['Tiny Train', 'G', '#F5B7A1'], ['Robot Recess', 'PG', '#9FD8C2'],
+          ['Cloud Kitchen', 'G', '#FFE08A'], ['Puddle Jumpers', 'G', '#D3C2F5'], ['Dino Dig', 'PG', '#C5D3A8']
+        ], -1) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
