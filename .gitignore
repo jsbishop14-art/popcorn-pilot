@@ -1,0 +1,11 @@
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+data/
+.tmp/
+test-results/
+playwright-report/
+lib/version.gen.json
+.env*
+scripts/__pycache__/

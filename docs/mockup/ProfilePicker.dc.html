@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot profile picker</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#16264A}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+button{font:inherit;cursor:pointer}
+.tv{width:1280px;height:720px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:#FFFFFF}
+.fd{font-family:Fredoka,Nunito,sans-serif}
+.blob{position:absolute;border-radius:50%;background:#1E3260}
+.kbtn{display:flex;align-items:center;justify-content:center;gap:14px;height:72px;padding:0 34px;border-radius:36px;border:6px solid transparent;background:#FFFFFF;color:#16264A;font-family:Fredoka,Nunito,sans-serif;font-size:28px;font-weight:700;box-shadow:0 8px 0 #0B1630}
+.kbtn.f{border-color:#FFC94A;transform:scale(1.05);box-shadow:0 10px 0 #0B1630,0 0 0 6px rgba(255,201,74,.35)}
+.kbtn.ghost{background:#1E3260;color:#FFFFFF}
+.pill{display:flex;align-items:center;gap:14px;background:#FFFFFF;color:#16264A;border-radius:40px;padding:10px 26px 10px 12px}
+.bar{width:200px;height:16px;border-radius:8px;background:#E4E9F2;overflow:hidden}
+.hint{font-size:18px;font-weight:700;color:#D6DDEA}
+</style>
+</helmet>
+<div class="tv" style="background: #16264A">
+<div class="blob" style="top: -90px; right: -60px; width: 320px; height: 320px" aria-hidden="true"></div><div class="blob" style="bottom: -120px; left: -80px; width: 360px; height: 360px" aria-hidden="true"></div>
+<div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 56px">
+  <h1 class="fd" style="margin: 0; font-size: 52px; font-weight: 700">Who's watching?</h1>
+  <div style="display: flex; gap: 56px"><button style="display: flex; flex-direction: column; align-items: center; gap: 18px; background: transparent; border: 0; color: #FFFFFF">
+<span style="position: relative; width: 190px; height: 190px; border-radius: 95px; background: #FF8A65; border: 7px solid transparent; display: flex; align-items: center; justify-content: center; box-sizing: border-box"><span class="fd" style="font-size: 88px; font-weight: 700; color: #16264A">F</span><span style="position: absolute; right: -4px; bottom: -4px; width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span></span>
+<span class="fd" style="font-size: 30px; font-weight: 600">Family</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 18px; background: transparent; border: 0; color: #FFFFFF">
+<span style="position: relative; width: 190px; height: 190px; border-radius: 95px; background: #7FC8A9; border: 7px solid #FFC94A; transform: scale(1.08); box-shadow: 0 0 0 8px rgba(255,201,74,0.3); display: flex; align-items: center; justify-content: center; box-sizing: border-box"><span class="fd" style="font-size: 88px; font-weight: 700; color: #16264A">K</span></span>
+<span class="fd" style="font-size: 30px; font-weight: 600">[Kid name]</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 18px; background: transparent; border: 0; color: #FFFFFF">
+<span style="position: relative; width: 190px; height: 190px; border-radius: 95px; background: #8FB3FF; border: 7px solid transparent; display: flex; align-items: center; justify-content: center; box-sizing: border-box"><span class="fd" style="font-size: 88px; font-weight: 700; color: #16264A">G</span></span>
+<span class="fd" style="font-size: 30px; font-weight: 600">Guest kid</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 18px; background: transparent; border: 0; color: #FFFFFF">
+<span style="position: relative; width: 190px; height: 190px; border-radius: 95px; background: #C5CEDF; border: 7px solid transparent; display: flex; align-items: center; justify-content: center; box-sizing: border-box"><span class="fd" style="font-size: 88px; font-weight: 700; color: #16264A">+</span><span style="position: absolute; right: -4px; bottom: -4px; width: 48px; height: 48px; border-radius: 24px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span></span>
+<span class="fd" style="font-size: 30px; font-weight: 600">Guest</span></button></div>
+  <span class="hint">Grown-up profiles ask for the PIN</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 1280, "height": 720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

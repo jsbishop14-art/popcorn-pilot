@@ -1,0 +1,10 @@
+[Unit]
+Description=Popcorn Pilot nightly database backup
+
+[Service]
+Type=oneshot
+User=popcorn
+Group=popcorn
+WorkingDirectory=/opt/popcorn-pilot
+EnvironmentFile=/etc/popcorn-pilot/env
+ExecStart=/usr/bin/node /opt/popcorn-pilot/scripts/backup.mjs

@@ -1,0 +1,9 @@
+[Unit]
+Description=Popcorn Pilot "Check for updates now" (Settings leaves a request file)
+
+[Path]
+PathExists=/var/lib/popcorn-pilot/update-requested
+Unit=popcorn-pilot-update.service
+
+[Install]
+WantedBy=multi-user.target

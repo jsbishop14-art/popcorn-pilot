@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot request sent screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#16264A}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+button{font:inherit;cursor:pointer}
+.tv{width:1280px;height:720px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:#FFFFFF}
+.fd{font-family:Fredoka,Nunito,sans-serif}
+.blob{position:absolute;border-radius:50%;background:#1E3260}
+.kbtn{display:flex;align-items:center;justify-content:center;gap:14px;height:72px;padding:0 34px;border-radius:36px;border:6px solid transparent;background:#FFFFFF;color:#16264A;font-family:Fredoka,Nunito,sans-serif;font-size:28px;font-weight:700;box-shadow:0 8px 0 #0B1630}
+.kbtn.f{border-color:#FFC94A;transform:scale(1.05);box-shadow:0 10px 0 #0B1630,0 0 0 6px rgba(255,201,74,.35)}
+.kbtn.ghost{background:#1E3260;color:#FFFFFF}
+.pill{display:flex;align-items:center;gap:14px;background:#FFFFFF;color:#16264A;border-radius:40px;padding:10px 26px 10px 12px}
+.bar{width:200px;height:16px;border-radius:8px;background:#E4E9F2;overflow:hidden}
+.hint{font-size:18px;font-weight:700;color:#D6DDEA}
+</style>
+</helmet>
+<div class="tv" style="background: #16264A">
+<div class="blob" style="top: -90px; right: -60px; width: 320px; height: 320px" aria-hidden="true"></div><div class="blob" style="bottom: -120px; left: -80px; width: 360px; height: 360px" aria-hidden="true"></div>
+<div style="position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; text-align: center">
+  <span style="width: 170px; height: 170px; border-radius: 85px; background: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M4 12l16-8-6 16-3-7z"></path></svg></span>
+  <h1 class="fd" style="margin: 0; font-size: 56px; font-weight: 700">Asked a grown-up!</h1>
+  <div style="display: flex; align-items: center; gap: 14px; background: #1E3260; padding: 14px 30px; border-radius: 34px"><span class="fd" style="font-size: 32px; font-weight: 600">+20 minutes</span></div>
+  <div style="display: flex; gap: 16px" aria-label="Waiting"><span style="width: 26px; height: 26px; border-radius: 13px; background: #FFC94A"></span><span style="width: 26px; height: 26px; border-radius: 13px; background: #FF8A65"></span><span style="width: 26px; height: 26px; border-radius: 13px; background: #7FC8A9"></span></div>
+  <span style="font-size: 22px; font-weight: 700; color: #D6DDEA">A grown-up can say yes on their phone, or with the PIN here.</span>
+  <div style="display: flex; gap: 24px"><button class="kbtn f"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M15 18l-6-6 6-6"></path></svg> Back</button><button class="kbtn"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg> Grown-up PIN</button></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 1280, "height": 720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

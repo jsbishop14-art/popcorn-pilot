@@ -1,0 +1,77 @@
+# One deliberate CI run per build (CLAUDE.md section 3). Every other push carries [skip ci].
+# Each build adds its branch to the list below.
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - pp1-foundation
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Type-check
+        run: npm run typecheck
+      - name: Generated database types are current
+        run: node scripts/gen-types.mjs --check
+      - name: Migrations apply and every expected object reads back
+        run: PP_DATA_DIR=$RUNNER_TEMP/migrate node scripts/migrate.mjs
+      - name: Shellcheck
+        run: shellcheck --version && shellcheck --severity=style scripts/install-pi.sh scripts/update.sh
+      - name: Install script dry run
+        run: bash scripts/install-pi.sh --dry-run
+      - name: Unit tests
+        run: npx vitest run
+      - name: Build
+        run: npm run build
+      - name: Browser
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests (production build + fake Roku)
+        run: npx playwright test
+      - name: Keep browser test traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  arm64:
+    # The hub is a Raspberry Pi (arm64): install, unit tests and the production build on an arm64 runner.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Architecture
+        run: uname -m && node -p process.arch
+      - name: Shellcheck available
+        run: command -v shellcheck || (sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck)
+      - name: Unit tests
+        run: npx vitest run
+      - name: Build
+        run: npm run build

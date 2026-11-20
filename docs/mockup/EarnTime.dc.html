@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot earn time screen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#16264A}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+button{font:inherit;cursor:pointer}
+.tv{width:1280px;height:720px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Nunito,system-ui,sans-serif;color:#FFFFFF}
+.fd{font-family:Fredoka,Nunito,sans-serif}
+.blob{position:absolute;border-radius:50%;background:#1E3260}
+.kbtn{display:flex;align-items:center;justify-content:center;gap:14px;height:72px;padding:0 34px;border-radius:36px;border:6px solid transparent;background:#FFFFFF;color:#16264A;font-family:Fredoka,Nunito,sans-serif;font-size:28px;font-weight:700;box-shadow:0 8px 0 #0B1630}
+.kbtn.f{border-color:#FFC94A;transform:scale(1.05);box-shadow:0 10px 0 #0B1630,0 0 0 6px rgba(255,201,74,.35)}
+.kbtn.ghost{background:#1E3260;color:#FFFFFF}
+.pill{display:flex;align-items:center;gap:14px;background:#FFFFFF;color:#16264A;border-radius:40px;padding:10px 26px 10px 12px}
+.bar{width:200px;height:16px;border-radius:8px;background:#E4E9F2;overflow:hidden}
+.hint{font-size:18px;font-weight:700;color:#D6DDEA}
+</style>
+</helmet>
+<div class="tv" style="background: #16264A">
+<div class="blob" style="top: -90px; right: -60px; width: 320px; height: 320px" aria-hidden="true"></div><div class="blob" style="bottom: -120px; left: -80px; width: 360px; height: 360px" aria-hidden="true"></div>
+<div style="position: relative; height: 100%; box-sizing: border-box; padding: 36px 64px 30px; display: flex; flex-direction: column; gap: 28px">
+  <header style="display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 18px"><svg width="56" height="56" viewBox="0 0 24 24" fill="#FFC94A" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg><span class="fd" style="font-size: 42px; font-weight: 700">Do a job, earn more TV!</span></div>
+    <div style="display: flex; align-items: center; gap: 8px" role="img" aria-label="2 of 4 bonus stars earned this week"><svg width="40" height="40" viewBox="0 0 24 24" fill="#FFC94A" stroke="#FFC94A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #FFC94A; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg><svg width="40" height="40" viewBox="0 0 24 24" fill="#FFC94A" stroke="#FFC94A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #FFC94A; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg></div>
+  </header>
+  <main style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; flex-grow: 1; align-items: center"><button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px 20px; border-radius: 32px; background: #FFFFFF; color: #16264A; border: 7px solid transparent; box-shadow: 0 10px 0 #0B1630">
+<span style="width: 110px; height: 110px; border-radius: 55px; background: #FFF3C4; display: flex; align-items: center; justify-content: center"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg></span>
+<span class="fd" style="font-size: 28px; font-weight: 600">Pick up toys</span>
+<span class="fd" style="font-size: 26px; font-weight: 700; color: #C2410C">+15 min</span>
+<span style="font-size: 18px; font-weight: 800; background: #E4E9F2; padding: 8px 18px; border-radius: 20px">Waiting for a grown-up</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px 20px; border-radius: 32px; background: #FFFFFF; color: #16264A; border: 7px solid #FFC94A; transform: scale(1.05); box-shadow: 0 10px 0 #0B1630">
+<span style="width: 110px; height: 110px; border-radius: 55px; background: #FFF3C4; display: flex; align-items: center; justify-content: center"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M3 11l9-7 9 7v9H3z"></path></svg></span>
+<span class="fd" style="font-size: 28px; font-weight: 600">Set the table</span>
+<span class="fd" style="font-size: 26px; font-weight: 700; color: #C2410C">+10 min</span>
+<span style="font-size: 18px; font-weight: 800; background: #FFC94A; padding: 8px 18px; border-radius: 20px">I did it!</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px 20px; border-radius: 32px; background: #FFFFFF; color: #16264A; border: 7px solid transparent; box-shadow: 0 10px 0 #0B1630">
+<span style="width: 110px; height: 110px; border-radius: 55px; background: #FFF3C4; display: flex; align-items: center; justify-content: center"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></span>
+<span class="fd" style="font-size: 28px; font-weight: 600">Pajamas on</span>
+<span class="fd" style="font-size: 26px; font-weight: 700; color: #C2410C">+10 min</span>
+<span style="font-size: 18px; font-weight: 800; background: #FFC94A; padding: 8px 18px; border-radius: 20px">I did it!</span></button><button style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px 20px; border-radius: 32px; background: #FFFFFF; color: #16264A; border: 7px solid transparent; box-shadow: 0 10px 0 #0B1630">
+<span style="width: 110px; height: 110px; border-radius: 55px; background: #FFF3C4; display: flex; align-items: center; justify-content: center"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #16264A; flex-shrink: 0"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span>
+<span class="fd" style="font-size: 28px; font-weight: 600">Brush teeth</span>
+<span class="fd" style="font-size: 26px; font-weight: 700; color: #C2410C">+5 min</span>
+<span style="font-size: 18px; font-weight: 800; background: #7FC8A9; padding: 8px 18px; border-radius: 20px">Done! +5 min</span></button></main>
+  <footer style="display: flex; justify-content: space-between; align-items: center"><button class="kbtn ghost" style="height: 60px; font-size: 22px; box-shadow: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #FFFFFF; flex-shrink: 0"><path d="M15 18l-6-6 6-6"></path></svg> Back</button><div style="display: flex; align-items: center; gap: 12px" aria-label="Use the arrows and OK button"><span style="width: 52px; height: 52px; border-radius: 26px; background: #1E3260; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M12 4l-3 3h6zM12 20l-3-3h6zM4 12l3-3v6zM20 12l-3-3v6z"></path></svg></span><span class="fd" style="height: 52px; padding: 0 22px; border-radius: 26px; background: #1E3260; display: flex; align-items: center; font-size: 22px; font-weight: 700">OK</span></div></footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 1280, "height": 720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

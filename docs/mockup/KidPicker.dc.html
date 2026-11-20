@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot kid picker board</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#16264A}
+a{color:#FFC94A}a:hover{color:#FFE08A}
+button{font:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1280px; height: 720px; box-sizing: border-box; position: relative; overflow: hidden; background: #16264A; font-family: Nunito, system-ui, sans-serif; color: #FFFFFF; padding: 30px 64px 28px; display: flex; flex-direction: column; gap: 22px">
+
+  <div style="position: absolute; top: -90px; right: -60px; width: 320px; height: 320px; border-radius: 160px; background: #1E3260" aria-hidden="true"></div>
+  <div style="position: absolute; bottom: -120px; left: -80px; width: 360px; height: 360px; border-radius: 180px; background: #1E3260" aria-hidden="true"></div>
+
+  <header style="position: relative; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <span style="width: 68px; height: 68px; border-radius: 34px; background: #7FC8A9; color: #16264A; display: flex; align-items: center; justify-content: center; font-family: Fredoka, Nunito, sans-serif; font-size: 32px; font-weight: 700; border: 4px solid #FFFFFF">K</span>
+      <span style="font-family: Fredoka, Nunito, sans-serif; font-size: 40px; font-weight: 700">Pick a show!</span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 16px; background: #FFFFFF; color: #16264A; border-radius: 40px; padding: 10px 26px 10px 12px" role="img" aria-label="{{timeLabel}}">
+      <svg width="54" height="54" viewBox="0 0 32 32" fill="none" stroke="#16264A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13l2 16h12l2-16z" fill="#FF8A65"></path><path d="M13 13l1 16M19 13l-1 16"></path><circle cx="11" cy="10" r="3" fill="#FFF3C4"></circle><circle cx="16" cy="8" r="3.4" fill="#FFF3C4"></circle><circle cx="21" cy="10" r="3" fill="#FFF3C4"></circle></svg>
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <span style="font-family: Fredoka, Nunito, sans-serif; font-size: 30px; font-weight: 700; line-height: 1">{{minutesLeft}} min left</span>
+        <div style="width: 210px; height: 16px; border-radius: 8px; background: #E4E9F2; overflow: hidden">
+          <div style="{{barStyle}}"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main style="position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; flex-grow: 1" aria-label="Shows you can watch">
+    <sc-for list="{{tiles}}" as="t" hint-placeholder-count="6">
+      <button style="{{t.style}}">
+        <div style="flex-grow: 1; background: {{t.color}}; display: flex; align-items: center; justify-content: center; gap: 8px; flex-direction: column">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#16264A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M21 16l-5-5-9 8"></path></svg>
+          <span style="font-size: 14px; font-weight: 800; color: #16264A">Cover art</span>
+        </div>
+        <span style="display: block; background: #FFFFFF; color: #16264A; font-family: Fredoka, Nunito, sans-serif; font-size: 24px; font-weight: 600; padding: 10px 16px; text-align: center">{{t.title}}</span>
+      </button>
+    </sc-for>
+  </main>
+
+  <footer style="position: relative; display: flex; align-items: center; justify-content: space-between">
+    <a href="#earn" style="display: flex; align-items: center; gap: 14px; height: 64px; padding: 0 30px 0 18px; border-radius: 32px; background: #FFFFFF; color: #16264A; text-decoration: none; font-family: Fredoka, Nunito, sans-serif; font-size: 26px; font-weight: 700; box-shadow: 0 8px 0 #0B1630">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="#FFC94A" stroke="#16264A" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21.1l1.4-7L2 9.3l7-.8z"></path></svg>
+      Earn more time
+    </a>
+    <div style="display: flex; align-items: center; gap: 14px" aria-label="Use the arrows and OK button">
+      <span style="width: 52px; height: 52px; border-radius: 26px; background: #1E3260; display: flex; align-items: center; justify-content: center">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="#FFFFFF" aria-hidden="true"><path d="M12 4l-3 3h6zM12 20l-3-3h6zM4 12l3-3v6zM20 12l-3-3v6z"></path></svg>
+      </span>
+      <span style="height: 52px; padding: 0 22px; border-radius: 26px; background: #1E3260; display: flex; align-items: center; font-family: Fredoka, Nunito, sans-serif; font-size: 22px; font-weight: 700">OK</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFC94A","options":["#FFC94A","#FF8A65","#7FC8A9","#8FB3FF"]},"minutesLeft":{"editor":"range","default":35,"min":0,"max":60,"step":1,"unit":"min"},"dailyLimit":{"editor":"int","default":60},"$preview":{"width":1280,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#FFC94A';
+    const left = this.props.minutesLeft ?? 35;
+    const limit = this.props.dailyLimit ?? 60;
+    const pct = Math.max(0, Math.min(1, limit > 0 ? left / limit : 0));
+    const hue = Math.round(120 * pct);
+    const barStyle = 'width: ' + Math.round(pct * 100) + '%; height: 16px; border-radius: 8px; background: hsl(' + hue + ', 72%, 45%)';
+    const base = 'display: flex; flex-direction: column; padding: 0; border-radius: 28px; overflow: hidden; ';
+    const focused = base + 'border: 7px solid ' + accent + '; transform: scale(1.05); box-shadow: 0 16px 0 #0B1630, 0 0 0 7px rgba(255,201,74,0.35)';
+    const idle = base + 'border: 7px solid transparent; box-shadow: 0 10px 0 #0B1630';
+    const list = [
+      ['Rocket Pals', '#8FB3FF'], ['Ocean Friends', '#7FC8A9'], ['Big Truck Town', '#FF8A65'],
+      ['Star Club', '#FFC94A'], ['Garden Bugs', '#C9A7F5'], ['Family Album', '#E4E9F2']
+    ];
+    return {
+      minutesLeft: left,
+      timeLabel: left + ' minutes of TV left today',
+      barStyle,
+      tiles: list.map((x, i) => ({ title: x[0], color: x[1], style: i === 0 ? focused : idle }))
+    };
+  }
+}
+</script>
+</body>
+</html>

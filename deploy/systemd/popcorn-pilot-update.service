@@ -1,0 +1,13 @@
+[Unit]
+Description=Popcorn Pilot updater (pull main, install, migrate, restart, smoke check, roll back on failure)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=popcorn
+Group=popcorn
+WorkingDirectory=/opt/popcorn-pilot
+EnvironmentFile=/etc/popcorn-pilot/env
+ExecStart=/bin/bash /opt/popcorn-pilot/scripts/update.sh
+TimeoutStartSec=45min

@@ -1,0 +1,10 @@
+[Unit]
+Description=Popcorn Pilot daily update check
+
+[Timer]
+OnCalendar=*-*-* 04:00:00
+RandomizedDelaySec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
