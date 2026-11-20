@@ -23,11 +23,14 @@ export default function PlaylistsScreen({
   initial,
   profiles,
   profile: startProfile,
+  routineCount,
 }: {
   role: 'adult' | 'guest';
   initial: Playlist[];
   profiles: PickerProfile[];
   profile: number | null;
+  /** Adult PIN only: how many routines there are (the Routines button). */
+  routineCount?: number;
 }) {
   const [profile, setProfile] = useState<number | null>(startProfile);
   const [list, setList] = useState(initial);
@@ -93,10 +96,15 @@ export default function PlaylistsScreen({
           </Link>
         ))}
       </section>
-      <div className="card">
-        <span className="t">Routines</span>
-        <span className="s">One button to set a TV up (turn on, profile, volume, playlist, timer) arrives in PP5.</span>
-      </div>
+      {/* Routines set up a TV (power, profile, volume, playlist, timer): Adult PIN only, like the hub's routes. */}
+      {role === 'adult' && (
+        <Link href="/playlists/routines" className="btn dark wide" aria-label="Routines">
+          <CalendarIcon size={18} /> Routines
+          <span style={{ marginLeft: 'auto', fontWeight: 700 }}>
+            {routineCount ?? 0} routine{routineCount === 1 ? '' : 's'}
+          </span>
+        </Link>
+      )}
       <Link href="/browse/suggestions" className="btn wide">
         <SparkIcon size={20} /> Suggestions
       </Link>

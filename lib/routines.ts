@@ -250,6 +250,15 @@ export function routineOr404(id: number): RoutineView {
   return r;
 }
 
+/** What the editor offers: the TVs, the profiles and the saved playlists. */
+export function editorChoices(): { tvs: { id: number; name: string }[]; profiles: { id: number; name: string; type: string }[]; playlists: { id: number; name: string }[] } {
+  return {
+    tvs: db().prepare('SELECT id, name FROM tvs WHERE deleted_at IS NULL ORDER BY name COLLATE NOCASE, id').all() as { id: number; name: string }[],
+    profiles: db().prepare('SELECT id, name, type FROM profiles WHERE deleted_at IS NULL ORDER BY type, name COLLATE NOCASE, id').all() as { id: number; name: string; type: string }[],
+    playlists: db().prepare('SELECT id, name FROM playlists WHERE deleted_at IS NULL AND quick = 0 ORDER BY name COLLATE NOCASE, id').all() as { id: number; name: string }[],
+  };
+}
+
 /** The routines that set up one TV (the TV home screen lists them). */
 export function routinesForTv(tvId: number): { id: number; name: string; icon: Icon; summary: string }[] {
   return listRoutines()

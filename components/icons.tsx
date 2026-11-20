@@ -113,6 +113,36 @@ export const MoonIcon = (p: P) => (
     <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
   </Svg>
 );
+export const SunIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Svg>
+);
+export const VolumeIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 9h4l5-4v14l-5-4H4z" />
+    <path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" />
+  </Svg>
+);
+export const TimerIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="13" r="8" />
+    <path d="M12 9v4l2.5 2.5M9 2h6" />
+  </Svg>
+);
+export const PhotoIcon = (p: P) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="14" rx="2" />
+    <circle cx="9" cy="10" r="2" />
+    <path d="M21 16l-5-5-9 8" />
+  </Svg>
+);
+export const ShieldIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z" />
+  </Svg>
+);
 export const BlockIcon = (p: P) => (
   <Svg {...p}>
     <circle cx="12" cy="12" r="9" />
