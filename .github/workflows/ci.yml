@@ -7,6 +7,7 @@ on:
     branches:
       - main
       - pp1-foundation
+      - pp2-browse
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -14,6 +15,8 @@ concurrency:
 
 env:
   NEXT_TELEMETRY_DISABLED: '1'
+  # No real outside calls from CI (TMDB and its images): the catalog refuses any address but this machine.
+  PP_NO_OUTSIDE_CALLS: '1'
 
 jobs:
   test:
