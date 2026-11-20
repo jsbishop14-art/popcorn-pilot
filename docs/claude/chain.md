@@ -5,7 +5,7 @@
 | # | Name | Branch | Spec | Handoff sections | Status |
 | --- | --- | --- | --- | --- | --- |
 | 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
-| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Queued |
+| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Building |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Queued |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
@@ -30,6 +30,9 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
+  PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.
+- Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
+  YouTube video id).
 - Confirm the time warning behavior over streaming apps (handoff 9.5).
 
 ## Sources
