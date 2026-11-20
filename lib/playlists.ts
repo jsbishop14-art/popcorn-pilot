@@ -172,8 +172,10 @@ export function itemAllowed(v: Viewer, f: Pick<ItemFields, 'kind' | 'titleKey' |
 
 function metaOf(items: Item[], loop: boolean, shuffle: boolean): string {
   const parts: string[] = [`${items.length} title${items.length === 1 ? '' : 's'}`];
-  const services = [...new Set(items.map((i) => (i.service ? SERVICE_INFO[i.service].name : ALBUM_NAME)))];
-  if (services.length) parts.push(services.length >= 3 ? 'all services' : services.join(', '));
+  const streaming = [...new Set(items.filter((i) => i.service).map((i) => i.service as Service))];
+  const sources = streaming.length === 3 ? ['all services'] : streaming.map((s) => SERVICE_INFO[s].name);
+  if (items.some((i) => i.kind === 'album')) sources.push(ALBUM_NAME);
+  if (sources.length) parts.push(sources.join(', '));
   const mins = items.map(itemMinutes);
   if (items.length && mins.every((m) => m !== null)) parts.push(durationWords((mins as number[]).reduce((a, b) => a + b, 0)));
   if (loop) parts.push('Loop');

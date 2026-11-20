@@ -50,6 +50,12 @@ export interface Actor {
 
 export const HUB: Actor = { pinType: 'hub', device: 'Hub' };
 
+/** The actor for a signed-in request (the routes only let the Adult and Guest PINs reach the engine). */
+export function actorOf(auth: { role: string; device: string }): Actor {
+  if (auth.role !== 'adult' && auth.role !== 'guest') throw new HttpError(403, 'Not allowed.');
+  return { pinType: auth.role, device: auth.device };
+}
+
 function log(actor: Actor, action: string, summary: string) {
   logActivity({ pinType: actor.pinType as ActivityPin, device: actor.device, action, summary });
 }

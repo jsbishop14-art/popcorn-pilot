@@ -114,7 +114,7 @@ describe('check 1: a 3-title playlist plays through in order with each mode', ()
     await startPlaylist(ADULT, { playlistId: id, tvIds: [tv1] });
     expect(launches(roku1)).toEqual([L_RP]);
     expect(now(tv1)?.now?.item.name).toBe('Rocket Pals');
-    expect(now(tv1)?.now?.modeLabel ?? now(tv1)?.now?.item.modeLabel).toBe('2 episodes');
+    expect(now(tv1)?.now?.item.modeLabel).toBe('2 episodes');
     expect(now(tv1)?.index).toBe(1);
     expect(now(tv1)?.count).toBe(3);
     await at(t0 + 22 * MIN);

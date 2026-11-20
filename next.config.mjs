@@ -4,6 +4,8 @@ const nextConfig = {
   poweredByHeader: false,
   experimental: {
     serverComponentsExternalPackages: ['better-sqlite3'],
+    // instrumentation.ts starts the playback engine timer when the hub starts (PP3).
+    instrumentationHook: true,
   },
 };
 
