@@ -164,7 +164,17 @@ style.
   NowPlaying, TimeWarning, Album, Pair); roku build 0 errors in both builds, zip 94 files with manifest,
   components, source, images, fonts; screen harness 33 scenarios. Unit 566/566, type-check 0, lint 0.
 
+- Step 3 (4b025de): Pair the channel (Settings > TV), power-on wake grace, sideload script and install guide step
+  11, CI channel build and zip artifact, smoke check, layout review, chain.md Waits on hardware.
+- Local checks (branch contains origin/main 48fe879), caches removed (.next, node_modules/.cache, build), each exit
+  code read on its own: lint 0; type-check 0; roku build 0 (0 errors in both builds, zip 94 files, 12 screens);
+  unit 571/571 (--no-cache); production build 0; browser 68/68 on the production build with the fake Rokus; smoke
+  check 0 against the production build (58 database objects), control without the app 1.
+- Checks: 1 passed (bsc 0 errors, zip holds manifest, components, source, images, fonts); 2 passed (key handling:
+  Rooibos suite compiles in the test build; the same 63 cases pass in the brs interpreter, control fails; one key
+  handler, policy first; 33 screen scenarios); 3 passed (channel-api 32 tests: 15 channel calls allowed with the
+  token, denied with none, a wrong token, Adult and Guest PIN; own TV only); 4 done by code review (table above).
+
 ## PICK UP HERE
 
-Step 3: CI steps for the channel build, deploy script and install guide steps, TvEditor browser test, layout
-review against the mockups (check 4), chain.md Waits on hardware.
+CI run 1 pushed (deliberate). Read its result: green on both jobs, then land (merge message "[Merge] PP6 (").
