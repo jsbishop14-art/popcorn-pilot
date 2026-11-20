@@ -24,7 +24,8 @@ export interface FakeRoku {
   port: number;
   ssdpPort: number | null;
   calls: FakeRokuCall[];
-  state: { power: 'on' | 'standby'; activeApp: { id: string | null; name: string }; player: 'play' | 'pause' | 'close' };
+  /** failChannels: launches (direct or search) of these channel ids answer 500, like a title that will not start. */
+  state: { power: 'on' | 'standby'; activeApp: { id: string | null; name: string }; player: 'play' | 'pause' | 'close'; failChannels: string[] };
   close(): Promise<void>;
 }
 
@@ -37,7 +38,7 @@ function esc(s: string): string {
 export async function startFakeRoku(opts: FakeRokuOptions = {}): Promise<FakeRoku> {
   const name = opts.name ?? 'Fake Roku';
   const calls: FakeRokuCall[] = [];
-  const state: FakeRoku['state'] = { power: 'on', activeApp: { id: null, name: 'Roku' }, player: 'close' };
+  const state: FakeRoku['state'] = { power: 'on', activeApp: { id: null, name: 'Roku' }, player: 'close', failChannels: [] };
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://fake');
@@ -53,6 +54,12 @@ export async function startFakeRoku(opts: FakeRokuOptions = {}): Promise<FakeRok
       return;
     }
     const p = url.pathname;
+    const launching = call.method === 'POST' && (p.startsWith('/launch/') ? decodeURIComponent(p.slice('/launch/'.length)) : p === '/search/browse' ? call.query['provider-id'] : null);
+    if (launching && state.failChannels.includes(launching)) {
+      res.writeHead(500);
+      res.end();
+      return;
+    }
     if (call.method === 'GET' && p === '/query/device-info') {
       return xml(
         `<device-info><serial-number>${esc(opts.serial ?? 'FAKE0001')}</serial-number><model-name>${esc(opts.model ?? 'Roku Ultra')}</model-name>` +
@@ -76,6 +83,7 @@ export async function startFakeRoku(opts: FakeRokuOptions = {}): Promise<FakeRok
       if (key === 'PowerOff') state.power = 'standby';
       if (key === 'PowerOn') state.power = 'on';
       if (key === 'Home') state.activeApp = { id: null, name: 'Roku' };
+      if (key === 'Play' && state.player !== 'close') state.player = state.player === 'play' ? 'pause' : 'play';
       res.writeHead(200);
       res.end();
       return;
