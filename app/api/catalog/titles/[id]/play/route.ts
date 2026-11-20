@@ -1,5 +1,7 @@
 import { route, json, body } from '@/lib/route';
-import { SERVICE_INFO, playOnTv, viewerFor } from '@/lib/catalog';
+import { SERVICE_INFO, playOnTv, viewerFor, type Service } from '@/lib/catalog';
+import { actorOf, startTitle } from '@/lib/playback';
+import type { LaunchRoute } from '@/lib/devices/types';
 import { logActivity } from '@/lib/activity';
 import type { PinType } from '@/lib/auth';
 
@@ -11,7 +13,14 @@ const ROUTE_WORDS = { deep_link: 'direct link', search: 'search launch' } as con
 export const POST = route('POST /api/catalog/titles/[id]/play', async (req, auth, ctx) => {
   const b = await body(req);
   const viewer = viewerFor(auth, b.profile);
-  const r = await playOnTv(viewer, ctx.params.id, { tvId: b.tvId, service: b.service });
+  // PP4: for a kid profile the title plays as a playback, so the kid rules apply to it (time counted, the warning,
+  // the stop, snap back). Otherwise it is a plain launch, as before.
+  const r = viewer.kid
+    ? await (async () => {
+        const s = await startTitle(actorOf(auth), viewer, { tvId: b.tvId, titleKey: ctx.params.id, service: b.service });
+        return { title: { name: s.name }, tvName: s.tvName, service: s.service as Service, route: s.route as LaunchRoute };
+      })()
+    : await playOnTv(viewer, ctx.params.id, { tvId: b.tvId, service: b.service });
   const from = typeof b.startFrom === 'string' && b.startFrom.length <= 60 ? `, start from ${b.startFrom}` : '';
   const who = viewer.profileName ? ` for ${viewer.profileName}` : '';
   const service = r.service === 'youtube' ? 'YouTube' : SERVICE_INFO[r.service].name;

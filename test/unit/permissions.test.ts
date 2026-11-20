@@ -81,6 +81,24 @@ const EXPECTED: Record<string, Answer> = {
   // The channel token: only its own TV's home screen and now playing.
   'GET /api/channel/home': A(false, false, false, true),
   'GET /api/channel/now-playing': A(false, false, false, true),
+  // PP4 kid safeguards. Guest: none of safeguards, approvals, alerts, tasks or the watch log; switching a TV to a
+  // (kid) profile is allowed (the handler refuses an adult profile). The channel: its kid screens, asking, and
+  // approving with the Adult PIN on the TV.
+  'GET /api/profiles/[id]/safeguards': ADULT_ONLY,
+  'PATCH /api/profiles/[id]/safeguards': ADULT_ONLY,
+  'GET /api/profiles/[id]/watch-log': ADULT_ONLY,
+  'GET /api/requests': ADULT_ONLY,
+  'POST /api/requests/[id]': ADULT_ONLY,
+  'GET /api/alerts': ADULT_ONLY,
+  'GET /api/tasks': ADULT_ONLY,
+  'POST /api/tasks': ADULT_ONLY,
+  'PATCH /api/tasks/[id]': ADULT_ONLY,
+  'DELETE /api/tasks/[id]': ADULT_ONLY,
+  'POST /api/tasks/[id]/done': ADULT_ONLY,
+  'POST /api/tvs/[id]/profile': PEOPLE,
+  'GET /api/channel/kid': A(false, false, false, true),
+  'POST /api/channel/requests': A(false, false, false, true),
+  'POST /api/channel/requests/[id]': A(false, false, false, true),
 };
 
 const EXPECTED_PAGES: Record<string, Answer> = {
@@ -101,6 +119,10 @@ const EXPECTED_PAGES: Record<string, Answer> = {
   '/profiles': ADULT_ONLY,
   '/profiles/new': ADULT_ONLY,
   '/profiles/[id]': ADULT_ONLY,
+  '/profiles/requests': ADULT_ONLY,
+  '/profiles/alerts': ADULT_ONLY,
+  '/profiles/tasks': ADULT_ONLY,
+  '/profiles/watch-log': ADULT_ONLY,
   '/settings': ADULT_ONLY,
   '/settings/tvs/[id]': ADULT_ONLY,
   '/settings/activity': ADULT_ONLY,
