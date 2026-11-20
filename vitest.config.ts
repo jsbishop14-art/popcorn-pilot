@@ -8,5 +8,7 @@ export default defineConfig({
     environment: 'node',
     pool: 'forks',
     testTimeout: 20000,
+    // No real outside calls from tests (TMDB, its images): only this machine may be called.
+    env: { PP_NO_OUTSIDE_CALLS: '1' },
   },
 });

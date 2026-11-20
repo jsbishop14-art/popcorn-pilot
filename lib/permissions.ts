@@ -44,6 +44,19 @@ export const API_RULES = {
   'POST /api/hub/update': ADULT,
 
   'GET /api/channel/hello': CHANNEL,
+
+  // Catalog (PP2). Browsing, details, trailers and playing are for both PINs (the Guest PIN only for a kid profile,
+  // checked in the handler); tags are kid safeguards, so Adult only.
+  'GET /api/catalog/browse': PEOPLE,
+  'GET /api/catalog/suggestions': PEOPLE,
+  'GET /api/catalog/art/[id]': PEOPLE,
+  'GET /api/catalog/titles/[id]': PEOPLE,
+  'GET /api/catalog/titles/[id]/similar': PEOPLE,
+  'POST /api/catalog/titles/[id]/play': PEOPLE,
+  'POST /api/catalog/titles/[id]/trailer': PEOPLE,
+  'POST /api/catalog/titles/[id]/calm': ADULT,
+  'POST /api/catalog/titles/[id]/block': ADULT,
+  'GET /api/catalog/calm': ADULT,
 } as const satisfies Record<string, Rule>;
 
 export type ApiRoute = keyof typeof API_RULES;
@@ -55,6 +68,8 @@ export const PAGE_RULES = {
   '/setup': PUBLIC,
   '/home': PEOPLE,
   '/browse': PEOPLE,
+  '/browse/suggestions': PEOPLE,
+  '/browse/[id]': PEOPLE,
   '/playlists': PEOPLE,
   '/profiles': ADULT,
   '/profiles/new': ADULT,
@@ -62,6 +77,7 @@ export const PAGE_RULES = {
   '/settings': ADULT,
   '/settings/tvs/[id]': ADULT,
   '/settings/activity': ADULT,
+  '/settings/calm': ADULT,
 } as const satisfies Record<string, Rule>;
 
 export type PagePattern = keyof typeof PAGE_RULES;

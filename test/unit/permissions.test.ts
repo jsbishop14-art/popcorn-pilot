@@ -48,6 +48,17 @@ const EXPECTED: Record<string, Answer> = {
   'GET /api/hub/status': ADULT_ONLY,
   'POST /api/hub/update': ADULT_ONLY,
   'GET /api/channel/hello': A(false, false, false, true),
+  // PP2 catalog. Guest: Browse (for a kid profile), title details, trailers, play. Tags are safeguards: Adult only.
+  'GET /api/catalog/browse': PEOPLE,
+  'GET /api/catalog/suggestions': PEOPLE,
+  'GET /api/catalog/art/[id]': PEOPLE,
+  'GET /api/catalog/titles/[id]': PEOPLE,
+  'GET /api/catalog/titles/[id]/similar': PEOPLE,
+  'POST /api/catalog/titles/[id]/play': PEOPLE,
+  'POST /api/catalog/titles/[id]/trailer': PEOPLE,
+  'POST /api/catalog/titles/[id]/calm': ADULT_ONLY,
+  'POST /api/catalog/titles/[id]/block': ADULT_ONLY,
+  'GET /api/catalog/calm': ADULT_ONLY,
 };
 
 const EXPECTED_PAGES: Record<string, Answer> = {
@@ -56,6 +67,8 @@ const EXPECTED_PAGES: Record<string, Answer> = {
   '/setup': A(true, true, true, true),
   '/home': PEOPLE,
   '/browse': PEOPLE,
+  '/browse/suggestions': PEOPLE,
+  '/browse/[id]': PEOPLE,
   '/playlists': PEOPLE,
   '/profiles': ADULT_ONLY,
   '/profiles/new': ADULT_ONLY,
@@ -63,6 +76,7 @@ const EXPECTED_PAGES: Record<string, Answer> = {
   '/settings': ADULT_ONLY,
   '/settings/tvs/[id]': ADULT_ONLY,
   '/settings/activity': ADULT_ONLY,
+  '/settings/calm': ADULT_ONLY,
 };
 
 const API_DIR = path.join(process.cwd(), 'app/api');
@@ -105,12 +119,19 @@ async function headersFor(role: Role): Promise<Record<string, string>> {
   return h;
 }
 
+function idFor(method: string, urlPath: string): string {
+  if (method === 'DELETE') return '999';
+  if (urlPath.startsWith('/api/catalog/art/')) return 'stub-9001.svg';
+  if (urlPath.startsWith('/api/catalog/')) return 'tv-9001';
+  return urlPath.includes('profiles') ? String(ids.profile) : String(ids.tv);
+}
+
 async function call(key: string, role: Role): Promise<Response> {
   const [method, urlPath] = key.split(' ');
   const mod = (await import(modulePath(key))) as Record<string, (req: Request, ctx: { params: Record<string, string> }) => Promise<Response>>;
   const handler = mod[method];
   if (!handler) throw new Error(`${key}: no ${method} export`);
-  const id = method === 'DELETE' ? '999' : urlPath.includes('profiles') ? String(ids.profile) : String(ids.tv);
+  const id = idFor(method, urlPath);
   const url = 'http://hub.test' + urlPath.replace('[id]', id);
   const init: RequestInit = { method, headers: await headersFor(role) };
   if (method !== 'GET') init.body = '{}';
