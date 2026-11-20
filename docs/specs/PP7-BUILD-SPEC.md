@@ -25,6 +25,7 @@
   "Not set up on this computer" instead of an error.
 - **The guide says plainly** that when the computer sleeps or is off, kid limits, snap back, schedules and routines pause
   until it is back; it shows where to change sleep settings but the install never changes them.
+- **CLAUDE.md:** sections 1, 3 and 6 say "the hub computer (Windows PC for now, Pi later)" where they say the Pi.
 - **CI:** a Windows job and a macOS job that run the install in a dry-run or test mode, build, migrate, start the app
   and pass the smoke check, plus the existing Linux and arm64 jobs.
 
