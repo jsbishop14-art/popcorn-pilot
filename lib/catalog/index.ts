@@ -9,6 +9,8 @@ import { getTv } from '../tvs';
 import { driverFor } from '../devices';
 import { DeviceError, type LaunchRoute } from '../devices/types';
 import type { KidSafeguardsRow, ProfilesRow } from '../db/types.gen';
+import { noteLaunch } from '../tvstate';
+import { now } from '../clock';
 import { stubSource } from './stub';
 import { TmdbSource } from './tmdb';
 import { SERVICES, SERVICE_INFO, YOUTUBE_CHANNEL, isService, isTitleKey, type CatalogSource, type Kind, type Service, type Title } from './types';
@@ -382,6 +384,7 @@ export async function playOnTv(v: Viewer, key: string, input: { tvId: unknown; s
     throw new HttpError(502, deviceMessage(tv.name, err));
   }
   logLaunch({ key, kind: 'title', service, tvId: tv.id, profileId: v.profileId, route, ok: true });
+  noteLaunch(tv.id, channelId, now());
   return { title: t, tvName: tv.name, service, route };
 }
 
@@ -397,5 +400,6 @@ export async function trailerOnTv(v: Viewer, key: string, input: { tvId: unknown
     throw new HttpError(502, deviceMessage(tv.name, err));
   }
   logLaunch({ key, kind: 'trailer', service: 'youtube', tvId: tv.id, profileId: v.profileId, route: 'deep_link', ok: true });
+  noteLaunch(tv.id, YOUTUBE_CHANNEL, now());
   return { title: t, tvName: tv.name, service: 'youtube', route: 'deep_link' };
 }

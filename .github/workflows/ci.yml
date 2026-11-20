@@ -9,6 +9,7 @@ on:
       - pp1-foundation
       - pp2-browse
       - pp3-playback
+      - pp4-kid-safeguards
 
 concurrency:
   group: ci-${{ github.ref }}

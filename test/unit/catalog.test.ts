@@ -10,6 +10,7 @@ import { getDb } from '@/lib/db';
 import { listActivity } from '@/lib/activity';
 import { readSecrets } from '@/lib/secrets';
 import { stubTitles } from '@/lib/catalog/stub';
+import { updateRules } from '@/lib/safeguards';
 import { startFakeRoku, type FakeRoku } from '../fake-roku/server';
 
 type Handler = (req: Request, ctx: { params: Record<string, string> }) => Promise<Response>;
@@ -65,6 +66,10 @@ beforeAll(async () => {
   grown = createProfile({ name: 'Family', color: '#FFC94A', type: 'adult' }).id;
   // Kid one's own block list (the PP4 editor fills this; here it is set directly).
   getDb().prepare('UPDATE kid_safeguards SET blocked_titles = ? WHERE profile_id = ?').run(JSON.stringify(['tv-9002']), kid);
+  // PP4: kid "Play on a TV" now runs under the time rules; this file runs on the real clock, so the kids may watch
+  // all day here (the time rules are checked in safeguards.test).
+  const allDay = Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, 720]));
+  for (const k of [kid, kid2]) updateRules(k, { hoursStart: '00:00', hoursEnd: '24:00', dailyLimits: allDay });
   roku = await startFakeRoku({ name: 'Living room' });
   tvId = Number(getDb().prepare("INSERT INTO tvs (name, address, port, online) VALUES ('Living room', '127.0.0.1', ?, 1)").run(roku.port).lastInsertRowid);
   offlineTvId = Number(getDb().prepare("INSERT INTO tvs (name, address, port) VALUES ('Guest room', '127.0.0.1', 1)").run().lastInsertRowid);

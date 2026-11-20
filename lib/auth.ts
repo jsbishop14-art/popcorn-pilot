@@ -86,7 +86,18 @@ export type PinResult =
   | { status: 'locked'; lockedUntil: number }
   | { status: 'not_set_up' };
 
-export async function signInWithPin(pin: string, device: string, now = Date.now()): Promise<PinResult> {
+export type PinCheck = { status: 'ok'; pinType: PinType } | Exclude<PinResult, { status: 'ok' }>;
+
+/**
+ * Check a PIN with the same hub-wide lockout as signing in, without starting a session: approvals with the Adult PIN
+ * on the TV (PP4). A right PIN clears the wrong-try count; a wrong one counts toward the lockout.
+ */
+export async function checkPinWithLockout(pin: unknown, device: string, now = Date.now()): Promise<PinCheck> {
+  const r = await signInWithPin(typeof pin === 'string' ? pin : '', device, now, false);
+  return r.status === 'ok' ? { status: 'ok', pinType: r.pinType } : r;
+}
+
+export async function signInWithPin(pin: string, device: string, now = Date.now(), startSession = true): Promise<PinResult> {
   const db = getDb();
   if (!isSetUp()) return { status: 'not_set_up' };
   const lock = lockState();
@@ -110,6 +121,7 @@ export async function signInWithPin(pin: string, device: string, now = Date.now(
     return { status: 'wrong', triesLeft: MAX_TRIES - failures };
   }
   db.prepare('UPDATE pin_lockout SET failures = 0, locked_until = 0 WHERE id = 1').run();
+  if (!startSession) return { status: 'ok', pinType, token: '' };
   const token = newToken();
   db.prepare('INSERT INTO sessions (token_hash, pin_type, device, created_at, last_seen_at) VALUES (?, ?, ?, ?, ?)').run(
     tokenHash(token),

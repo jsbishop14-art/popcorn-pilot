@@ -4,5 +4,8 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const { startEngineTimer } = await import('./lib/playback');
     startEngineTimer();
+    // PP4: snap back for TVs in kid mode (every 2 seconds).
+    const { startSnapBackWatcher } = await import('./lib/snapback');
+    startSnapBackWatcher();
   }
 }

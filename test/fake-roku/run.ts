@@ -24,6 +24,13 @@ async function main() {
       };
       if (url.pathname === '/calls') return send(roku.calls);
       if (url.pathname === '/calls2') return send(roku2.calls);
+      // PP4: POST /app?id=2285&name=Hulu puts that app on the first TV, like a kid pressing the Hulu button (snap back).
+      if (url.pathname === '/app' && req.method === 'POST') {
+        const id = url.searchParams.get('id');
+        roku.state.activeApp = { id: id || null, name: url.searchParams.get('name') ?? 'Roku' };
+        return send(roku.state.activeApp);
+      }
+      if (url.pathname === '/state') return send(roku.state);
       if (url.pathname === '/fail' && req.method === 'POST') {
         roku.state.failChannels = (url.searchParams.get('channels') ?? '').split(',').filter(Boolean);
         return send({ failChannels: roku.state.failChannels });

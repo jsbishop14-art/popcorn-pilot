@@ -45,6 +45,11 @@ test('TV editor: rename, room, default profile, channel token', async ({ page })
   await page.getByLabel('Name').fill('Kid placeholder');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page.getByRole('link', { name: 'Edit Kid placeholder' })).toBeVisible();
+  // PP4: the browser tests run at any time of day, so the test kid may watch all day, 12 hours a day (the time
+  // rules themselves are checked in test/unit/safeguards.test.ts).
+  const kidId = (await page.getByRole('link', { name: 'Edit Kid placeholder' }).getAttribute('href'))?.split('/').pop();
+  const allDay = Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, 720]));
+  expect((await page.request.patch(`/api/profiles/${kidId}/safeguards`, { data: { hoursStart: '00:00', hoursEnd: '24:00', dailyLimits: allDay } })).status()).toBe(200);
 
   await tab(page, 'Settings');
   await page.getByRole('link', { name: 'TV Fake living room Roku' }).click();

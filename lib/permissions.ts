@@ -82,6 +82,27 @@ export const API_RULES = {
   // The Roku channel (PP6) for its own TV: home screen data, and now playing with up next.
   'GET /api/channel/home': CHANNEL,
   'GET /api/channel/now-playing': CHANNEL,
+
+  // Kid safeguards (PP4). Safeguards, requests and approvals, alerts, tasks and the watch log are Adult only (the
+  // Guest PIN has none of them). Switching a TV to a profile is for both PINs: the Guest PIN to a kid profile only
+  // (checked in the handler), so it can never take a TV out of kid mode.
+  'GET /api/profiles/[id]/safeguards': ADULT,
+  'PATCH /api/profiles/[id]/safeguards': ADULT,
+  'GET /api/profiles/[id]/watch-log': ADULT,
+  'GET /api/requests': ADULT,
+  'POST /api/requests/[id]': ADULT,
+  'GET /api/alerts': ADULT,
+  'GET /api/tasks': ADULT,
+  'POST /api/tasks': ADULT,
+  'PATCH /api/tasks/[id]': ADULT,
+  'DELETE /api/tasks/[id]': ADULT,
+  'POST /api/tasks/[id]/done': ADULT,
+  'POST /api/tvs/[id]/profile': PEOPLE,
+  // The channel's kid screens: time left, tasks and the bonus, asking (more time, a title, a task done), and an
+  // adult approving on the TV with the Adult PIN (checked in the handler, with the PIN lockout).
+  'GET /api/channel/kid': CHANNEL,
+  'POST /api/channel/requests': CHANNEL,
+  'POST /api/channel/requests/[id]': CHANNEL,
 } as const satisfies Record<string, Rule>;
 
 export type ApiRoute = keyof typeof API_RULES;
@@ -105,6 +126,10 @@ export const PAGE_RULES = {
   '/profiles': ADULT,
   '/profiles/new': ADULT,
   '/profiles/[id]': ADULT,
+  '/profiles/requests': ADULT,
+  '/profiles/alerts': ADULT,
+  '/profiles/tasks': ADULT,
+  '/profiles/watch-log': ADULT,
   '/settings': ADULT,
   '/settings/tvs/[id]': ADULT,
   '/settings/activity': ADULT,

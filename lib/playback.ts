@@ -6,29 +6,30 @@
 // Timing is approximate: streaming apps do not reliably report playback position, so the hub counts playing time
 // itself (paused time does not count) and moves on when a title's time is up. All times come from now(), which the
 // tests replace with a fake clock.
+//
+// Kid safeguards (PP4, handoff 5) are enforced here too: a kid start outside viewing hours or with no time left is
+// refused; the time warning; the stop at the episode boundary nearest the limit, then the TV turns off; bedtime
+// wind-down (calm titles only, the volume steps down); the watch log; and the TV's kid mode for snap back.
 import { getDb } from './db';
+import { now, setClockForTests } from './clock';
 import type { PlaybackRow, PlaylistsRow, QueueItemsRow } from './db/types.gen';
 import { BadRequest, HttpError } from './route';
 import { getTv, listTvs, type Tv } from './tvs';
 import { driverFor } from './devices';
 import { DeviceError, type RemoteKey } from './devices/types';
-import { CatalogUnavailable, EVERYONE, SERVICE_INFO, artUrl, playOnTv, viewerForProfile, type Viewer } from './catalog';
+import { CatalogUnavailable, EVERYONE, SERVICE_INFO, allows, artUrl, playOnTv, taggedTitles, viewerForProfile, type Viewer } from './catalog';
 import { logActivity, type ActivityPin } from './activity';
 import { DAYS, ITEM_COLUMNS, cleanMode, itemAllowed, itemMinutes, itemValues, modeLabel, quickId, rowFields, titleFields, type ItemFields, type ModeInput } from './playlists';
+import { addAlert, checkKidStart, kidRules, openWatch, syncWatch, timeStatus, type KidRules, type TimeStatus } from './safeguards';
+import { addVolumeSteps, channelAppId, kidModeProfile, noteLaunch, setTvProfile, tvState, type SetBy } from './tvstate';
+
+const MIN = 60_000;
 
 // ---------------------------------------------------------------------------------------------- clock, order
 
-let clockFn: () => number = () => Date.now();
 let randomFn: () => number = Math.random;
 
-export function now(): number {
-  return clockFn();
-}
-
-/** Tests only: a fake clock (null puts the real one back). */
-export function setClockForTests(fn: (() => number) | null): void {
-  clockFn = fn ?? (() => Date.now());
-}
+export { now, setClockForTests };
 
 /** Tests only: a fixed random source for shuffle (null puts Math.random back). */
 export function setRandomForTests(fn: (() => number) | null): void {
@@ -178,13 +179,21 @@ async function advance(pbId: number, at: number): Promise<void> {
       db().prepare('UPDATE playback SET message = ? WHERE id = ?').run(`Skipped the Family Album: it arrives in a later build.`, pbId);
       continue;
     }
+    const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
+    if (rules) {
+      const gate = await kidGate(pb, rules, next, f, at);
+      if (gate === 'stopped') return;
+      if (gate === 'skip') continue;
+    }
     const viewer = viewerOf(pb);
     try {
       if (!tv) throw new Error('the TV was removed');
       const r = await playOnTv(viewer, f.titleKey as string, { tvId: tv.id, service: f.service });
       db().prepare("UPDATE queue_items SET status = 'playing', launch_route = ? WHERE id = ?").run(r.route, next.id);
-      db().prepare("UPDATE playback SET current_item_id = ?, item_played_ms = 0, item_resumed_at = ?, state = 'playing' WHERE id = ?").run(next.id, at, pbId);
-      log(HUB, 'playback.next', `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
+      db().prepare("UPDATE playback SET current_item_id = ?, item_played_ms = 0, item_resumed_at = ?, state = 'playing', kid_ep_seen = -1 WHERE id = ?").run(next.id, at, pbId);
+      openWatch(playbackRow(pbId), next, at);
+      // A one-title playback (a kid's "Play on a TV", an approved title) is logged by whoever started it.
+      if (pb.playlist_id !== null) log(HUB, 'playback.next', `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
       return;
     } catch (err) {
       const reason = failReason(err, viewer);
@@ -197,7 +206,8 @@ async function advance(pbId: number, at: number): Promise<void> {
   }
 }
 
-function finishCurrent(pb: PlaybackRow, status: 'done' | 'skipped') {
+function finishCurrent(pb: PlaybackRow, status: 'done' | 'skipped', at: number) {
+  syncWatch(pb, at, true);
   if (pb.current_item_id !== null) db().prepare("UPDATE queue_items SET status = ? WHERE id = ? AND status = 'playing'").run(status, pb.current_item_id);
   db().prepare('UPDATE playback SET current_item_id = NULL, item_played_ms = 0, item_resumed_at = NULL WHERE id = ?').run(pb.id);
 }
@@ -205,9 +215,195 @@ function finishCurrent(pb: PlaybackRow, status: 'done' | 'skipped') {
 function stopLive(tv: Tv, at: number, message: string): PlaybackRow | null {
   const pb = livePlayback(tv.id);
   if (!pb) return null;
-  finishCurrent(pb, 'done');
+  finishCurrent(pb, 'done', at);
   db().prepare("UPDATE playback SET state = 'stopped', ended_at = ?, message = ? WHERE id = ?").run(at, message, pb.id);
   return pb;
+}
+
+// ---------------------------------------------------------------------------------------------- kid rules
+
+/** One episode of a title (a movie is one long episode), for the episode aware stop. */
+function episodeMs(f: Pick<ItemFields, 'titleKind' | 'episodeMinutes' | 'runtimeMinutes'>): number {
+  return (f.titleKind === 'movie' ? (f.runtimeMinutes ?? 90) : (f.episodeMinutes ?? 30)) * MIN;
+}
+
+function isCalm(key: string | null): boolean {
+  if (!key) return false;
+  return !!db().prepare('SELECT 1 FROM title_tags WHERE title_key = ? AND calm = 1').get(key);
+}
+
+function windingDown(rules: KidRules, s: TimeStatus): boolean {
+  return rules.windDown && s.remainingMs <= rules.windDownMinutes * MIN;
+}
+
+/** Why the kid's time ran out: the end of viewing hours when that came before the end of today's minutes. */
+function stopReason(s: TimeStatus): 'time' | 'hours' {
+  return s.leftMs > s.remainingMs ? 'hours' : 'time';
+}
+
+/** Launch the Popcorn Pilot channel on a TV (the kid home screen), and expect it there. */
+async function launchChannel(tv: Tv, at: number): Promise<void> {
+  const id = channelAppId();
+  noteLaunch(tv.id, id, at);
+  await driverFor(tv).launch({ channelId: id });
+}
+
+/**
+ * Time is up (or viewing hours ended): the playback stops, the TV turns off, and the adults get an alert. The TV
+ * stays in kid mode, so snap back still brings Popcorn Pilot back if the TV is turned on again.
+ */
+async function timeUp(pbId: number, rules: KidRules, at: number, reason: 'time' | 'hours' | 'calm'): Promise<void> {
+  const pb = playbackRow(pbId);
+  const tv = getTv(pb.tv_id);
+  const cur = pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
+  finishCurrent(pb, 'done', at);
+  const why = reason === 'hours' ? `Viewing hours ended for ${rules.name}` : reason === 'calm' ? `Time is up for ${rules.name} (no calm titles left for wind-down)` : `Time is up for ${rules.name}`;
+  let off = false;
+  if (tv) {
+    noteLaunch(tv.id, channelAppId(), at);
+    try {
+      await driverFor(tv).keypress('PowerOff');
+      off = true;
+    } catch {
+      off = false;
+    }
+  }
+  db().prepare("UPDATE playback SET state = 'stopped', ended_at = ?, message = ? WHERE id = ?").run(at, `${why}. ${off ? 'The TV was turned off.' : 'The TV did not answer to turn off.'}`, pb.id);
+  const detail = `${cur ? `Finished ${cur.name}` : 'Stopped'}, ${off ? 'TV turned off' : 'the TV did not answer to turn off'} · ${rules.name} · ${tv?.name ?? 'a TV'}`;
+  addAlert({ kind: 'time_up', profileId: rules.profileId, tvId: pb.tv_id, title: reason === 'hours' ? 'Viewing hours ended' : 'Time is up', detail }, at);
+  log(HUB, 'kid.time_up', `${why}: stopped ${pb.name} on ${tv?.name ?? 'a TV'}${off ? ' and turned the TV off' : ''}`);
+}
+
+/**
+ * Before a kid's next title starts: outside viewing hours, or not enough time left for (the nearest boundary of) an
+ * episode, time is up. In wind-down only calm titles play: others are skipped, and when the queue has no calm title
+ * left, one from the household's calm list (that this kid may watch) is added.
+ */
+async function kidGate(pb: PlaybackRow, rules: KidRules, next: QueueItemsRow, f: ItemFields, at: number): Promise<'ok' | 'skip' | 'stopped'> {
+  const s = timeStatus(rules, at);
+  if (!s.inHours) {
+    await timeUp(pb.id, rules, at, 'hours');
+    return 'stopped';
+  }
+  // The episode aware stop: the boundary nearest the limit. Before an episode starts, that is "now" when less than
+  // half of it fits; with "finish the current episode" off, time is up only at the limit itself.
+  if (rules.finishEpisode ? s.remainingMs <= episodeMs(f) / 2 : s.remainingMs <= 0) {
+    await timeUp(pb.id, rules, at, stopReason(s));
+    return 'stopped';
+  }
+  if (windingDown(rules, s)) {
+    if (pb.kid_wind_down_at === null) startWindDown(pb, rules, at);
+    if (!isCalm(f.titleKey)) {
+      db().prepare("UPDATE queue_items SET status = 'skipped', note = ? WHERE id = ?").run('not a calm title (bedtime wind-down)', next.id);
+      const calmLeft = (db().prepare("SELECT title_key FROM queue_items WHERE playback_id = ? AND status = 'pending' AND kind = 'title'").all(pb.id) as { title_key: string }[]).some((r) => isCalm(r.title_key));
+      if (!calmLeft) {
+        const viewer = viewerOf(pb);
+        const pick = taggedTitles('calm').find((t) => allows(viewer, { key: t.key, rating: t.rating } as Parameters<typeof allows>[1]) && t.key !== f.titleKey);
+        let added: ItemFields | null = null;
+        if (pick) {
+          try {
+            added = await titleFields(viewer, pick.key, undefined, { mode: 'indefinite' });
+          } catch {
+            added = null;
+          }
+        }
+        if (!added) {
+          await timeUp(pb.id, rules, at, 'calm');
+          return 'stopped';
+        }
+        const pos = Math.max(0, ...queue(pb.id).map((x) => x.position)) + 1;
+        insertQueueItem(pb.id, pos, added);
+        log(HUB, 'kid.wind_down_add', `Bedtime wind-down: added ${added.name} (calm) for ${rules.name} on ${getTv(pb.tv_id)?.name ?? 'a TV'}`);
+      }
+      return 'skip';
+    }
+  }
+  return 'ok';
+}
+
+function startWindDown(pb: PlaybackRow, rules: KidRules, at: number) {
+  db().prepare('UPDATE playback SET kid_wind_down_at = ? WHERE id = ?').run(at, pb.id);
+  log(HUB, 'kid.wind_down', `Bedtime wind-down began for ${rules.name} on ${getTv(pb.tv_id)?.name ?? 'a TV'}: calm titles only, the volume steps down`);
+}
+
+/** How often the volume steps down during wind-down. */
+export const VOLUME_STEP_MS = 3 * MIN;
+
+/**
+ * The kid rules on each engine step, for a kid's playback with a title on: the watch log, the time warning,
+ * wind-down (and its volume steps), and the stop at the episode boundary nearest the limit. Returns whether the
+ * playback moved on (stopped, or went to the next title).
+ */
+async function kidTick(pb: PlaybackRow, rules: KidRules, cur: QueueItemsRow, at: number): Promise<boolean> {
+  syncWatch(pb, at);
+  const tv = getTv(pb.tv_id);
+  const s = timeStatus(rules, at);
+  if (pb.kid_warned_at === null && s.remainingMs <= rules.warningMinutes * MIN) {
+    const mins = Math.max(1, Math.ceil(s.remainingMs / MIN));
+    db().prepare('UPDATE playback SET kid_warned_at = ? WHERE id = ?').run(at, pb.id);
+    addAlert({ kind: 'time_warning', profileId: rules.profileId, tvId: pb.tv_id, title: `${mins} minute${mins === 1 ? '' : 's'} left`, detail: `${rules.name} · ${tv?.name ?? 'a TV'}` }, at);
+    log(HUB, 'kid.warning', `Time warning for ${rules.name} on ${tv?.name ?? 'a TV'}: ${mins} min left`);
+  }
+  const wind = windingDown(rules, s);
+  if (wind) {
+    if (pb.kid_wind_down_at === null) startWindDown(pb, rules, at);
+    if (tv && (pb.kid_volume_at === null || at - pb.kid_volume_at >= VOLUME_STEP_MS)) {
+      db().prepare('UPDATE playback SET kid_volume_at = ? WHERE id = ?').run(at, pb.id);
+      try {
+        await driverFor(tv).keypress('VolumeDown');
+        addVolumeSteps(tv.id, 1);
+      } catch {
+        // the next step tries again
+      }
+    }
+  }
+  const f = rowFields(cur);
+  const p = playedMs(pb, at);
+  if (!rules.finishEpisode) {
+    if (s.remainingMs <= 0) {
+      await timeUp(pb.id, rules, at, stopReason(s));
+      return true;
+    }
+    return false;
+  }
+  const e = episodeMs(f);
+  const k = Math.floor(p / e);
+  if (k > pb.kid_ep_seen) {
+    db().prepare('UPDATE playback SET kid_ep_seen = ? WHERE id = ?').run(k, pb.id);
+    if (k > 0) {
+      // An episode just ended. What was left at that boundary decides: stop here when the limit is nearer to this
+      // boundary than to the next one.
+      const leftAtBoundary = s.remainingMs + (p - k * e);
+      if (leftAtBoundary <= e / 2) {
+        await timeUp(pb.id, rules, at, stopReason(s));
+        return true;
+      }
+      if (wind && !isCalm(f.titleKey)) {
+        finishCurrent(pb, 'done', at);
+        await advance(pb.id, at);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** Set the TV's profile when something starts there for a profile (kid mode follows it). */
+function followProfile(tv: Tv, profileId: number | null, actor: Actor, at: number) {
+  setTvProfile(tv.id, profileId, actor.pinType as SetBy, at);
+}
+
+/** After a wind-down turned the volume down on a TV, the next start there turns it back up by the same steps. */
+async function restoreVolume(tv: Tv) {
+  const steps = tvState(tv.id)?.volume_steps ?? 0;
+  if (steps <= 0) return;
+  addVolumeSteps(tv.id, -steps);
+  try {
+    for (let i = 0; i < steps; i++) await driverFor(tv).keypress('VolumeUp');
+    log(HUB, 'kid.volume_restore', `Turned the volume on ${tv.name} back up ${steps} step${steps === 1 ? '' : 's'} (after bedtime wind-down)`);
+  } catch {
+    // best effort
+  }
 }
 
 // ---------------------------------------------------------------------------------------------- start
@@ -243,10 +439,16 @@ async function startLocked(actor: Actor, input: StartInput, at: number): Promise
   const items = db().prepare('SELECT * FROM playlist_items WHERE playlist_id = ? ORDER BY position, id').all(pl.id) as Parameters<typeof rowFields>[0][];
   if (!items.length) throw new BadRequest('This playlist has no titles yet.');
   const name = pl.quick ? 'Quick playlist' : pl.name;
+  // Kid rules first, for every TV, before anything changes: viewing hours and time left.
+  tvs.forEach((tv, i) => {
+    if (viewers[i].kid && viewers[i].profileId !== null) checkKidStart(viewers[i].profileId as number, tv, at);
+  });
   const out: number[] = [];
   for (const [i, tv] of tvs.entries()) {
     const v = viewers[i];
     stopLive(tv, at, `Replaced by ${name}`);
+    followProfile(tv, v.profileId, actor, at);
+    await restoreVolume(tv);
     const pbId = Number(
       db()
         .prepare("INSERT INTO playback (tv_id, playlist_id, name, profile_id, state, loop, shuffle, started_by, started_at) VALUES (?, ?, ?, ?, 'playing', ?, ?, ?, ?)")
@@ -286,10 +488,14 @@ export function tick(): Promise<{ advanced: number; started: number }> {
         advanced++;
         continue;
       }
+      const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
+      if (rules && (await kidTick(pb, rules, cur, at))) {
+        advanced++;
+        continue;
+      }
       const mins = itemMinutes(rowFields(cur));
       if (mins !== null && playedMs(pb, at) >= mins * 60_000) {
-        db().prepare("UPDATE queue_items SET status = 'done' WHERE id = ?").run(cur.id);
-        db().prepare('UPDATE playback SET current_item_id = NULL, item_played_ms = 0, item_resumed_at = NULL WHERE id = ?').run(pb.id);
+        finishCurrent(playbackRow(pb.id), 'done', at);
         await advance(pb.id, at);
         advanced++;
       }
@@ -373,6 +579,7 @@ export function control(actor: Actor, tvId: number, action: unknown): Promise<st
       case 'pause':
         if (pb.state !== 'playing') throw new BadRequest('It is already paused.');
         await key(tv, 'Play');
+        syncWatch(pb, at);
         db().prepare("UPDATE playback SET state = 'paused', item_played_ms = ?, item_resumed_at = NULL WHERE id = ?").run(playedMs(pb, at), pb.id);
         words = `Paused ${what} on ${tv.name}`;
         break;
@@ -388,14 +595,16 @@ export function control(actor: Actor, tvId: number, action: unknown): Promise<st
         words = `Resumed ${what} on ${tv.name}`;
         break;
       case 'skip':
-        finishCurrent(pb, 'skipped');
+        finishCurrent(pb, 'skipped', at);
         db().prepare("UPDATE playback SET state = 'playing', message = NULL WHERE id = ?").run(pb.id);
         await advance(pb.id, at);
         words = `Skipped ${cur?.name ?? 'to the next title'} on ${tv.name} (${pb.name})`;
         break;
       case 'stop':
         stopLive(tv, at, `Stopped`);
-        await key(tv, 'Home').catch(() => undefined);
+        // In kid mode the TV goes back to the Popcorn Pilot kid home screen; otherwise to the Roku home screen.
+        if (kidModeProfile(tv.id) !== null) await launchChannel(tv, at).catch(() => undefined);
+        else await key(tv, 'Home').catch(() => undefined);
         words = `Stopped ${pb.name} on ${tv.name}`;
         break;
       default:
@@ -426,12 +635,16 @@ export function sendTo(actor: Actor, fromTvId: number, toTvId: unknown): Promise
       }
     }
     const played = playedMs(pb, at);
+    syncWatch(pb, at);
     db().prepare("UPDATE playback SET state = 'paused', item_played_ms = ?, item_resumed_at = NULL, message = ? WHERE id = ?").run(played, `Sent to ${to.name}`, pb.id);
     stopLive(to, at, `Replaced by ${pb.name}, sent from ${from.name}`);
+    followProfile(to, pb.profile_id, actor, at);
+    const curRow = pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
+    const epSeen = curRow ? Math.floor(played / episodeMs(rowFields(curRow))) : -1;
     const newId = Number(
       db()
-        .prepare("INSERT INTO playback (tv_id, playlist_id, name, profile_id, state, loop, shuffle, item_played_ms, started_by, started_at) VALUES (?, ?, ?, ?, 'playing', ?, ?, ?, ?, ?)")
-        .run(to.id, pb.playlist_id, pb.name, pb.profile_id, pb.loop, pb.shuffle, played, actor.pinType, at).lastInsertRowid,
+        .prepare("INSERT INTO playback (tv_id, playlist_id, name, profile_id, state, loop, shuffle, item_played_ms, started_by, started_at, kid_ep_seen, kid_warned_at, kid_wind_down_at, kid_volume_at) VALUES (?, ?, ?, ?, 'playing', ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        .run(to.id, pb.playlist_id, pb.name, pb.profile_id, pb.loop, pb.shuffle, played, actor.pinType, at, epSeen, pb.kid_warned_at, pb.kid_wind_down_at, pb.kid_volume_at).lastInsertRowid,
     );
     let current: QueueItemsRow | null = null;
     for (const r of queue(pb.id)) {
@@ -445,6 +658,7 @@ export function sendTo(actor: Actor, fromTvId: number, toTvId: unknown): Promise
         const r = await playOnTv(viewer, current.title_key as string, { tvId: to.id, service: current.service });
         db().prepare("UPDATE queue_items SET status = 'playing', launch_route = ? WHERE id = ?").run(r.route, current.id);
         db().prepare('UPDATE playback SET current_item_id = ?, item_resumed_at = ? WHERE id = ?').run(current.id, at, newId);
+        openWatch(playbackRow(newId), current, at);
       } catch (err) {
         const reason = failReason(err, viewer);
         db().prepare("UPDATE queue_items SET status = 'failed', note = ? WHERE id = ?").run(reason, current.id);
@@ -502,7 +716,7 @@ export function editQueue(actor: Actor, tvId: number, input: QueueEdit): Promise
       case 'remove': {
         const r = item();
         if (r.id === pb.current_item_id) {
-          finishCurrent(pb, 'skipped');
+          finishCurrent(pb, 'skipped', at);
           db().prepare("UPDATE queue_items SET status = 'removed' WHERE id = ?").run(r.id);
           db().prepare("UPDATE playback SET state = 'playing' WHERE id = ?").run(pb.id);
           await advance(pb.id, at);
@@ -594,6 +808,120 @@ export function remote(actor: Actor, tvId: number, k: unknown): Promise<string> 
   });
 }
 
+// ---------------------------------------------------------------------------------------------- kid mode, one title
+
+async function startTitleLocked(actor: Actor, viewer: Viewer, tv: Tv, titleKey: unknown, service: unknown, at: number, label?: string): Promise<PlaybackRow> {
+  const f = await titleFields(viewer, titleKey, service, { mode: 'indefinite' });
+  if (viewer.kid && viewer.profileId !== null) checkKidStart(viewer.profileId, tv, at);
+  stopLive(tv, at, `Replaced by ${f.name}`);
+  followProfile(tv, viewer.profileId, actor, at);
+  await restoreVolume(tv);
+  const pbId = Number(
+    db()
+      .prepare("INSERT INTO playback (tv_id, playlist_id, name, profile_id, state, loop, shuffle, started_by, started_at) VALUES (?, NULL, ?, ?, 'playing', 0, 0, ?, ?)")
+      .run(tv.id, label ?? f.name, viewer.profileId, actor.pinType, at).lastInsertRowid,
+  );
+  insertQueueItem(pbId, 1, f);
+  await advance(pbId, at);
+  return playbackRow(pbId);
+}
+
+/**
+ * Play one title on a TV for a kid profile (Browse "Play on a TV", or an approved title request). It runs as a
+ * playback, so the kid rules apply to it like to a playlist: time is counted, the warning, the stop, snap back.
+ * Throws when the hub could not start it.
+ */
+export function startTitle(actor: Actor, viewer: Viewer, input: { tvId: unknown; titleKey: unknown; service?: unknown }): Promise<{ tvName: string; service: string; route: string; name: string }> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(input.tvId);
+    const pb = await startTitleLocked(actor, viewer, tv, input.titleKey, input.service, at);
+    const item = queue(pb.id)[0];
+    if (item.status !== 'playing') throw new HttpError(item.status === 'failed' ? 502 : 403, pb.message ?? `${item.name} did not start.`);
+    return { tvName: tv.name, service: item.service as string, route: item.launch_route as string, name: item.name };
+  });
+}
+
+/**
+ * An approved title request: the title plays next on the TV the kid asked from (after the title on now), or starts
+ * there when nothing is playing for that kid. Returns what happened, in plain words.
+ */
+export function playRequestedTitle(viewer: Viewer, tvId: number, titleKey: string, service: string | null): Promise<string> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(tvId);
+    const pb = livePlayback(tv.id);
+    if (pb && pb.profile_id === viewer.profileId) {
+      const f = await titleFields(viewer, titleKey, service ?? undefined, { mode: 'indefinite' });
+      const items = queue(pb.id);
+      const cur = items.find((x) => x.id === pb.current_item_id);
+      const pos = cur ? cur.position : 0;
+      // Make room right after the current title.
+      db().prepare("UPDATE queue_items SET position = position + 1 WHERE playback_id = ? AND position > ?").run(pb.id, pos);
+      insertQueueItem(pb.id, pos + 1, f);
+      log(HUB, 'queue.add', `Added ${f.name} to play next on ${tv.name} (approved request)`);
+      return `${f.name} plays next on ${tv.name}.`;
+    }
+    const started = await startTitleLocked(HUB, viewer, tv, titleKey, service ?? undefined, at, undefined);
+    const item = queue(started.id)[0];
+    log(HUB, 'playback.start', `Started ${item.name} on ${tv.name} for ${viewer.profileName} (approved request)`);
+    return item.status === 'playing' ? `Started ${item.name} on ${tv.name}.` : (started.message ?? `${item.name} did not start.`);
+  });
+}
+
+/**
+ * Switch a TV to a profile (null: no profile). A kid profile puts the TV in kid mode, and the TV goes to the Popcorn
+ * Pilot kid home screen. The Guest PIN may switch a TV to a kid profile only, so it can never take a TV out of kid
+ * mode. Whatever was playing for another profile stops.
+ */
+export function switchProfile(actor: Actor, tvId: unknown, profile: unknown): Promise<string> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(tvId);
+    let v: Viewer = EVERYONE;
+    if (profile !== null && profile !== undefined && profile !== '') {
+      const n = Number(profile);
+      const got = Number.isInteger(n) && n > 0 ? viewerForProfile(n) : null;
+      if (!got) throw new BadRequest('That profile does not exist.');
+      v = got;
+    }
+    if (actor.pinType === 'guest' && !v.kid) throw new HttpError(403, 'With the Guest PIN, switch a TV to a kid profile.');
+    const pb = livePlayback(tv.id);
+    let stopped = '';
+    if (pb && pb.profile_id !== v.profileId) {
+      stopLive(tv, at, `Stopped: ${tv.name} was switched to ${v.profileName ?? 'no profile'}`);
+      stopped = ` and stopped ${pb.name}`;
+    }
+    followProfile(tv, v.profileId, actor, at);
+    if (v.kid && (stopped || !pb)) await launchChannel(tv, at).catch(() => undefined);
+    const words = `Switched ${tv.name} to ${v.profileName ?? 'no profile'}${v.kid ? ' (kid mode)' : ''}${stopped}`;
+    log(actor, 'tv.profile', words);
+    return words;
+  });
+}
+
+/**
+ * Snap back (handoff 5.7): the TV is showing something the hub did not start. Relaunch what should be on: the
+ * playlist's current title, or the Popcorn Pilot channel when nothing is playing. Returns what was relaunched.
+ */
+export function snapBackRelaunch(tvId: number, seenExpectedAt: number | null): Promise<{ what: 'title' | 'channel'; name: string } | null> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(tvId);
+    // The hub launched something on this TV since the watcher looked (a start, a skip, a stop): what the watcher saw
+    // was that launch, not a change by the kid. Nothing to undo.
+    if ((tvState(tv.id)?.expected_at ?? null) !== seenExpectedAt) return null;
+    const pb = livePlayback(tv.id);
+    const cur = pb && pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
+    if (pb && cur && cur.title_key) {
+      await playOnTv(viewerOf(pb), cur.title_key, { tvId: tv.id, service: cur.service });
+      return { what: 'title', name: cur.name };
+    }
+    await launchChannel(tv, at);
+    return { what: 'channel', name: 'Popcorn Pilot' };
+  });
+}
+
 // ---------------------------------------------------------------------------------------------- views
 
 export interface QueueView {
@@ -652,6 +980,10 @@ export interface TvView {
   playback: PlaybackView | null;
   /** Why the last playback on this TV ended, when it ended with a message in the last 30 minutes. */
   lastMessage: string | null;
+  /** The profile the TV is on (set by a start or a switch), and whether that puts it in kid mode. */
+  profile: { id: number; name: string; kid: boolean } | null;
+  /** For a TV in kid mode: that kid's time today (the bar fades green to yellow to red). */
+  kidTime: { name: string; leftMin: number; limitMin: number; bonusMin: number; percent: number; color: string; inHours: boolean } | null;
 }
 
 function queueView(r: QueueItemsRow): QueueView {
@@ -731,6 +1063,19 @@ export function tvView(tv: Tv, at = now()): TvView {
     tv: { id: tv.id, name: tv.name, room: tv.room, online: tv.online, defaultProfileName: tv.defaultProfileName },
     playback: pb ? playbackView(pb, at) : null,
     lastMessage,
+    ...kidModeView(tv.id, at),
+  };
+}
+
+function kidModeView(tvId: number, at: number): Pick<TvView, 'profile' | 'kidTime'> {
+  const pid = tvState(tvId)?.profile_id ?? null;
+  const row = pid !== null ? (db().prepare('SELECT id, name, type FROM profiles WHERE id = ? AND deleted_at IS NULL').get(pid) as { id: number; name: string; type: string } | undefined) : undefined;
+  if (!row) return { profile: null, kidTime: null };
+  const rules = row.type === 'kid' ? kidRules(row.id) : null;
+  const s = rules ? timeStatus(rules, at) : null;
+  return {
+    profile: { id: row.id, name: row.name, kid: row.type === 'kid' },
+    kidTime: s ? { name: s.name, leftMin: s.leftMin, limitMin: s.limitMin, bonusMin: s.bonusMin, percent: s.percent, color: s.color, inHours: s.inHours } : null,
   };
 }
 
