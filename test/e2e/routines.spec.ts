@@ -22,6 +22,12 @@ async function ids(page: Page) {
   return { tv: Object.fromEntries(tvs.map((t) => [t.name, t.id])), profile: Object.fromEntries(profiles.map((p) => [p.name, p.id])) };
 }
 
+/** The page fits the screen width: nothing pushes it sideways (at phone width especially). */
+async function fitsWidth(page: Page, where: string) {
+  const r = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: window.innerWidth }));
+  expect(`${where}: ${r.sw <= r.w ? 'fits' : `${r.sw - r.w} px too wide`}`).toBe(`${where}: fits`);
+}
+
 async function fake(path: string, method: 'GET' | 'POST' = 'GET') {
   const r = await fetch(FAKE + path, { method });
   return r.json();
@@ -68,6 +74,7 @@ test.describe('Adult PIN', () => {
     const sch = page.getByRole('region', { name: 'Schedule' });
     await sch.getByRole('switch', { name: 'Run on a schedule' }).click();
     await expect(sch.getByText('Mon to Fri · 7:00 AM')).toBeVisible();
+    await fitsWidth(page, 'routine editor with every step');
 
     await page.getByRole('button', { name: 'Test now' }).click();
     const test1 = page.getByRole('status', { name: 'Routine result' });
@@ -86,6 +93,7 @@ test.describe('Adult PIN', () => {
     await card.getByRole('button', { name: `Run ${name}` }).click();
     await expect(card.getByRole('status', { name: 'Routine result' })).toContainText(`${name}: all 5 steps done on Living room.`, { timeout: 30_000 });
     await expect(card).toContainText('Turns Living room off at');
+    await fitsWidth(page, 'routines list with a run result and a timer');
     const state = await fake('/state');
     expect(state.volume).toBe(18);
     expect(state.activeApp.id).toBe('12'); // Rocket Pals on Netflix
@@ -160,6 +168,7 @@ test.describe('Adult PIN', () => {
     await album.getByRole('button', { name: 'Save link' }).click();
     await expect(album.getByRole('alert')).toContainText('Last sync failed: iCloud did not find that album.', { timeout: 20_000 });
     await expect(album.getByRole('note')).toContainText('3 photos · 1 clip');
+    await fitsWidth(page, 'Settings with an album error');
     // Back to the good link.
     await link.fill(GOOD_LINK);
     await album.getByRole('button', { name: 'Save link' }).click();
