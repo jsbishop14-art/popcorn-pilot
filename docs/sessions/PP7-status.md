@@ -74,6 +74,13 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   is not running; a running one is left alone). No time limit, runs on battery, never wakes the PC. The folder is
   open only to SYSTEM, administrators and Local Service; the key file is read-only for Local Service.
 - D-9: Port 8765 on Windows and Mac (80 needs extra rights and is often taken on a work PC). -Port changes it.
+- D-10: Mac: the hub runs as the Mac account that ran the install (launchd daemon with UserName), not a new system
+  account (creating one takes many directory-service commands and a hidden user). /Library/PopcornPilot is that
+  account's, mode 0700, key 0600. Its own Node 20 copy, as on Windows. Git comes with the Mac's Command Line Tools;
+  the install stops with "xcode-select --install" if they are missing (it does not install them).
+- D-11: Mac firewall: the Mac has no per-port rule like Windows. Only when the macOS firewall is on, the install adds
+  the hub's own Node copy to the allowed apps (socketfilterfw --add/--unblockapp); the uninstall removes it. When the
+  firewall is off nothing is changed.
 
 ## Questions
 
@@ -91,7 +98,10 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   account, firewall rule, leftovers), test/install/hub-check.mjs (CI: installed hub's host, address, ad blocking,
   Guest refused). PSScriptAnalyzer 1.23.0: 0 findings on all three (control snippet: 3 findings). Not run on Windows
   here (no Windows in the codespace): the CI Windows job runs them.
+- Step 4: scripts/install-mac.sh, scripts/uninstall-mac.sh, test/install/mac-check.sh. shellcheck --severity=style:
+  exit 0. install-mac.sh --dry-run here: exit 0 (15 dry run lines). Real run: CI macOS job.
 
 ## PICK UP HERE
 
-Step 4: scripts/install-mac.sh and scripts/uninstall-mac.sh (launchd, test mode for CI), shellcheck clean.
+Step 5: browser tests (Settings > Hub from the menus, Adult and Guest; a second test hub with PP_HOST=windows for
+ad blocking not set up), docs/install-windows.md, docs/install-mac.md, CLAUDE.md, chain.md, CI jobs.
