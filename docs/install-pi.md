@@ -85,6 +85,22 @@ Until this is done, Browse shows a built-in sample catalog with invented titles.
 Popcorn Pilot counts the time each title plays itself (the streaming apps do not report it), so the move to the next
 title can be a minute or two off the real end of an episode.
 
+## 7. Try kid mode on a TV
+
+1. **Profiles**, open a kid profile, and set its safeguards (allowed ratings, minutes per day, viewing hours,
+   warning, wind-down, snap back). Press **Save**.
+2. On **Home**, set **Profile on this TV** for the Living room to that kid. The card says **Kid mode** and shows the
+   kid's time left today.
+3. Start a playlist for the kid. While it plays, press the **Hulu** button on the Roku remote: within a few seconds
+   the TV goes back to the playlist's title, and **Profiles > Alerts** shows "Left the playlist". Press **Home** on
+   the remote: the same, as "Pressed Home".
+4. Near the end of the kid's time: **Alerts** shows the warning; at the end of the episode the TV turns off.
+5. **Profiles > Earn time tasks**: add a task, then **Mark done** for the kid; the minutes are added to today.
+6. To take the TV out of kid mode, set **Profile on this TV** to **No profile** with the Adult PIN.
+
+Until the Popcorn Pilot channel is installed (a later build), snap back with nothing playing cannot open the kid home
+screen; it says so in Settings > Activity history.
+
 ## Later steps (other builds)
 
 - Router DNS pointing at the Pi, for ad blocking (PP5).

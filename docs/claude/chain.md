@@ -7,7 +7,7 @@
 | 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
-| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
+| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | In progress |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
 
@@ -38,6 +38,12 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   from a playlist (the launch log records direct link or search launch per title); Pause and Resume (the Roku
   play/pause key) pause the streaming app; Stop (Home key) leaves it; Send to starts the title on the other TV; how
   far the hub's estimated episode ends are from the real ones.
+- Kid mode on the real Rokus (PP4, docs/install-pi.md step 7): snap back after the Home, Netflix, Hulu and Prime
+  buttons (how fast the Roku reports the new app; the hub polls every 2 s and gives its own launches 6 s, which
+  search launches may need); what the Roku reports as the active app in standby and with the screensaver on; time up
+  turning the TV off (PowerOff); how far one wind-down volume step goes on each TV, and the volume coming back up on
+  the next start. With nothing playing, snap back opens the Popcorn Pilot channel, which needs the channel installed
+  (PP6).
 
 ## Sources
 
