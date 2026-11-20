@@ -5,6 +5,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 3100;
 const DATA = '.tmp/e2e-data';
+// PP7: a second test hub that says it runs on a Windows PC (its own empty data folder).
+const WIN_PORT = 3101;
+const WIN_DATA = '.tmp/e2e-data-windows';
 
 export default defineConfig({
   testDir: 'test/e2e',
@@ -32,6 +35,8 @@ export default defineConfig({
     { name: 'routines-desktop', testMatch: /routines\.spec\.ts/, dependencies: ['routines-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['routines-desktop'] },
     { name: 'lockout', testMatch: /lockout\.spec\.ts/, dependencies: ['http-map'], use: { ...devices['Pixel 7'] } },
+    // PP7: Settings > Hub and Ad blocking on the Windows test hub.
+    { name: 'hub-windows', testMatch: /hub-windows\.spec\.ts/, dependencies: ['lockout'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 }, baseURL: `http://127.0.0.1:${WIN_PORT}` } },
   ],
   webServer: [
     {
@@ -45,9 +50,20 @@ export default defineConfig({
       // file the install script leaves for the hub (test values, not real ones).
       command:
         `rm -rf ${DATA} && mkdir -p ${DATA} && cp test/fixtures/adguard-credentials.json ${DATA}/ && ` +
-        `PP_DATA_DIR=${DATA} PP_NO_OUTSIDE_CALLS=1 PP_SSDP_TARGET=127.0.0.1:11900 PP_ICLOUD_BASE=http://127.0.0.1:18063 PP_ADGUARD_URL=http://127.0.0.1:18064 ` +
+        // PP7: this test hub says it is a Pi (Settings > Hub, ad blocking as on the Pi); PORT is the address's port.
+        `PP_HOST=pi PORT=${PORT} PP_DATA_DIR=${DATA} PP_NO_OUTSIDE_CALLS=1 PP_SSDP_TARGET=127.0.0.1:11900 PP_ICLOUD_BASE=http://127.0.0.1:18063 PP_ADGUARD_URL=http://127.0.0.1:18064 ` +
         `NEXT_TELEMETRY_DISABLED=1 npx next start -p ${PORT} -H 127.0.0.1`,
       url: `http://127.0.0.1:${PORT}/api/auth/state`,
+      reuseExistingServer: false,
+      timeout: 120_000,
+      stdout: 'pipe',
+    },
+    {
+      command:
+        `rm -rf ${WIN_DATA} && mkdir -p ${WIN_DATA} && ` +
+        `PP_HOST=windows PORT=${WIN_PORT} PP_DATA_DIR=${WIN_DATA} PP_NO_OUTSIDE_CALLS=1 PP_SSDP_TARGET=127.0.0.1:11900 PP_ADGUARD_URL=http://127.0.0.1:18064 ` +
+        `NEXT_TELEMETRY_DISABLED=1 npx next start -p ${WIN_PORT} -H 127.0.0.1`,
+      url: `http://127.0.0.1:${WIN_PORT}/api/auth/state`,
       reuseExistingServer: false,
       timeout: 120_000,
       stdout: 'pipe',

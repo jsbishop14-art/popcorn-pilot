@@ -10,10 +10,12 @@
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Landed 2026-11-20 |
+| 7 | PP7 | pp7-windows-mac-hub | docs/specs/PP7-BUILD-SPEC.md | 1.1, 11.4, 12 | Landed 2026-11-20 |
 
 ## Grants
 
-None. Production is the Raspberry Pi; build sessions never touch it or a real TV. No real outside calls; no real email.
+None. Production is the hub computer (Windows PC for now, Pi later; PP7); build sessions never touch it or a real
+TV. No real outside calls; no real email.
 
 ## Waits on Josh
 
@@ -22,6 +24,23 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   sync, docs/install-pi.md step 9).
 
 ## Waits on hardware
+
+- Hub on the Windows PC (PP7): run the Windows install (docs/install-windows.md), then the Roku and Settings steps below from that PC. The Pi items below apply when a Pi is bought.
+- Windows install on Josh's real PC (PP7, docs/install-windows.md): checked here only by PSScriptAnalyzer and by the
+  CI Windows job (a test-mode install on a GitHub Windows runner: scheduled task as Local Service, firewall rule,
+  start, smoke, uninstall). On the real PC check: the install ends with the address; the home network is Private
+  (step 3); a phone on the Wi-Fi opens the address and the QR code in Settings > Hub; the hub comes back after a
+  restart of the PC before anyone signs in; Settings > Check for updates now updates (or says up to date);
+  Settings > Hub shows the 3:00 AM backup the next day.
+- Find TVs on the network from the Windows PC (PP7): Windows' firewall may hold back the Rokus' replies to the search
+  (only the app's TCP port is opened); if nothing is found, Add by address works (docs/install-windows.md step 6).
+- The Popcorn Pilot channel from the Windows PC (PP7, docs/install-windows.md step 8): build the zip with the hub's
+  Node and upload it on the Roku's developer page in a browser; then pair. The channel calls the hub at
+  http://<PC address>:8765, so the PC needs a reserved address in the router.
+- Sleep on the Windows PC (PP7): while it sleeps, kid limits, snap back, schedules and routines pause (said in the
+  guide and Settings > Hub); Josh decides whether to change the sleep setting; the install never does.
+- Mac install (PP7, docs/install-mac.md): only if the hub moves to the Mac; checked here by shellcheck and the CI
+  macOS job (test-mode install with launchd).
 
 - Buy the Raspberry Pi 5 (8GB), power supply, case with fan, storage; run the install (docs/install-pi.md, PP1).
 - On each Roku: "Control by mobile apps" network access set to Default or Permissive, and a reserved address in the
@@ -90,6 +109,11 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - 22:15: "1. CC in the claude browser using github. exactly as the command center was built 2. not mac 3. nothing has been done. you have permission to do what is needed and set up the repo as needed, assuming this is done in github. i dont know what is best 4. jsbishop-art. should already be connected 5. every 30 minutes. restart anything as needed. answer questions as needed 6. message me here. table anything that cant be answered without me and continue on something else 7. build everything that doesnt need hardware 8. no budget at this time". Meaning: account jsbishop14-art (the connected account); overwatch every 30 minutes by the chat session; no weekly budget limit.
 - 22:18: "this will be unattended from here for 10 hours. please ensure the build continues"
 
+## Rulings in force (2026-11-20, Eastern time)
+
+- 06:30: "can this be used without the pi? turns out a pi is more expensive than i thought. looked at the pi website and they were under 100. but the only way to buy is from a reseller and theyre nearly 200. for now id like to control with my computer and phone straight to the roku. is that possible?"
+- 06:42: "i will host this on the windows machine. the mac is for building software. 1. windows is on same network 2. ok on windows 3. write script for windows and mac so it can be changed later if i want. keep the pi scripts as well because i will eventually get one 4. skip for now 5. keep pi version". Meaning: the hub runs on the Windows PC for now; install scripts for Windows and Mac are added; Pi scripts stay; ad blocking skipped on Windows and Mac for now.
+
 ## Decided by the chat session (2026-11-19)
 
 - D-1: Same stack and build process as Command Center (Next.js 14, SQLite, Codespaces, runner, one CI run per build).
@@ -129,3 +153,9 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   (numbers and the layout table in docs/sessions/PP6-status.md). Migration 006 (2 expected columns) lands with the
   code and is applied by the Pi updater. Installing the channel on the Rokus (developer mode, sideload, pairing) and
   everything it does on a real TV wait on hardware.
+- PP7 (hub on Windows and Mac): landed 2026-11-20 by the merge commit "[Merge] PP7 (" on main. CI run 44735974044
+  green (test, arm64, windows and macos jobs) on the branch at 5576fb1, which contained current main (8b5b5fe); CI
+  run 1 (44734851112) was red (macos-14 image not offered; a Windows test cleanup hook) and is classified in
+  docs/sessions/PP7-status.md. Checks 1 to 6 passed (numbers in the status file). No migration. The hub now runs on
+  Josh's Windows PC: install with docs/install-windows.md (Waits on hardware). The Pi install and updater are
+  unchanged; the Mac install is there if the hub moves later.

@@ -7,6 +7,7 @@ import path from 'node:path';
 import { dataDir } from './paths.mjs';
 import { readSecrets, updateSecrets } from './secrets';
 import { now } from './clock';
+import { adBlockingSetUp } from './host';
 
 const TIMEOUT_MS = 4000;
 
@@ -39,6 +40,9 @@ function authHeader(): Record<string, string> {
 
 class AdGuardDown extends Error {}
 
+/** Ad blocking is not installed on this hub computer (Windows or Mac). */
+export class NotSetUp extends Error {}
+
 async function call(method: 'GET' | 'POST', p: string, body?: unknown): Promise<{ status: number; json: Record<string, unknown> }> {
   let res: Response;
   try {
@@ -65,8 +69,11 @@ async function call(method: 'GET' | 'POST', p: string, body?: unknown): Promise<
 }
 
 export interface AdBlockStatus {
-  /** on: blocking; off: AdGuard Home runs but protection is off; unavailable: it did not answer. */
-  state: 'on' | 'off' | 'unavailable';
+  /**
+   * on: blocking; off: AdGuard Home runs but protection is off; unavailable: it did not answer; not_set_up: the hub
+   * runs on a Windows PC or a Mac, where ad blocking is not installed (PP7).
+   */
+  state: 'on' | 'off' | 'unavailable' | 'not_set_up';
   blockedToday: number | null;
   queriesToday: number | null;
   message: string | null;
@@ -91,7 +98,10 @@ export function todayFrom(stats: Record<string, unknown>, list: string, total: s
   return typeof t === 'number' ? t : null;
 }
 
+export const NOT_SET_UP = 'Not set up on this computer';
+
 export async function adBlockStatus(at = now()): Promise<AdBlockStatus> {
+  if (!adBlockingSetUp()) return { state: 'not_set_up', blockedToday: null, queriesToday: null, message: NOT_SET_UP };
   try {
     const s = await call('GET', '/control/status');
     if (s.status !== 200) return { state: 'unavailable', blockedToday: null, queriesToday: null, message: `Ad blocking answered ${s.status}.` };
@@ -111,6 +121,7 @@ export async function adBlockStatus(at = now()): Promise<AdBlockStatus> {
 
 /** Turn blocking on or off. Returns the status afterwards. Throws with plain words when AdGuard Home did not answer. */
 export async function setAdBlocking(on: boolean): Promise<AdBlockStatus> {
+  if (!adBlockingSetUp()) throw new NotSetUp(`${NOT_SET_UP}. Ad blocking runs only when the hub is a Raspberry Pi.`);
   try {
     let r = await call('POST', '/control/protection', { enabled: on });
     // Older AdGuard Home versions: protection is part of the DNS settings.

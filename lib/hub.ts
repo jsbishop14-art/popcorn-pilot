@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { backupsDir, dbFile, updateRequestFile, updateStatusFile } from './paths.mjs';
+import { HOST_LABEL, hostKind, hubUrl, type HostKind } from './host';
 
 export interface UpdateStatus {
   at: string;
@@ -13,6 +14,11 @@ export interface UpdateStatus {
 }
 
 export interface HubStatus {
+  /** Which computer the hub runs on (PP7). */
+  host: HostKind;
+  hostLabel: string;
+  /** The address to open on a phone on the home Wi-Fi (also in the QR code in Settings > Hub). */
+  address: string;
   version: string;
   builtAt: string | null;
   uptimeSeconds: number;
@@ -57,7 +63,11 @@ export function hubStatus(): HubStatus {
   } catch {
     // never updated
   }
+  const host = hostKind();
   return {
+    host,
+    hostLabel: HOST_LABEL[host],
+    address: hubUrl(),
     version: v.sha,
     builtAt: v.builtAt,
     uptimeSeconds: Math.round(os.uptime()),
@@ -70,7 +80,10 @@ export function hubStatus(): HubStatus {
   };
 }
 
-/** Leaves a request file; on the Pi a systemd path unit sees it and runs the updater. */
+/**
+ * Leaves a request file; on the Pi a systemd path unit sees it and runs the updater; on Windows and Mac the hub
+ * service (scripts/hub-service.mjs) sees it within a few seconds.
+ */
 export function requestUpdate(): void {
   fs.mkdirSync(path.dirname(updateRequestFile()), { recursive: true });
   fs.writeFileSync(updateRequestFile(), new Date().toISOString() + '\n');

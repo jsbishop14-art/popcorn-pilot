@@ -10,10 +10,13 @@ docs/claude/chain.md (build order, rulings, what waits on Josh). Keep this file 
 - **Owner:** Josh Bishop, the only human. Contractor, not a programmer: plain words, what a change means for him.
 - **Repo:** jsbishop14-art/popcorn-pilot. Public until the build is complete, then private (same as Command Center).
   Never commit secrets or real data. Plan branch: docs/next-builds.
-- **Where it runs:** a Raspberry Pi 5 on the home network (not bought yet), Raspberry Pi OS 64-bit. Home network only,
-  no remote access. Builds run in GitHub Codespaces and never touch the Pi or a real TV.
+- **Where it runs:** the hub computer (Windows PC for now, Pi later) on the home network: Josh's Windows PC
+  (docs/install-windows.md, PP7), later a Raspberry Pi 5 with Raspberry Pi OS 64-bit (docs/install-pi.md, kept); a
+  Mac install exists too (docs/install-mac.md). Home network only, no remote access. Builds run in GitHub
+  Codespaces and never touch the hub computer or a real TV.
 - **Stack:** Next.js 14 (App Router) + React 18 + TypeScript, SQLite via better-sqlite3, Vitest, Playwright, Node 20,
-  Node crypto only. Roku channel: BrightScript and SceneGraph, compiled with BrighterScript. Must run on arm64 Linux.
+  Node crypto only. Roku channel: BrightScript and SceneGraph, compiled with BrighterScript. Must run on Windows x64,
+  macOS and arm64 Linux.
 - **Layout source of truth:** docs/mockup/ (the approved mockup). Bracketed values and show names are placeholders.
 
 ## 2. Run protocol
@@ -29,15 +32,16 @@ docs/claude/chain.md (build order, rulings, what waits on Josh). Keep this file 
 
 ## 3. Landing and production (handoff section 12 overrides docs/process.md here)
 
-- **Production is the Raspberry Pi.** Build sessions never touch it or a real TV.
+- **Production is the hub computer (Windows PC for now, Pi later).** Build sessions never touch it or a real TV.
 - **Landing without Josh** when both hold:
   1. CI is green on the branch rebased onto current main (or green with only docs/ or root *.md changed since, listed
      in the merge message with the command used).
   2. Every agreed check passed, with its number stated.
 - Process.md's third condition (migrations already on production) does not apply. Migrations land with the code and
-  list the database objects they should produce, so the Pi updater can read them back.
+  list the database objects they should produce, so the hub computer's updater can read them back.
 - Merge message starts `[Merge] <NAME> (`. Record the landing in chain.md and the status file.
-- Deploy and smoke after merge are done by the Pi updater (handoff 11), not by the build session.
+- Deploy and smoke after merge are done by the hub computer's updater (Windows PC for now, Pi later; handoff 11),
+  not by the build session.
 - One deliberate CI run per build (budget: 1 + 2 infrastructure re-runs + 2 fix runs). Every other push carries
   `[skip ci]`; the pre-push hook enforces it (`git config core.hooksPath scripts/hooks`; ALLOW_CI=1 for the CI push).
   Each build adds its branch to the CI workflow's branch list.
@@ -75,7 +79,7 @@ docs/claude/chain.md (build order, rulings, what waits on Josh). Keep this file 
 
 ## 6. Database and storage
 
-- Local SQLite on the Pi. No tenant id or row security (single household).
+- Local SQLite on the hub computer (Windows PC for now, Pi later). No tenant id or row security (single household).
 - Explicit migrations, each listing its expected objects. Soft delete where data matters. Generated types.
 - Secrets (TMDB key, session secret) only in the secret store. PINs stored hashed (scrypt). Never in code, logs or tests.
 

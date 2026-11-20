@@ -12,6 +12,7 @@ on:
       - pp4-kid-safeguards
       - pp5-routines-album-adblock
       - pp6-roku-channel
+      - pp7-windows-mac-hub
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -44,9 +45,11 @@ jobs:
       - name: Migrations apply and every expected object reads back
         run: PP_DATA_DIR=$RUNNER_TEMP/migrate node scripts/migrate.mjs
       - name: Shellcheck
-        run: shellcheck --version && shellcheck --severity=style scripts/install-pi.sh scripts/update.sh scripts/roku-sideload.sh
+        run: shellcheck --version && shellcheck --severity=style scripts/install-pi.sh scripts/update.sh scripts/roku-sideload.sh scripts/install-mac.sh scripts/uninstall-mac.sh test/install/mac-check.sh
       - name: Install script dry run
         run: bash scripts/install-pi.sh --dry-run
+      - name: Mac install script dry run (PP7)
+        run: bash scripts/install-mac.sh --dry-run
       # PP6: the Roku channel, compiled by the BrighterScript compiler (and again with its Rooibos tests), packaged as
       # the sideload zip and read back (manifest, components, source, images, fonts). Exit 1 on any compile error.
       - name: Roku channel build (bsc) and zip check
@@ -96,3 +99,141 @@ jobs:
         run: npx vitest run
       - name: Build
         run: npm run build
+
+  windows:
+    # PP7 check 1: the hub on a Windows PC. The install in test mode on a GitHub Windows runner (Windows PowerShell 5.1,
+    # as on Josh's PC): scheduled task as Local Service, firewall rule, the app started as the task starts it, smoke
+    # check, the installed hub's answers, a restart after the app stops, and an uninstall that leaves nothing behind.
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: PSScriptAnalyzer (check 5)
+        shell: powershell
+        run: |
+          if (-not (Get-Module -ListAvailable PSScriptAnalyzer)) { Install-Module PSScriptAnalyzer -Scope CurrentUser -Force }
+          (Get-Module -ListAvailable PSScriptAnalyzer | Select-Object -First 1).Version.ToString()
+          $control = @(Invoke-ScriptAnalyzer -ScriptDefinition 'function Set-Thing { Write-Host hi }; $x = 1')
+          if ($control.Count -eq 0) { throw 'control: PSScriptAnalyzer found nothing in a script that breaks its rules' }
+          $all = 0
+          foreach ($f in @('scripts/install-windows.ps1', 'scripts/uninstall-windows.ps1', 'test/install/windows-check.ps1')) {
+            $r = @(Invoke-ScriptAnalyzer -Path $f)
+            "$f findings: $($r.Count)"
+            $r | Format-Table -AutoSize RuleName, Severity, Line, Message | Out-String -Width 200
+            $all += $r.Count
+          }
+          if ($all -ne 0) { exit 1 }
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Updater rollback, hub service and host tests on Windows (check 3)
+        run: npx vitest run test/unit/hub-updater.test.ts test/unit/hub-service.test.ts test/unit/host.test.ts
+      - name: Install script dry run
+        shell: powershell
+        run: .\scripts\install-windows.ps1 -DryRun -TestMode -Root "$env:RUNNER_TEMP\pp-dry"
+      - name: Install in test mode
+        shell: powershell
+        run: .\scripts\install-windows.ps1 -TestMode -Root "$env:RUNNER_TEMP\pp" -Port 3999 -RepoUrl "$env:GITHUB_WORKSPACE" -Branch "$env:GITHUB_REF_NAME" -NodeDir (Split-Path (Get-Command node).Source)
+      - name: What the install left (task, account, firewall rule, files)
+        shell: powershell
+        run: .\test\install\windows-check.ps1 -Root "$env:RUNNER_TEMP\pp" -Port 3999 -Stage Installed
+      - name: The installed hub answers (host, address, ad blocking, Guest refused)
+        run: node test/install/hub-check.mjs 3999 windows
+      - name: The app stops; the hub service starts it again
+        shell: powershell
+        run: |
+          $old = @(Get-NetTCPConnection -LocalPort 3999 -State Listen)[0].OwningProcess
+          Stop-Process -Id $old -Force
+          $deadline = (Get-Date).AddSeconds(90)
+          do {
+            Start-Sleep -Seconds 2
+            $now = @(Get-NetTCPConnection -LocalPort 3999 -State Listen -ErrorAction SilentlyContinue)
+          } until (($now.Count -gt 0 -and $now[0].OwningProcess -ne $old) -or (Get-Date) -gt $deadline)
+          if (-not ($now.Count -gt 0 -and $now[0].OwningProcess -ne $old)) { throw 'the app did not come back' }
+          "the app came back (pid $old -> $($now[0].OwningProcess))"
+          $env:PORT = '3999'; $env:PP_DATA_DIR = "$env:RUNNER_TEMP\pp\data"; $env:SMOKE_TIMEOUT = '120'
+          node scripts/smoke.mjs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - name: Uninstall, keeping the data
+        shell: powershell
+        run: .\scripts\uninstall-windows.ps1 -TestMode -Root "$env:RUNNER_TEMP\pp"
+      - name: Nothing left but the data
+        shell: powershell
+        run: .\test\install\windows-check.ps1 -Root "$env:RUNNER_TEMP\pp" -Port 3999 -Stage KeptData
+      - name: Uninstall with the data
+        shell: powershell
+        run: .\scripts\uninstall-windows.ps1 -TestMode -Root "$env:RUNNER_TEMP\pp" -RemoveData
+      - name: Nothing left
+        shell: powershell
+        run: .\test\install\windows-check.ps1 -Root "$env:RUNNER_TEMP\pp" -Port 3999 -Stage Removed
+      - name: Keep the hub logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-hub-logs
+          path: ${{ runner.temp }}/pp/logs/
+          retention-days: 7
+
+  macos:
+    # PP7 check 2: the hub on a Mac. The install in test mode on a GitHub macOS runner: launchd daemon, the app
+    # started as launchd starts it, smoke check, the installed hub's answers, a restart after the app stops, and an
+    # uninstall that leaves nothing behind.
+    # macos-14 is no longer offered (CI run 1: "The configuration 'macos-14-arm64-us-default' is not supported").
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Updater rollback, hub service and host tests on macOS (check 3)
+        run: npx vitest run test/unit/hub-updater.test.ts test/unit/hub-service.test.ts test/unit/host.test.ts
+      - name: Install script dry run
+        run: bash scripts/install-mac.sh --dry-run --test --root "$RUNNER_TEMP/pp-dry"
+      - name: Install in test mode
+        run: sudo bash scripts/install-mac.sh --test --root "$RUNNER_TEMP/pp" --port 3998 --repo "$GITHUB_WORKSPACE" --branch "$GITHUB_REF_NAME" --node-dir "$(dirname "$(dirname "$(command -v node)")")"
+      - name: What the install left (daemon, account, files)
+        run: sudo bash test/install/mac-check.sh "$RUNNER_TEMP/pp" 3998 installed
+      - name: The installed hub answers (host, address, ad blocking, Guest refused)
+        run: node test/install/hub-check.mjs 3998 mac
+      - name: The app stops; the hub service starts it again
+        run: |
+          old="$(sudo lsof -nP -iTCP:3998 -sTCP:LISTEN -t | head -n 1)"
+          sudo kill -9 "$old"
+          new=""
+          for _ in $(seq 1 45); do
+            sleep 2
+            new="$(sudo lsof -nP -iTCP:3998 -sTCP:LISTEN -t | head -n 1 || true)"
+            if [ -n "$new" ] && [ "$new" != "$old" ]; then break; fi
+          done
+          if [ -z "$new" ] || [ "$new" = "$old" ]; then echo "the app did not come back"; exit 1; fi
+          echo "the app came back (pid $old -> $new)"
+          PORT=3998 PP_DATA_DIR="$RUNNER_TEMP/pp/data" SMOKE_TIMEOUT=120 node scripts/smoke.mjs
+      - name: Uninstall, keeping the data
+        run: sudo bash scripts/uninstall-mac.sh --test --root "$RUNNER_TEMP/pp"
+      - name: Nothing left but the data
+        run: sudo bash test/install/mac-check.sh "$RUNNER_TEMP/pp" 3998 kept-data
+      - name: Uninstall with the data
+        run: sudo bash scripts/uninstall-mac.sh --test --root "$RUNNER_TEMP/pp" --remove-data
+      - name: Nothing left
+        run: sudo bash test/install/mac-check.sh "$RUNNER_TEMP/pp" 3998 removed
+      - name: Keep the hub logs
+        if: failure()
+        run: sudo chmod -R a+rX "$RUNNER_TEMP/pp" || true
+      - name: Upload the hub logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-hub-logs
+          path: ${{ runner.temp }}/pp/logs/
+          retention-days: 7

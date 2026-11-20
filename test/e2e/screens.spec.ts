@@ -1,8 +1,8 @@
 // Check 3: with the Adult PIN, Profiles, the profile editor, Settings, a TV and Activity history are reached by
 // clicking from the app's own menus; with the Guest PIN those entry points are absent and the pages refuse (403).
-// Runs at phone width and at desktop width.
+// Runs at phone width and at desktop width. PP7: Settings > Hub shows the host (Pi here), the address and its QR code.
 import { expect, test } from '@playwright/test';
-import { ADULT, GUEST, signIn, tab } from './helpers';
+import { ADULT, GUEST, readQr, signIn, tab } from './helpers';
 
 test.describe('Adult PIN', () => {
   test.beforeEach(async ({ page }) => signIn(page, ADULT));
@@ -67,7 +67,15 @@ test.describe('Adult PIN', () => {
   test('Settings: TVs, PINs, hub and Activity history are reached from the menu', async ({ page }) => {
     await tab(page, 'Settings');
     await expect(page.getByText('Lock the app after', { exact: true })).toBeVisible();
-    await expect(page.getByText('Raspberry Pi')).toBeVisible();
+    // PP7: Settings > Hub says which computer the hub runs on (this test hub says Pi), the address to open on a
+    // phone, and a QR code that a phone camera reads as that same address.
+    const hub = page.getByRole('region', { name: 'Hub' });
+    await expect(hub.getByText('Raspberry Pi', { exact: true })).toBeVisible();
+    const address = (await hub.getByLabel('Hub address').innerText()).trim();
+    expect(address).toMatch(/^http:\/\/\d+\.\d+\.\d+\.\d+:3100$/);
+    expect(await readQr(page, `QR code for ${address}`)).toBe(address);
+    // The sleep note is for Windows and Mac hubs only.
+    await expect(hub.getByText('kid limits, snap back, schedules and routines pause')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Find TVs on the network' })).toBeVisible();
 
     // Make sure there is a TV to open (an offline one; tvs.spec.ts adds the fake Roku by discovery), then open it.

@@ -12,5 +12,18 @@ export async function register() {
     startRoutineTimer();
     const { startAlbumTimer } = await import('./lib/album');
     startAlbumTimer();
+    // PP7: on Windows and Mac the hub service (scripts/hub-service.mjs) runs the app. Windows ends a task without a
+    // signal, so the app checks every 5 seconds that the service is still there and stops with it (otherwise the
+    // next start would find the port taken).
+    const parent = Number(process.env.PP_SUPERVISOR_PID);
+    if (parent > 0) {
+      setInterval(() => {
+        try {
+          process.kill(parent, 0);
+        } catch (err) {
+          if ((err as NodeJS.ErrnoException).code !== 'EPERM') process.exit(0);
+        }
+      }, 5000).unref();
+    }
   }
 }
