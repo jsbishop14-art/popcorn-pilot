@@ -55,6 +55,17 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 - D-2: QR code with the package qrcode-generator (MIT, no dependencies) in the app; jsqr (Apache 2.0, no
   dependencies) only in tests, to decode the code as a phone would. Both from npm; no outside service.
 - D-3: On the Pi the address drops ":80" (http://<address> instead of http://<address>:80). Same place.
+- D-4: One hub service on Windows and Mac (scripts/hub-service.mjs, plain Node, nothing from node_modules) runs the
+  app, restarts it (2 s, doubling to a minute while it keeps failing), runs the nightly backup at 3:00 AM and the
+  updater at 4:00 AM and on Check for updates now. A time missed while the computer slept runs when it is back. The
+  updater (scripts/hub-update.mjs) is the Pi updater's steps in Node, so one updater serves Windows and Mac and is
+  tested on all three systems; the Pi keeps scripts/update.sh unchanged. Reason: Windows Task Scheduler does not
+  restart a task whose program exits, and one process in charge of stop, start and update avoids races.
+- D-5: The app stops by itself when the hub service is gone (it checks every 5 s; instrumentation.ts), because
+  Windows ends a task without a signal and the app would otherwise keep the port.
+- D-6: No development seed on a real hub. The spec says the install "runs the migrations and seed"; scripts/seed.mjs
+  adds placeholder profiles for development, and the Pi install does not run it. The real hub's starting data is the
+  migrations plus first run (PINs) and the sample catalog, which ships with the app. Same as the Pi.
 
 ## Questions
 
@@ -66,8 +77,9 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 - Step 1: lib/host.ts (host kind, home address, hub URL), Settings > Hub shows the host, the address and a QR code,
   ad blocking "Not set up on this computer" on Windows and Mac (GET says so, PATCH 409). Unit: host 9/9, adblock
   7/7, channel-api 32/32.
+- Step 2: scripts/hub-service.mjs and scripts/hub-update.mjs, the app's service watchdog. Unit: hub-updater 6/6
+  (control: with the database restore removed, the rollback test fails, 1 failed 5 passed), hub-service 4/4.
 
 ## PICK UP HERE
 
-Step 2: the cross-platform hub service (scripts/hub-service.mjs: runs the app, restarts it, backup 3:00, updater
-4:00 and on request) and updater (scripts/hub-update.mjs) with the rollback test.
+Step 3: scripts/install-windows.ps1 and scripts/uninstall-windows.ps1 (test mode for CI), PSScriptAnalyzer clean.
