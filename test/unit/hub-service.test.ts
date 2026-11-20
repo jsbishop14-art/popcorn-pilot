@@ -74,7 +74,8 @@ function starts() {
 }
 
 afterEach(async () => {
-  if (svc && svc.exitCode === null) {
+  // A process ended by a signal (and on Windows every kill) has exitCode null and signalCode set: it is gone already.
+  if (svc && svc.exitCode === null && svc.signalCode === null) {
     const gone = new Promise((r) => svc!.once('exit', r));
     svc.kill('SIGTERM');
     await gone;
@@ -120,13 +121,16 @@ describe('hub service on Windows and Mac', () => {
     expect(starts()[1].pid).not.toBe(first);
   });
 
-  it('stopping the service stops the app', async () => {
-    setUp({ lastBackupAt: Date.now(), lastUpdateAt: Date.now() });
-    await until('the app starts', () => starts().length === 1);
-    const pid = starts()[0].pid;
-    const gone = new Promise((r) => svc!.once('exit', r));
-    svc!.kill('SIGTERM');
-    await gone;
-    await until('the app is gone', () => !alive(pid), 12_000);
-  });
+  for (const how of ['SIGTERM', 'SIGKILL'] as const) {
+    // SIGKILL is how Windows ends the task (no signal reaches the service): the app sees the service is gone and stops.
+    it(`stopping the service stops the app (${how})`, async () => {
+      setUp({ lastBackupAt: Date.now(), lastUpdateAt: Date.now() });
+      await until('the app starts', () => starts().length === 1);
+      const pid = starts()[0].pid;
+      const gone = new Promise((r) => svc!.once('exit', r));
+      svc!.kill(how);
+      await gone;
+      await until('the app is gone', () => !alive(pid), 12_000);
+    }, 20_000);
+  }
 });

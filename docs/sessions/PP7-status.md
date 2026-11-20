@@ -121,8 +121,17 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   (58 expected objects, 0 missing); roku build 0; shellcheck 0 (Pi scripts and the new Mac scripts); Pi install dry
   run 0; Mac install dry run 0; unit 590/590 (--no-cache, 22 files); PSScriptAnalyzer 0 findings on the three
   PowerShell files; production build 0; browser 70/70 on the production build. Then CI run 1 (deliberate).
+- CI run 1 (44734851112, 04b52cf): test green, arm64 green, windows red, macos cancelled. Classified from the logs:
+  macos never started: "The configuration 'macos-14-arm64-us-default' is not supported" (infrastructure: the image
+  is no longer offered; fixed by macos-latest). windows: hub-updater 6/6 and host 9/9 passed on Windows; hub-service
+  3/4: "stopping the service stops the app" failed in its cleanup hook (Hook timed out in 10000ms). Wrong test,
+  proven: on Windows every kill ends the process at once, so Node reports exitCode null with signalCode set, and the
+  hook waited for an exit that had already happened; the same hang reproduced on Linux by killing the service with
+  SIGKILL (1 failed, 3 passed). Fixed: the hook treats a set signalCode as gone; the stop test runs both SIGTERM and
+  SIGKILL (SIGKILL is how Windows ends the task). Unit hub-service 5/5 here. The install steps after it did not run.
+  Fix run 1 of 2 next (CI run 2).
 
 ## PICK UP HERE
 
-Step 6: read CI run 1 (jobs test, arm64, windows, macos). Green: land (merge message "[Merge] PP7 (", record in
+Step 6b: read CI run 2 (jobs test, arm64, windows, macos). Green: land (merge message "[Merge] PP7 (", record in
 chain.md and here). Red: classify from the log (process.md section 7); budget 2 infrastructure re-runs, 2 fix runs.

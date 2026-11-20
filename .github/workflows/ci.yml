@@ -183,7 +183,8 @@ jobs:
     # PP7 check 2: the hub on a Mac. The install in test mode on a GitHub macOS runner: launchd daemon, the app
     # started as launchd starts it, smoke check, the installed hub's answers, a restart after the app stops, and an
     # uninstall that leaves nothing behind.
-    runs-on: macos-14
+    # macos-14 is no longer offered (CI run 1: "The configuration 'macos-14-arm64-us-default' is not supported").
+    runs-on: macos-latest
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -217,7 +218,7 @@ jobs:
           done
           if [ -z "$new" ] || [ "$new" = "$old" ]; then echo "the app did not come back"; exit 1; fi
           echo "the app came back (pid $old -> $new)"
-          sudo env PORT=3998 PP_DATA_DIR="$RUNNER_TEMP/pp/data" SMOKE_TIMEOUT=120 "$(command -v node)" scripts/smoke.mjs
+          PORT=3998 PP_DATA_DIR="$RUNNER_TEMP/pp/data" SMOKE_TIMEOUT=120 node scripts/smoke.mjs
       - name: Uninstall, keeping the data
         run: sudo bash scripts/uninstall-mac.sh --test --root "$RUNNER_TEMP/pp"
       - name: Nothing left but the data
