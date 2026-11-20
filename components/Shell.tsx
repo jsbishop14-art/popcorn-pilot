@@ -77,7 +77,7 @@ export default function Shell({ role, lockMinutes, children }: { role: 'adult' |
           );
         })}
       </nav>
-      <div className="shell-body">{children}</div>
+      <div className={path === '/browse' ? 'shell-body wide' : 'shell-body'}>{children}</div>
     </div>
   );
 }

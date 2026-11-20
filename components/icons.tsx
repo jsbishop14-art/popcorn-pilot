@@ -97,3 +97,30 @@ export const TrashIcon = (p: P) => (
     <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
   </Svg>
 );
+export const PlayIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M8 5l12 7-12 7z" fill="currentColor" />
+  </Svg>
+);
+export const ScreenIcon = (p: P) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="12" rx="2" />
+    <path d="M8 21h8M12 17v4" />
+  </Svg>
+);
+export const MoonIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
+  </Svg>
+);
+export const BlockIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M5.6 5.6l12.8 12.8" />
+  </Svg>
+);
+export const SparkIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M12 3l2 5.5L19.5 10 14 12l-2 6-2-6-5.5-2L10 8.5z" />
+  </Svg>
+);

@@ -1,0 +1,896 @@
+{
+ "note": "Stub catalog. Every name is invented. Made by scripts/make-stub-catalog.mjs.",
+ "titles": [
+  {
+   "key": "tv-9001",
+   "kind": "show",
+   "name": "Rocket Pals",
+   "year": 2023,
+   "rating": "TV-Y",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Three friends build a cardboard rocket and visit a new planet every episode.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    },
+    {
+     "number": 2,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 22,
+   "runtimeMinutes": null,
+   "poster": "stub-9001.svg",
+   "trailer": "stub9001",
+   "similar": [
+    "tv-9002",
+    "tv-9005",
+    "tv-9006",
+    "tv-9104"
+   ],
+   "contentIds": {
+    "netflix": "81000001"
+   },
+   "popularity": 1000
+  },
+  {
+   "key": "tv-9002",
+   "kind": "show",
+   "name": "Ocean Friends",
+   "year": 2022,
+   "rating": "TV-Y",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A little submarine and its fish friends explore the reef.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 12
+    }
+   ],
+   "episodeMinutes": 11,
+   "runtimeMinutes": null,
+   "poster": "stub-9002.svg",
+   "trailer": "stub9002",
+   "similar": [
+    "tv-9001",
+    "tv-9005",
+    "tv-9101",
+    "tv-9201"
+   ],
+   "contentIds": {},
+   "popularity": 999
+  },
+  {
+   "key": "tv-9003",
+   "kind": "show",
+   "name": "Big Truck Town",
+   "year": 2021,
+   "rating": "TV-Y7",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Diggers, dump trucks and a crane named Gus fix up a busy town.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 8
+    },
+    {
+     "number": 2,
+     "episodes": 8
+    },
+    {
+     "number": 3,
+     "episodes": 8
+    }
+   ],
+   "episodeMinutes": 24,
+   "runtimeMinutes": null,
+   "poster": "stub-9003.svg",
+   "trailer": "stub9003",
+   "similar": [
+    "tv-9004",
+    "tv-9103",
+    "movie-8003"
+   ],
+   "contentIds": {},
+   "popularity": 998
+  },
+  {
+   "key": "tv-9004",
+   "kind": "show",
+   "name": "Star Club",
+   "year": 2024,
+   "rating": "TV-Y7",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Kids at a backyard telescope club solve space puzzles.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 23,
+   "runtimeMinutes": null,
+   "poster": "stub-9004.svg",
+   "trailer": "stub9004",
+   "similar": [
+    "tv-9003",
+    "tv-9001",
+    "tv-9202"
+   ],
+   "contentIds": {},
+   "popularity": 997
+  },
+  {
+   "key": "tv-9005",
+   "kind": "show",
+   "name": "Garden Bugs",
+   "year": 2020,
+   "rating": "TV-Y",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Tiny gardeners with big ideas look after a rooftop garden.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 13
+    },
+    {
+     "number": 2,
+     "episodes": 13
+    }
+   ],
+   "episodeMinutes": 12,
+   "runtimeMinutes": null,
+   "poster": "stub-9005.svg",
+   "trailer": "stub9005",
+   "similar": [
+    "tv-9002",
+    "tv-9001",
+    "tv-9203"
+   ],
+   "contentIds": {},
+   "popularity": 996
+  },
+  {
+   "key": "tv-9006",
+   "kind": "show",
+   "name": "Moon Camp",
+   "year": 2022,
+   "rating": "TV-G",
+   "services": [
+    "netflix",
+    "hulu"
+   ],
+   "overview": "A summer camp on the moon, with campfire songs in low gravity.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 9
+    }
+   ],
+   "episodeMinutes": 25,
+   "runtimeMinutes": null,
+   "poster": "stub-9006.svg",
+   "trailer": "stub9006",
+   "similar": [
+    "tv-9001",
+    "tv-9004",
+    "tv-9203"
+   ],
+   "contentIds": {},
+   "popularity": 995
+  },
+  {
+   "key": "tv-9007",
+   "kind": "show",
+   "name": "Night Harbor",
+   "year": 2023,
+   "rating": "TV-MA",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A harbor town hides a smuggling ring. For adults.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 8
+    },
+    {
+     "number": 2,
+     "episodes": 8
+    }
+   ],
+   "episodeMinutes": 52,
+   "runtimeMinutes": null,
+   "poster": "stub-9007.svg",
+   "trailer": "stub9007",
+   "similar": [
+    "tv-9105",
+    "tv-9204"
+   ],
+   "contentIds": {},
+   "popularity": 994
+  },
+  {
+   "key": "tv-9008",
+   "kind": "show",
+   "name": "Kitchen Clash",
+   "year": 2024,
+   "rating": "TV-14",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Home cooks face off in timed challenges.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 44,
+   "runtimeMinutes": null,
+   "poster": "stub-9008.svg",
+   "trailer": "stub9008",
+   "similar": [
+    "tv-9204",
+    "tv-9105"
+   ],
+   "contentIds": {},
+   "popularity": 993
+  },
+  {
+   "key": "movie-8001",
+   "kind": "movie",
+   "name": "Snow Pups",
+   "year": 2021,
+   "rating": "G",
+   "services": [
+    "netflix",
+    "prime"
+   ],
+   "overview": "Three puppies get lost in a snowstorm and find their way home.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 84,
+   "poster": "stub-8001.svg",
+   "trailer": "stub8001",
+   "similar": [
+    "movie-8002",
+    "movie-8101",
+    "movie-8201"
+   ],
+   "contentIds": {
+    "netflix": "81000101"
+   },
+   "popularity": 992
+  },
+  {
+   "key": "movie-8002",
+   "kind": "movie",
+   "name": "Tiny Train",
+   "year": 2019,
+   "rating": "G",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A toy train sets off across the living room on a big adventure.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 78,
+   "poster": "stub-8002.svg",
+   "trailer": "stub8002",
+   "similar": [
+    "movie-8001",
+    "movie-8004",
+    "movie-8102"
+   ],
+   "contentIds": {},
+   "popularity": 991
+  },
+  {
+   "key": "movie-8003",
+   "kind": "movie",
+   "name": "Robot Recess",
+   "year": 2022,
+   "rating": "PG",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A school robot learns how to play at recess.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 92,
+   "poster": "stub-8003.svg",
+   "trailer": "stub8003",
+   "similar": [
+    "movie-8005",
+    "tv-9003",
+    "movie-8102"
+   ],
+   "contentIds": {},
+   "popularity": 990
+  },
+  {
+   "key": "movie-8004",
+   "kind": "movie",
+   "name": "Cloud Kitchen",
+   "year": 2020,
+   "rating": "G",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A baker in the clouds makes rain out of soup.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 81,
+   "poster": "stub-8004.svg",
+   "trailer": "stub8004",
+   "similar": [
+    "movie-8002",
+    "movie-8201",
+    "tv-9203"
+   ],
+   "contentIds": {},
+   "popularity": 989
+  },
+  {
+   "key": "movie-8005",
+   "kind": "movie",
+   "name": "Dino Dig",
+   "year": 2023,
+   "rating": "PG",
+   "services": [
+    "netflix"
+   ],
+   "overview": "Cousins find a dinosaur egg in grandma’s garden.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 95,
+   "poster": "stub-8005.svg",
+   "trailer": "stub8005",
+   "similar": [
+    "movie-8003",
+    "movie-8202"
+   ],
+   "contentIds": {},
+   "popularity": 988
+  },
+  {
+   "key": "movie-8006",
+   "kind": "movie",
+   "name": "Last Signal",
+   "year": 2022,
+   "rating": "R",
+   "services": [
+    "netflix"
+   ],
+   "overview": "A radio operator hears a call that should not exist. For adults.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 118,
+   "poster": "stub-8006.svg",
+   "trailer": "stub8006",
+   "similar": [
+    "movie-8104",
+    "movie-8203"
+   ],
+   "contentIds": {},
+   "popularity": 987
+  },
+  {
+   "key": "movie-8007",
+   "kind": "movie",
+   "name": "City of Glass",
+   "year": 2021,
+   "rating": "PG-13",
+   "services": [
+    "netflix"
+   ],
+   "overview": "An architect races to save her tower before it opens.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 109,
+   "poster": "stub-8007.svg",
+   "trailer": "stub8007",
+   "similar": [
+    "movie-8103",
+    "movie-8203"
+   ],
+   "contentIds": {},
+   "popularity": 986
+  },
+  {
+   "key": "tv-9101",
+   "kind": "show",
+   "name": "Puddle Jumpers",
+   "year": 2022,
+   "rating": "TV-Y",
+   "services": [
+    "prime"
+   ],
+   "overview": "Two frogs and a duck jump into every puddle in town.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 12
+    },
+    {
+     "number": 2,
+     "episodes": 12
+    }
+   ],
+   "episodeMinutes": 11,
+   "runtimeMinutes": null,
+   "poster": "stub-9101.svg",
+   "trailer": "stub9101",
+   "similar": [
+    "tv-9002",
+    "tv-9201",
+    "tv-9103"
+   ],
+   "contentIds": {},
+   "popularity": 985
+  },
+  {
+   "key": "tv-9102",
+   "kind": "show",
+   "name": "Lantern Lane",
+   "year": 2021,
+   "rating": "TV-G",
+   "services": [
+    "prime"
+   ],
+   "overview": "Neighbors on a quiet street light lanterns for each holiday.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 22,
+   "runtimeMinutes": null,
+   "poster": "stub-9102.svg",
+   "trailer": "stub9102",
+   "similar": [
+    "tv-9006",
+    "tv-9203",
+    "tv-9101"
+   ],
+   "contentIds": {},
+   "popularity": 984
+  },
+  {
+   "key": "tv-9103",
+   "kind": "show",
+   "name": "Brave Little Boat",
+   "year": 2023,
+   "rating": "TV-Y7",
+   "services": [
+    "prime"
+   ],
+   "overview": "A tugboat helps big ships into the harbor.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    },
+    {
+     "number": 2,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 24,
+   "runtimeMinutes": null,
+   "poster": "stub-9103.svg",
+   "trailer": "stub9103",
+   "similar": [
+    "tv-9003",
+    "tv-9101",
+    "tv-9202"
+   ],
+   "contentIds": {},
+   "popularity": 983
+  },
+  {
+   "key": "tv-9104",
+   "kind": "show",
+   "name": "Desert Patrol",
+   "year": 2020,
+   "rating": "TV-14",
+   "services": [
+    "prime"
+   ],
+   "overview": "Rangers keep watch over a desert park.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 8
+    },
+    {
+     "number": 2,
+     "episodes": 8
+    }
+   ],
+   "episodeMinutes": 45,
+   "runtimeMinutes": null,
+   "poster": "stub-9104.svg",
+   "trailer": "stub9104",
+   "similar": [
+    "tv-9105",
+    "tv-9204"
+   ],
+   "contentIds": {},
+   "popularity": 982
+  },
+  {
+   "key": "tv-9105",
+   "kind": "show",
+   "name": "The Long Con",
+   "year": 2024,
+   "rating": "TV-MA",
+   "services": [
+    "prime"
+   ],
+   "overview": "A crew of swindlers plans one last job. For adults.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 6
+    }
+   ],
+   "episodeMinutes": 55,
+   "runtimeMinutes": null,
+   "poster": "stub-9105.svg",
+   "trailer": "stub9105",
+   "similar": [
+    "tv-9007",
+    "tv-9204"
+   ],
+   "contentIds": {},
+   "popularity": 981
+  },
+  {
+   "key": "movie-8101",
+   "kind": "movie",
+   "name": "Paper Kites",
+   "year": 2020,
+   "rating": "G",
+   "services": [
+    "prime"
+   ],
+   "overview": "A girl and her grandfather build a kite for the town festival.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 80,
+   "poster": "stub-8101.svg",
+   "trailer": "stub8101",
+   "similar": [
+    "movie-8001",
+    "movie-8201",
+    "movie-8102"
+   ],
+   "contentIds": {},
+   "popularity": 980
+  },
+  {
+   "key": "movie-8102",
+   "kind": "movie",
+   "name": "Marble Run",
+   "year": 2022,
+   "rating": "PG",
+   "services": [
+    "prime"
+   ],
+   "overview": "A marble rolls through a house built of traps and ramps.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 88,
+   "poster": "stub-8102.svg",
+   "trailer": "stub8102",
+   "similar": [
+    "movie-8002",
+    "movie-8003",
+    "movie-8101"
+   ],
+   "contentIds": {},
+   "popularity": 979
+  },
+  {
+   "key": "movie-8103",
+   "kind": "movie",
+   "name": "Iron Orchard",
+   "year": 2023,
+   "rating": "PG-13",
+   "services": [
+    "prime"
+   ],
+   "overview": "Two families fight over an apple orchard.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 112,
+   "poster": "stub-8103.svg",
+   "trailer": "stub8103",
+   "similar": [
+    "movie-8007",
+    "movie-8203"
+   ],
+   "contentIds": {},
+   "popularity": 978
+  },
+  {
+   "key": "movie-8104",
+   "kind": "movie",
+   "name": "Cold Front",
+   "year": 2021,
+   "rating": "R",
+   "services": [
+    "prime"
+   ],
+   "overview": "A storm traps strangers in a mountain lodge. For adults.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 121,
+   "poster": "stub-8104.svg",
+   "trailer": "stub8104",
+   "similar": [
+    "movie-8006",
+    "movie-8203"
+   ],
+   "contentIds": {},
+   "popularity": 977
+  },
+  {
+   "key": "tv-9201",
+   "kind": "show",
+   "name": "Bubble Bakery",
+   "year": 2023,
+   "rating": "TV-Y",
+   "services": [
+    "hulu"
+   ],
+   "overview": "A bakery where every cake floats away.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 13
+    }
+   ],
+   "episodeMinutes": 11,
+   "runtimeMinutes": null,
+   "poster": "stub-9201.svg",
+   "trailer": "stub9201",
+   "similar": [
+    "tv-9002",
+    "tv-9101",
+    "tv-9005"
+   ],
+   "contentIds": {},
+   "popularity": 976
+  },
+  {
+   "key": "tv-9202",
+   "kind": "show",
+   "name": "Sock Puppet Band",
+   "year": 2022,
+   "rating": "TV-Y7",
+   "services": [
+    "hulu"
+   ],
+   "overview": "A band of sock puppets plays a new song each week.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 10
+    },
+    {
+     "number": 2,
+     "episodes": 10
+    }
+   ],
+   "episodeMinutes": 22,
+   "runtimeMinutes": null,
+   "poster": "stub-9202.svg",
+   "trailer": "stub9202",
+   "similar": [
+    "tv-9004",
+    "tv-9103",
+    "tv-9201"
+   ],
+   "contentIds": {},
+   "popularity": 975
+  },
+  {
+   "key": "tv-9203",
+   "kind": "show",
+   "name": "Farmhouse Friends",
+   "year": 2021,
+   "rating": "TV-G",
+   "services": [
+    "hulu"
+   ],
+   "overview": "Life on a small farm, one gentle chore at a time.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 12
+    },
+    {
+     "number": 2,
+     "episodes": 12
+    },
+    {
+     "number": 3,
+     "episodes": 12
+    }
+   ],
+   "episodeMinutes": 22,
+   "runtimeMinutes": null,
+   "poster": "stub-9203.svg",
+   "trailer": "stub9203",
+   "similar": [
+    "tv-9005",
+    "tv-9102",
+    "tv-9006"
+   ],
+   "contentIds": {},
+   "popularity": 974
+  },
+  {
+   "key": "tv-9204",
+   "kind": "show",
+   "name": "Precinct 9",
+   "year": 2023,
+   "rating": "TV-14",
+   "services": [
+    "hulu"
+   ],
+   "overview": "Detectives work the night shift.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 18
+    },
+    {
+     "number": 2,
+     "episodes": 18
+    }
+   ],
+   "episodeMinutes": 43,
+   "runtimeMinutes": null,
+   "poster": "stub-9204.svg",
+   "trailer": "stub9204",
+   "similar": [
+    "tv-9104",
+    "tv-9008"
+   ],
+   "contentIds": {},
+   "popularity": 973
+  },
+  {
+   "key": "tv-9205",
+   "kind": "show",
+   "name": "Static",
+   "year": 2024,
+   "rating": "TV-MA",
+   "services": [
+    "hulu"
+   ],
+   "overview": "A hacker uncovers a city-wide secret. For adults.",
+   "seasons": [
+    {
+     "number": 1,
+     "episodes": 8
+    }
+   ],
+   "episodeMinutes": 50,
+   "runtimeMinutes": null,
+   "poster": "stub-9205.svg",
+   "trailer": "stub9205",
+   "similar": [
+    "tv-9007",
+    "tv-9105"
+   ],
+   "contentIds": {},
+   "popularity": 972
+  },
+  {
+   "key": "movie-8201",
+   "kind": "movie",
+   "name": "Pillow Fort",
+   "year": 2021,
+   "rating": "G",
+   "services": [
+    "hulu"
+   ],
+   "overview": "Siblings build a pillow fort that becomes a kingdom.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 76,
+   "poster": "stub-8201.svg",
+   "trailer": "stub8201",
+   "similar": [
+    "movie-8001",
+    "movie-8004",
+    "movie-8101"
+   ],
+   "contentIds": {},
+   "popularity": 971
+  },
+  {
+   "key": "movie-8202",
+   "kind": "movie",
+   "name": "Owl Night",
+   "year": 2022,
+   "rating": "PG",
+   "services": [
+    "hulu"
+   ],
+   "overview": "A boy follows an owl through the woods one night.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 90,
+   "poster": "stub-8202.svg",
+   "trailer": "stub8202",
+   "similar": [
+    "movie-8005",
+    "movie-8102"
+   ],
+   "contentIds": {},
+   "popularity": 970
+  },
+  {
+   "key": "movie-8203",
+   "kind": "movie",
+   "name": "Harbor Lights",
+   "year": 2020,
+   "rating": "PG-13",
+   "services": [
+    "hulu"
+   ],
+   "overview": "A ferry captain’s last season on the bay.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 104,
+   "poster": "stub-8203.svg",
+   "trailer": "stub8203",
+   "similar": [
+    "movie-8007",
+    "movie-8103"
+   ],
+   "contentIds": {},
+   "popularity": 969
+  },
+  {
+   "key": "movie-8204",
+   "kind": "movie",
+   "name": "The Basement Tapes",
+   "year": 2023,
+   "rating": null,
+   "services": [
+    "hulu"
+   ],
+   "overview": "Found footage from a house sale. Not rated.",
+   "seasons": [],
+   "episodeMinutes": null,
+   "runtimeMinutes": 97,
+   "poster": "stub-8204.svg",
+   "trailer": "stub8204",
+   "similar": [
+    "movie-8104",
+    "movie-8006"
+   ],
+   "contentIds": {},
+   "popularity": 968
+  }
+ ]
+}

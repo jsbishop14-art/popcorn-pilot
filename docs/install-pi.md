@@ -60,11 +60,22 @@ On each Roku (Living room and Guest room):
 Then in Popcorn Pilot: **Settings > Find TVs on the network**, and **Add** each Roku. If one is not found, use **Add
 by address** with the IP address from step 2. Tap a TV to set its name, room and default profile.
 
+## 5. Real titles and cover art (TMDB key)
+
+Until this is done, Browse shows a built-in sample catalog with invented titles.
+
+1. On a computer, make a free account at **themoviedb.org**.
+2. In your account: **Settings > API**, ask for an API key (personal use). Copy the **API Key** (32 letters and
+   numbers).
+3. In Popcorn Pilot: **Settings > Titles and cover art**, paste it into **TMDB key**, and press **Save key**. Settings
+   then says "Titles, cover art and trailers come from TMDB", and Browse shows real titles on Netflix, Prime Video
+   and Hulu. The first Browse after this takes a little longer while the hub saves the titles and cover art.
+
 ## Later steps (other builds)
 
 - Router DNS pointing at the Pi, for ad blocking (PP5).
 - Roku developer mode and installing the Popcorn Pilot channel on each Roku (PP6).
-- TMDB key and iCloud shared album link, entered in Settings (PP2 and PP5).
+- iCloud shared album link, entered in Settings (PP5).
 
 ## If something goes wrong
 

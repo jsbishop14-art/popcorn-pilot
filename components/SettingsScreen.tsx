@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
-import { ChevronIcon, HistoryIcon, HubIcon, LockIcon, PlusIcon, TvIcon, WifiIcon } from './icons';
+import { ChevronIcon, HistoryIcon, HubIcon, LockIcon, MoonIcon, PlusIcon, TvIcon, WifiIcon } from './icons';
 import { ComingLaterInline } from './ComingLaterInline';
 
 interface Tv {
@@ -31,6 +31,12 @@ interface Hub {
   lastBackup: string | null;
   lastUpdate: { at: string; result: string; message?: string } | null;
   updateRequested: boolean;
+}
+
+interface Catalog {
+  source: 'tmdb' | 'stub';
+  tmdbKeySet: boolean;
+  calmCount: number;
 }
 
 function addr(t: { address: string; port: number }) {
@@ -72,6 +78,10 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
   const [newPin2, setNewPin2] = useState('');
   const [pinMsg, setPinMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [tmdbKey, setTmdbKey] = useState('');
+  const [tmdbMsg, setTmdbMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
   const [hub, setHub] = useState<Hub | null>(null);
   const [hubMsg, setHubMsg] = useState<string | null>(null);
 
@@ -86,10 +96,11 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
 
   useEffect(() => {
     void refresh().catch(() => undefined);
-    api<{ lockMinutes: number; lockChoices: number[] }>('/api/settings')
+    api<{ lockMinutes: number; lockChoices: number[]; catalog: Catalog }>('/api/settings')
       .then((s) => {
         setLockMinutes(s.lockMinutes);
         setLockChoices(s.lockChoices);
+        setCatalog(s.catalog);
       })
       .catch(() => undefined);
     api<{ hub: Hub }>('/api/hub/status')
@@ -143,6 +154,26 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
     } catch (err) {
       setPinMsg({ ok: false, text: err instanceof ApiError ? err.message : 'Could not change the PIN.' });
     }
+  }
+
+  async function saveTmdb(e: React.FormEvent) {
+    e.preventDefault();
+    setTmdbMsg(null);
+    try {
+      const r = await api<{ catalog: Catalog }>('/api/settings', { method: 'PATCH', body: { tmdbKey: tmdbKey.trim() } });
+      setCatalog(r.catalog);
+      setTmdbKey('');
+      setTmdbMsg({ ok: true, text: 'TMDB key saved. Browse now shows titles from TMDB.' });
+    } catch (err) {
+      setTmdbMsg({ ok: false, text: err instanceof ApiError ? err.message : 'Could not save the key.' });
+    }
+  }
+
+  async function removeTmdb() {
+    setTmdbMsg(null);
+    const r = await api<{ catalog: Catalog }>('/api/settings', { method: 'PATCH', body: { tmdbKey: null } });
+    setCatalog(r.catalog);
+    setTmdbMsg({ ok: true, text: 'TMDB key removed. Browse shows the sample catalog.' });
   }
 
   async function checkUpdates() {
@@ -312,6 +343,38 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
       <span className="lbl">Ad blocking</span>
       <ComingLaterInline text="Home screen ad and tracking blocking arrives in PP5." />
 
+      <span className="lbl">Titles and cover art</span>
+      <div className="card" aria-label="Titles and cover art" role="region">
+        <div className="col">
+          <span className="t">TMDB key</span>
+          <span className="s" role="note">
+            {catalog === null
+              ? 'Checking…'
+              : catalog.source === 'tmdb'
+                ? 'Titles, cover art and trailers come from TMDB.'
+                : 'No TMDB key yet: Browse shows a built-in sample catalog. Get a free key at themoviedb.org (Settings, API).'}
+          </span>
+        </div>
+        <form className="col" style={{ gap: 8 }} onSubmit={(e) => void saveTmdb(e)}>
+          <input className="field" type="password" autoComplete="off" value={tmdbKey} onChange={(e) => setTmdbKey(e.target.value)} aria-label="TMDB key" placeholder={catalog?.tmdbKeySet ? 'A key is saved. Type a new one to replace it.' : 'Paste the TMDB API key'} />
+          <div className="btns">
+            <button type="submit" className="btn pri" disabled={!tmdbKey.trim()}>
+              Save key
+            </button>
+            {catalog?.tmdbKeySet && (
+              <button type="button" className="btn" onClick={() => void removeTmdb()}>
+                Remove key
+              </button>
+            )}
+          </div>
+        </form>
+        {tmdbMsg && (
+          <p className={`msg ${tmdbMsg.ok ? 'ok' : 'err'}`} role="status">
+            {tmdbMsg.text}
+          </p>
+        )}
+      </div>
+
       <span className="lbl">Hub</span>
       <div className="card" style={{ gap: 0 }}>
         <div className="row" style={{ padding: '6px 0' }}>
@@ -341,6 +404,17 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
             </p>
           )}
         </div>
+        <div className="sep" />
+        <Link href="/settings/calm" className="rowlink">
+          <div className="lft">
+            <MoonIcon />
+            <div className="col">
+              <span className="t">Calm titles</span>
+              <span className="s">{catalog ? `${catalog.calmCount} tagged` : '…'}</span>
+            </div>
+          </div>
+          <ChevronIcon size={18} />
+        </Link>
         <div className="sep" />
         <Link href="/settings/activity" className="rowlink">
           <div className="lft">

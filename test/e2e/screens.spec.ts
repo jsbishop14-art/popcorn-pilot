@@ -7,11 +7,12 @@ import { ADULT, GUEST, signIn, tab } from './helpers';
 test.describe('Adult PIN', () => {
   test.beforeEach(async ({ page }) => signIn(page, ADULT));
 
-  test('all five tabs; Browse and Playlists say they come later', async ({ page }) => {
+  test('all five tabs; Browse is built (PP2); Playlists says it comes later', async ({ page }) => {
     const nav = page.getByRole('navigation', { name: 'Main' });
     for (const name of ['Home', 'Browse', 'Playlists', 'Profiles', 'Settings']) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible();
     await tab(page, 'Browse');
-    await expect(page.getByText('Browse (Netflix, Prime Video and Hulu titles with cover art) is coming in a later build')).toBeVisible();
+    await expect(page.getByRole('tablist', { name: 'Platform' })).toBeVisible();
+    await expect(page.getByText('is coming in a later build')).toHaveCount(0);
     await tab(page, 'Playlists');
     await expect(page.getByText('Playlists and playback is coming in a later build')).toBeVisible();
     await tab(page, 'Home');

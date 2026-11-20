@@ -1,12 +1,18 @@
-import { ComingLater, PageTop } from '@/components/Page';
+// Browse (mockups Browse and PhoneBrowse).
+import BrowseScreen from '@/components/BrowseScreen';
+import { PageTop } from '@/components/Page';
+import { pickerProfiles, startProfile } from '@/lib/browse-profiles';
+import { pageAuth } from '@/lib/server-auth';
 
-export default function BrowsePage() {
+export const dynamic = 'force-dynamic';
+
+export default function BrowsePage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  const role = pageAuth().role === 'adult' ? 'adult' : 'guest';
+  const profiles = pickerProfiles(role);
   return (
     <>
       <PageTop title="Browse" />
-      <main className="main">
-        <ComingLater what="Browse (Netflix, Prime Video and Hulu titles with cover art)" build="PP2" />
-      </main>
+      <BrowseScreen role={role} profiles={profiles} initialProfile={startProfile(role, profiles, searchParams.profile)} />
     </>
   );
 }

@@ -2,6 +2,7 @@
 // handler runs. 401 for signed out (or an unknown channel token), 403 for a role the route is not for.
 import { API_RULES, type ApiRoute } from './permissions';
 import { authFromRequest, type Auth } from './auth';
+import { CatalogUnavailable } from './catalog/types';
 
 export type Ctx = { params: Record<string, string> };
 type Handler = (req: Request, auth: Auth, ctx: Ctx) => Promise<Response> | Response;
@@ -31,6 +32,8 @@ export function route(key: ApiRoute, handler: Handler) {
       return await handler(req, auth, ctx ?? { params: {} });
     } catch (err) {
       if (err instanceof BadRequest) return fail(400, err.message);
+      if (err instanceof HttpError) return fail(err.status, err.message);
+      if (err instanceof CatalogUnavailable) return fail(503, `The catalog is not available right now. ${err.message}`);
       console.error(`${key} failed:`, err instanceof Error ? err.message : err);
       return fail(500, 'Something went wrong on the hub.');
     }
@@ -38,6 +41,13 @@ export function route(key: ApiRoute, handler: Handler) {
 }
 
 export class BadRequest extends Error {}
+
+/** A refusal or miss decided inside a handler (the role may use the route, but not for this). */
+export class HttpError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+  }
+}
 
 export async function body(req: Request): Promise<Record<string, unknown>> {
   try {

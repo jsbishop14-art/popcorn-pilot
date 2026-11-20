@@ -9,6 +9,12 @@ export interface ActivityRow {
   summary: string;
 }
 
+export interface CatalogCacheRow {
+  key: string;
+  body: string;
+  fetched_at: number;
+}
+
 export interface KidSafeguardsRow {
   profile_id: number;
   allowed_ratings: string;
@@ -24,6 +30,19 @@ export interface KidSafeguardsRow {
   alert_on_snap_back: number;
   can_ask_for_time: number;
   weekly_bonus_cap: number;
+}
+
+export interface LaunchLogRow {
+  id: number;
+  at: string;
+  title_key: string;
+  kind: string;
+  service: string;
+  tv_id: number;
+  profile_id: number | null;
+  route: string;
+  ok: number;
+  error: string | null;
 }
 
 export interface PinLockoutRow {
@@ -62,6 +81,17 @@ export interface SessionsRow {
 export interface SettingsRow {
   key: string;
   value: string;
+}
+
+export interface TitleTagsRow {
+  title_key: string;
+  name: string;
+  services: string;
+  rating: string | null;
+  calm: number;
+  blocked: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TvsRow {

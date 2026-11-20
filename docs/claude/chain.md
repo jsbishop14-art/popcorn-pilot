@@ -5,7 +5,7 @@
 | # | Name | Branch | Spec | Handoff sections | Status |
 | --- | --- | --- | --- | --- | --- |
 | 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
-| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Queued |
+| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Queued |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
@@ -30,6 +30,9 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
+  PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.
+- Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
+  YouTube video id).
 - Confirm the time warning behavior over streaming apps (handoff 9.5).
 
 ## Sources
@@ -70,3 +73,8 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   1 to 7 passed (numbers in docs/sessions/PP1-status.md). No migration grant needed: migration 001 (13 expected
   objects) is applied by the Pi updater. The Pi does not exist yet, so the first install (docs/install-pi.md) applies
   it.
+- PP2 (catalog, Browse, title details and suggestions): landed 2026-11-20 by the merge commit "[Merge] PP2 (" on
+  main. CI run 44677555216 green (test job and arm64 job) on the branch, which contained current main (84643cb).
+  Checks 1 to 5 passed (numbers in docs/sessions/PP2-status.md). Migration 002 (10 expected objects) lands with the
+  code and is applied by the Pi updater. Until Josh enters a TMDB key (Waits on Josh), Browse shows the sample
+  catalog.
