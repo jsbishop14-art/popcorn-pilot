@@ -4,7 +4,7 @@
 
 | # | Name | Branch | Spec | Handoff sections | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Queued |
+| 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Building |
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Queued |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Queued |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
@@ -23,6 +23,10 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 ## Waits on hardware
 
 - Buy the Raspberry Pi 5 (8GB), power supply, case with fan, storage; run the install (docs/install-pi.md, PP1).
+- On each Roku: "Control by mobile apps" network access set to Default or Permissive, and a reserved address in the
+  router; then Settings > Find TVs on the network (docs/install-pi.md step 4, PP1).
+- If the repo is private when the Pi is installed: a read-only deploy key on the Pi for the clone and the updater
+  (PP1 install script clones over HTTPS).
 - Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).

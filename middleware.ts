@@ -9,7 +9,9 @@ export async function middleware(req: NextRequest) {
   if (!rule || rule.signed_out) return NextResponse.next();
   let state: { role: Role; setUp: boolean; idleLocked: boolean } = { role: 'signed_out', setUp: true, idleLocked: false };
   try {
-    const res = await fetch(new URL('/api/auth/state', req.nextUrl.origin), {
+    // Ask the hub over loopback: the name the browser used (popcorn.local) may not resolve on the Pi itself.
+    const port = process.env.PORT || req.nextUrl.port || '80';
+    const res = await fetch(`http://127.0.0.1:${port}/api/auth/state`, {
       headers: { cookie: req.headers.get('cookie') ?? '', 'user-agent': req.headers.get('user-agent') ?? '' },
       cache: 'no-store',
     });

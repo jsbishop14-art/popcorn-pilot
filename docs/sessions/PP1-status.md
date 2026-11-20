@@ -48,7 +48,36 @@ None (spec section 6). Production is the Pi; never touched.
 
 ## Decided without asking
 
-(see below as added)
+- D-1: Fonts bundled from the @fontsource npm packages (Fredoka, Nunito), no font CDN. Reason: handoff 1.2.
+- D-2: Wrong-PIN lockout is hub-wide, not per device: 5 wrong tries from any phone or computer lock PIN entry for
+  1 minute for everyone, and the lockout is written to Activity history. Reason: per-device counting is easy to dodge
+  by switching devices; the spec says 5 tries, 1 minute.
+- D-3: Sessions live on the hub (the cookie holds only a random token; the hub keeps an HMAC of it). Idle lock is
+  enforced on the hub and by the app's own timer. Lock time choices: 1, 2, 5, 10, 15, 30, 60 min (default 5).
+- D-4: The Guest PIN sees the TV list on Home (name, room, online, default profile), nothing about TV setup. Reason:
+  kid mode and playlists need to pick a TV; no settings are exposed.
+- D-5: Channel token per TV (CLAUDE.md section 7 role): made by the Adult PIN on the TV screen, shown once, only its
+  hash kept. One channel route in PP1 (GET /api/channel/hello) so the permission map covers the token; PP6 builds
+  pairing on it.
+- D-6: Changing a PIN in Settings needs the current Adult PIN again; changing the Guest PIN signs out Guest sessions.
+- D-7: TV addresses must be on the home network (private IPv4; loopback allowed for the fake Roku). A TV can be
+  added while it is off; it shows Offline.
+- D-8: Activity history also records hub events (first run PIN setup, lockouts) with a "Hub" badge.
+- D-9: The app is served on port 80 on the Pi (http://popcorn.local, hostname set in Raspberry Pi Imager).
+- D-10: AdGuard Home is not in the PP1 install script. Reason: spec section 5 puts ad blocking in PP5 (handoff 11.1
+  lists it in the install; PP5 adds it to the script).
+- D-11: The updater stops the app while it updates (a few minutes at 4:00 AM) so the pre-update database copy is
+  consistent, and restores that copy when it rolls back. "Check for updates now" leaves a request file that a
+  systemd path unit watches (the app itself never runs the updater or holds root).
+- D-12: Next.js telemetry is turned off in the build session, CI and the Pi service. Reason: it is an outside call.
+- D-13: Desktop width: the tabs become a left sidebar from 900px; content up to 760px wide.
+- D-14: Sections of the mockup that belong to later builds (Kid tools, Family Album, Ad blocking) show a one-line
+  "arrives in PPn" note.
+- D-15: CI has a second job on GitHub's arm64 runner (free for public repos): install, unit tests and the production
+  build on arm64, the Pi's architecture.
+- D-16: A profile switched from Kid to Adult keeps its stored safeguards, so switching back restores them. Deleting a
+  profile clears it as any TV's default profile.
+- D-17: The page guard asks the hub over loopback (127.0.0.1), not through the name the browser used.
 
 ## Questions
 
@@ -56,8 +85,16 @@ None (spec section 6). Production is the Pi; never touched.
 
 ## Progress
 
-- Step 0: branch created; spec, handoff, chain.md, mockup and runner brought from origin/docs/next-builds.
+- Step 0 (2e457a7): branch created; spec, handoff, chain.md, mockup and runner brought from origin/docs/next-builds.
+- Step 1 (7bc44ab): scaffold, migration 001 (13 expected objects), secret store, PIN auth, permission map, Roku
+  driver, fake Roku, discovery. unit 13/13.
+- Step 2 (ea23e7c): API routes, profiles, TVs, activity, hub status. unit 135/135.
+- Step 3 (9c30b5d): screens (PIN entry, first run, shell, Profiles, editor, Settings, TV, Activity), page guard.
+- Step 4 (632d090): browser tests. e2e 17/17; HTTP permission map 144 answers.
+- Step 5 (7305755): updater with rollback, install script, systemd units, backup, smoke, seed. unit 146/146.
+- Step 6: install guide, CI workflow, status and chain.
 
 ## PICK UP HERE
 
-Step 1: scaffold the Next.js 14 app (package.json, tsconfig, vitest, playwright, lint), bundled fonts.
+Run the local checks (lint, type-check, unit, build, e2e; each exit code read on its own line), then the one CI push
+with ALLOW_CI=1.
