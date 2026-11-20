@@ -4,12 +4,13 @@
 
 | # | Name | Branch | Spec | Handoff sections | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Queued |
-| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Queued |
-| 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Queued |
-| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
-| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
-| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
+| 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
+| 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
+| 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
+| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
+| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
+| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Landed 2026-11-20 |
+| 7 | PP7 | pp7-windows-mac-hub | docs/specs/PP7-BUILD-SPEC.md | 1.1, 11.4, 12 | Queued |
 
 ## Grants
 
@@ -18,15 +19,56 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 ## Waits on Josh
 
 - TMDB API key (free account at themoviedb.org) for real cover art and catalog. Until then the stub is used.
-- iCloud shared album link for the Family Album.
+- iCloud shared album link for the Family Album (entered in Settings > Family Album once the Pi runs; PP5 built the
+  sync, docs/install-pi.md step 9).
 
 ## Waits on hardware
 
+- Hub on the Windows PC (PP7): run the Windows install (docs/install-windows.md), then the Roku and Settings steps below from that PC. The Pi items below apply when a Pi is bought.
+
 - Buy the Raspberry Pi 5 (8GB), power supply, case with fan, storage; run the install (docs/install-pi.md, PP1).
-- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
+- On each Roku: "Control by mobile apps" network access set to Default or Permissive, and a reserved address in the
+  router; then Settings > Find TVs on the network (docs/install-pi.md step 4, PP1).
+- If the repo is private when the Pi is installed: a read-only deploy key on the Pi for the clone and the updater
+  (PP1 install script clones over HTTPS).
+- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5, docs/install-pi.md step 8).
+- Ad blocking on the real Pi (PP5): the install script downloads AdGuard Home for arm64 and answers its first-run
+  setup through its API (checked here only by shellcheck and a dry run); then Settings > Ad blocking shows On and a
+  count of requests blocked today after TV use; which Roku home screen ads it actually removes.
+- Routines on the real Rokus (PP5, docs/install-pi.md step 10): Turn on from standby (a Roku TV in deep standby may
+  not answer the network; Fast TV start), how long it takes to answer after Turn on (the hub waits up to 20 s), the
+  volume step (100 presses of Volume down, then up to the level; some TVs step by 2 or cap the range), and the timer
+  turning the TV off.
+- Family Album with a real iCloud shared album (PP5, docs/install-pi.md step 9): the sync is written to iCloud's
+  shared album web service and tested only against a stub; check a real link syncs (counts in Settings), that a
+  change in the album shows after Sync now, and that iPhone clips (iCloud's 720p copy) play on the Roku. The album as
+  the TV home background and as a playlist item needs the channel (PP6).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
+- The Popcorn Pilot channel on the real Rokus (PP6, docs/install-pi.md step 11): developer mode, then
+  scripts/roku-sideload.sh from the Pi with the developer password, then Settings > the TV > Pair the channel (the
+  hub hands the channel its address and token by a Roku launch with parameters). Check: the Rooibos key tests on a
+  Roku (build/popcorn-pilot-channel-tests.zip; checked here by the compiler and by the brs interpreter only); every
+  TV screen against its mockup (checked here by code review only, no screenshots); in kid mode only arrows, OK and
+  volume act; the PIN pad; picture loads with the channel token (cover art, album photos, clips); the album clips
+  play in the Roku video player; power on opens the channel on the TV's default profile (the hub polls each paired
+  TV every 2 s and ignores TVs it woke itself in the last 30 s); the Now playing bridge between titles (8 s); the
+  mid-episode warning screen and whether Netflix, Hulu and Prime resume or restart the episode when the hub opens
+  the title again.
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
+  PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.
+- Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
+  YouTube video id).
 - Confirm the time warning behavior over streaming apps (handoff 9.5).
+- Playlists on the real Rokus (PP3, docs/install-pi.md step 6): each of Netflix, Prime Video and Hulu opens its title
+  from a playlist (the launch log records direct link or search launch per title); Pause and Resume (the Roku
+  play/pause key) pause the streaming app; Stop (Home key) leaves it; Send to starts the title on the other TV; how
+  far the hub's estimated episode ends are from the real ones.
+- Kid mode on the real Rokus (PP4, docs/install-pi.md step 7): snap back after the Home, Netflix, Hulu and Prime
+  buttons (how fast the Roku reports the new app; the hub polls every 2 s and gives its own launches 6 s, which
+  search launches may need); what the Roku reports as the active app in standby and with the screensaver on; time up
+  turning the TV off (PowerOff); how far one wind-down volume step goes on each TV, and the volume coming back up on
+  the next start. With nothing playing, snap back opens the Popcorn Pilot channel, which needs the channel installed
+  (PP6).
 
 ## Sources
 
@@ -51,6 +93,11 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - 22:15: "1. CC in the claude browser using github. exactly as the command center was built 2. not mac 3. nothing has been done. you have permission to do what is needed and set up the repo as needed, assuming this is done in github. i dont know what is best 4. jsbishop-art. should already be connected 5. every 30 minutes. restart anything as needed. answer questions as needed 6. message me here. table anything that cant be answered without me and continue on something else 7. build everything that doesnt need hardware 8. no budget at this time". Meaning: account jsbishop14-art (the connected account); overwatch every 30 minutes by the chat session; no weekly budget limit.
 - 22:18: "this will be unattended from here for 10 hours. please ensure the build continues"
 
+## Rulings in force (2026-11-20, Eastern time)
+
+- 06:30: "can this be used without the pi? turns out a pi is more expensive than i thought. looked at the pi website and they were under 100. but the only way to buy is from a reseller and theyre nearly 200. for now id like to control with my computer and phone straight to the roku. is that possible?"
+- 06:42: "i will host this on the windows machine. the mac is for building software. 1. windows is on same network 2. ok on windows 3. write script for windows and mac so it can be changed later if i want. keep the pi scripts as well because i will eventually get one 4. skip for now 5. keep pi version". Meaning: the hub runs on the Windows PC for now; install scripts for Windows and Mac are added; Pi scripts stay; ad blocking skipped on Windows and Mac for now.
+
 ## Decided by the chat session (2026-11-19)
 
 - D-1: Same stack and build process as Command Center (Next.js 14, SQLite, Codespaces, runner, one CI run per build).
@@ -61,4 +108,32 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 
 ## Landings
 
-(none yet)
+- PP1 (foundation, PIN access, profiles, TVs, hub): landed 2026-11-20 by the merge commit "[Merge] PP1 (" on main.
+  CI run 44673857800 green (test job and arm64 job) on the branch, which contained current main (e9dbc46). Checks
+  1 to 7 passed (numbers in docs/sessions/PP1-status.md). No migration grant needed: migration 001 (13 expected
+  objects) is applied by the Pi updater. The Pi does not exist yet, so the first install (docs/install-pi.md) applies
+  it.
+- PP2 (catalog, Browse, title details and suggestions): landed 2026-11-20 by the merge commit "[Merge] PP2 (" on
+  main. CI run 44677555216 green (test job and arm64 job) on the branch, which contained current main (84643cb).
+  Checks 1 to 5 passed (numbers in docs/sessions/PP2-status.md). Migration 002 (10 expected objects) lands with the
+  code and is applied by the Pi updater. Until Josh enters a TMDB key (Waits on Josh), Browse shows the sample
+  catalog.
+- PP3 (playlists, playback engine, queue, remote and dashboard): landed 2026-11-20 by the merge commit "[Merge] PP3
+  (" on main. CI run 44683080963 green (test job and arm64 job) on the branch, which contained current main
+  (1504db0). Checks 1 to 6 passed (numbers in docs/sessions/PP3-status.md). Migration 003 (11 expected objects)
+  lands with the code and is applied by the Pi updater. Playlists on the real Rokus wait on hardware.
+- PP4 (kid safeguards, snap back, requests, earn time, watch log): landed 2026-11-20 by the merge commit "[Merge]
+  PP4 (" on main. CI run 44691753827 green (test job and arm64 job) on the branch, which contained current main
+  (24965d6). Checks 1 to 6 passed (numbers in docs/sessions/PP4-status.md). Migration 004 (14 expected objects)
+  lands with the code and is applied by the Pi updater. Kid mode on the real Rokus waits on hardware.
+- PP5 (routines, Family Album, ad blocking): landed 2026-11-20 by the merge commit "[Merge] PP5 (" on main. CI run
+  44697841978 green (test job and arm64 job) on the branch, which contained current main (c142ce1). Checks 1 to 4
+  passed (numbers in docs/sessions/PP5-status.md). Migration 005 (12 expected objects) lands with the code and is
+  applied by the Pi updater. The iCloud album link waits on Josh; AdGuard Home on the Pi, router DNS, routines and
+  the album with real devices wait on hardware.
+- PP6 (the Popcorn Pilot Roku channel): landed 2026-11-20 by the merge commit "[Merge] PP6 (" on main. CI run
+  44705799534 green (test job and arm64 job) on the branch, which contained current main (48fe879); the channel
+  zip is that run's artifact "popcorn-pilot-channel". Checks 1 to 3 passed and check 4 was done by code review
+  (numbers and the layout table in docs/sessions/PP6-status.md). Migration 006 (2 expected columns) lands with the
+  code and is applied by the Pi updater. Installing the channel on the Rokus (developer mode, sideload, pairing) and
+  everything it does on a real TV wait on hardware.

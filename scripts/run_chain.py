@@ -20,7 +20,7 @@ HEARTBEAT_SECONDS = 600
 BUDGET_REPO = os.environ.get("BUILD_BUDGET_REPO", "")
 BUDGET_DIR = os.path.expanduser("~/.build-control")
 TZ = ZoneInfo("America/New_York")
-GRANT_BASE = ("No production grant. Production is Josh's Raspberry Pi, which build sessions never touch, and no real TV is "
+GRANT_BASE = ("No production grant. Production is Josh's hub computer (his Windows PC for now, a Raspberry Pi later), which build sessions never touch, and no real TV is "
               "touched (handoff section 12). Migrations land with the code and the Pi updater applies them. No real outside "
               "calls: use the stubs and the fake Roku. No real email, ever. Build everything that does not need hardware; "
               "list hardware steps in chain.md under Waits on hardware.")
@@ -33,6 +33,7 @@ BUILDS = [
     ("PP4", "pp4-kid-safeguards", "docs/specs/PP4-BUILD-SPEC.md", ""),
     ("PP5", "pp5-routines-album-adblock", "docs/specs/PP5-BUILD-SPEC.md", ""),
     ("PP6", "pp6-roku-channel", "docs/specs/PP6-BUILD-SPEC.md", ""),
+    ("PP7", "pp7-windows-mac-hub", "docs/specs/PP7-BUILD-SPEC.md", ""),
 ]
 
 
