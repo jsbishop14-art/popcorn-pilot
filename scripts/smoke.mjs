@@ -38,11 +38,17 @@ async function main() {
         const r = await get(p);
         if (r.status !== 401) throw new Error(`${p} answered ${r.status} without a PIN (want 401)`);
       }
+      // Routines, the Family Album and ad blocking (PP5) answer and still ask for a PIN; the album's channel route
+      // refuses a call without a channel token.
+      for (const p of ['/api/routines', '/api/adblock', '/api/channel/album']) {
+        const r = await get(p);
+        if (r.status !== 401) throw new Error(`${p} answered ${r.status} without a PIN (want 401)`);
+      }
       const db = new Database(dbFile(), { readonly: true });
       const { checked, missing } = verify(db, migrationsDir());
       db.close();
       if (missing.length) throw new Error(`database missing ${missing.join(', ')}`);
-      console.log(`smoke ok: app answers, PIN entry loads, catalog, playlists, playback and kid safeguards ask for a PIN, ${checked} database objects present`);
+      console.log(`smoke ok: app answers, PIN entry loads, catalog, playlists, playback, kid safeguards, routines and ad blocking ask for a PIN, ${checked} database objects present`);
       return 0;
     } catch (err) {
       last = err instanceof Error ? err.message : String(err);

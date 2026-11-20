@@ -27,7 +27,10 @@ export default defineConfig({
     // Kid safeguards (PP4) after playback: the PP2 and PP3 tests played titles for the kid (the watch log).
     { name: 'kid-phone', testMatch: /kid\.spec\.ts/, dependencies: ['playback-desktop'], use: { ...devices['Pixel 7'] } },
     { name: 'kid-desktop', testMatch: /kid\.spec\.ts/, dependencies: ['kid-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['kid-desktop'] },
+    // Routines, the Family Album and ad blocking (PP5) after kid safeguards, against the iCloud and AdGuard stubs.
+    { name: 'routines-phone', testMatch: /routines\.spec\.ts/, dependencies: ['kid-desktop'], use: { ...devices['Pixel 7'] } },
+    { name: 'routines-desktop', testMatch: /routines\.spec\.ts/, dependencies: ['routines-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['routines-desktop'] },
     { name: 'lockout', testMatch: /lockout\.spec\.ts/, dependencies: ['http-map'], use: { ...devices['Pixel 7'] } },
   ],
   webServer: [
@@ -38,7 +41,12 @@ export default defineConfig({
       stdout: 'pipe',
     },
     {
-      command: `rm -rf ${DATA} && PP_DATA_DIR=${DATA} PP_NO_OUTSIDE_CALLS=1 PP_SSDP_TARGET=127.0.0.1:11900 NEXT_TELEMETRY_DISABLED=1 npx next start -p ${PORT} -H 127.0.0.1`,
+      // PP5: the iCloud and AdGuard Home stubs (started with the fake Rokus), and the stub's AdGuard login in the
+      // file the install script leaves for the hub (test values, not real ones).
+      command:
+        `rm -rf ${DATA} && mkdir -p ${DATA} && cp test/fixtures/adguard-credentials.json ${DATA}/ && ` +
+        `PP_DATA_DIR=${DATA} PP_NO_OUTSIDE_CALLS=1 PP_SSDP_TARGET=127.0.0.1:11900 PP_ICLOUD_BASE=http://127.0.0.1:18063 PP_ADGUARD_URL=http://127.0.0.1:18064 ` +
+        `NEXT_TELEMETRY_DISABLED=1 npx next start -p ${PORT} -H 127.0.0.1`,
       url: `http://127.0.0.1:${PORT}/api/auth/state`,
       reuseExistingServer: false,
       timeout: 120_000,

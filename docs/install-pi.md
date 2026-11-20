@@ -34,7 +34,7 @@ This is done once, by hand, when the Pi arrives. About 30 minutes, most of it wa
 3. It takes 10 to 20 minutes. It ends with "Open http://popcorn.local ...".
 
 What it sets up: Node 20, the app (starts by itself when the Pi turns on), the database and its nightly backup
-(3:00 AM), a secret store for PINs, and the updater (checks for a new version daily at 4:00 AM and when you press
+(3:00 AM), a secret store for PINs, ad blocking (AdGuard Home, step 8), and the updater (checks for a new version daily at 4:00 AM and when you press
 **Check for updates now** in Settings; if a new version fails its checks it goes back to the previous one by itself).
 
 If the repo has been made private by then, the clone needs a read-only deploy key. The chat session will give the
@@ -101,11 +101,65 @@ title can be a minute or two off the real end of an episode.
 Until the Popcorn Pilot channel is installed (a later build), snap back with nothing playing cannot open the kid home
 screen; it says so in Settings > Activity history.
 
+## 8. Ad blocking: point the router's DNS at the Pi
+
+The install set up AdGuard Home (free) on the Pi. It blocks Roku home screen ads and tracking for every device that
+asks the Pi for addresses (DNS). It does nothing until the router tells devices to use the Pi.
+
+1. In the router app, give the Pi a reserved (fixed) address, the same way as the Rokus in step 4. Note it (for
+   example 192.168.1.20).
+2. Find the router's **LAN** or **DHCP** DNS setting (often "DNS server" under LAN, DHCP or Network settings; not the
+   WAN or Internet DNS). Set the first DNS server to the Pi's address. Leave the second one empty if the router
+   allows it (a second server lets devices skip the Pi).
+3. Restart each Roku (**Settings > System > Power > System restart**) so it picks up the new DNS.
+4. In Popcorn Pilot: **Settings > Ad blocking** says **On** and, after a few minutes of TV, a count of requests
+   blocked today. The switch there turns blocking off and on (for example if an app stops working; turn it back on
+   after).
+
+**If the count stays at 0 while the TVs are on:** some Rokus ignore the router and ask Google's DNS (8.8.8.8 and
+8.8.4.4) directly. Add a router rule so those requests go to the Pi instead:
+
+- Routers with port forwarding for outgoing traffic (often called **DNS redirect**, **DNS hijack**, **NAT rule** or
+  **Intercept DNS**): redirect outgoing port 53 (UDP and TCP) to 8.8.8.8 and 8.8.4.4 to the Pi's address, port 53.
+  Make an exception for the Pi itself.
+- Routers without that: add a **firewall rule** (or **parental control / block list**) that blocks the devices on the
+  home network from reaching 8.8.8.8 and 8.8.4.4. The Roku then falls back to the router's DNS, which is the Pi.
+
+Restart the Rokus again after adding the rule. Netflix, Prime Video and Hulu keep working: their own ads are not
+blocked (the plans are ad free); only the Roku home screen ads and tracking are.
+
+If the Pi is off, devices that use it cannot look up addresses. Keep the Pi on, or set the router's DNS back.
+
+## 9. Family Album: the photos on the TV home screen
+
+1. On an iPhone or Mac, in **Photos**, make a **Shared Album** (for example "Family TV") and add photos and short
+   clips. Anyone in the family can add to it; Popcorn Pilot picks up what is added.
+2. Open the album, tap **People** (on a Mac: the people button), and turn on **Public Website**. Copy the link it
+   shows (it starts with `https://www.icloud.com/sharedalbum/`). Anyone with this link can see the album; Popcorn
+   Pilot keeps it in its secret store.
+3. In Popcorn Pilot: **Settings > Family Album**, paste the link, and press **Save link**. The hub copies the photos
+   and clips; Settings then shows how many and when it last synced. It syncs again every 6 hours, and **Sync now**
+   syncs at once.
+4. The photos become the scrolling background of the TV home screen (once the Popcorn Pilot channel is installed,
+   a later build), and **Family Album** can be added to a playlist (**Playlists >** a playlist **> Edit > Family
+   Album**).
+
+If the link stops working (Public Website turned off, the album deleted), Settings says the last sync failed and why;
+the photos already copied stay on the TV.
+
+## 10. Routines
+
+**Playlists > Routines > New routine**: one button that sets a TV up. Pick the TV, then the steps in order: **Turn
+on**, **Profile**, **Volume** (0 to 100), **Playlist**, **Timer** (turns the TV off after that many minutes). **Test
+now** tries the steps as they are (without the timer); **Save**, then **Run** from the list or from **Start routine**
+on a TV card on Home. **Run on a schedule** runs it by itself on the days and at the time you pick.
+
+Roku has no "set the volume to 18" command: the hub presses Volume down until the volume is at 0, then Volume up 18
+times. Check on each TV that the level it ends at is right (some TVs step by 2).
+
 ## Later steps (other builds)
 
-- Router DNS pointing at the Pi, for ad blocking (PP5).
 - Roku developer mode and installing the Popcorn Pilot channel on each Roku (PP6).
-- iCloud shared album link, entered in Settings (PP5).
 
 ## If something goes wrong
 

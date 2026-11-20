@@ -18,7 +18,8 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 ## Waits on Josh
 
 - TMDB API key (free account at themoviedb.org) for real cover art and catalog. Until then the stub is used.
-- iCloud shared album link for the Family Album.
+- iCloud shared album link for the Family Album (entered in Settings > Family Album once the Pi runs; PP5 built the
+  sync, docs/install-pi.md step 9).
 
 ## Waits on hardware
 
@@ -27,7 +28,18 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   router; then Settings > Find TVs on the network (docs/install-pi.md step 4, PP1).
 - If the repo is private when the Pi is installed: a read-only deploy key on the Pi for the clone and the updater
   (PP1 install script clones over HTTPS).
-- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
+- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5, docs/install-pi.md step 8).
+- Ad blocking on the real Pi (PP5): the install script downloads AdGuard Home for arm64 and answers its first-run
+  setup through its API (checked here only by shellcheck and a dry run); then Settings > Ad blocking shows On and a
+  count of requests blocked today after TV use; which Roku home screen ads it actually removes.
+- Routines on the real Rokus (PP5, docs/install-pi.md step 10): Turn on from standby (a Roku TV in deep standby may
+  not answer the network; Fast TV start), how long it takes to answer after Turn on (the hub waits up to 20 s), the
+  volume step (100 presses of Volume down, then up to the level; some TVs step by 2 or cap the range), and the timer
+  turning the TV off.
+- Family Album with a real iCloud shared album (PP5, docs/install-pi.md step 9): the sync is written to iCloud's
+  shared album web service and tested only against a stub; check a real link syncs (counts in Settings), that a
+  change in the album shows after Sync now, and that iPhone clips (iCloud's 720p copy) play on the Roku. The album as
+  the TV home background and as a playlist item needs the channel (PP6).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
   PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.

@@ -33,6 +33,7 @@ describe('install script (check 7)', () => {
       'Creating the secret store key',
       'Getting the app',
       'Installing, building and setting up the database',
+      'Installing ad blocking (AdGuard Home)',
       'Installing the services',
       'Checking the app answers',
     ])
@@ -40,6 +41,11 @@ describe('install script (check 7)', () => {
     expect(out).toContain('node scripts/migrate.mjs');
     expect(out).toContain('systemctl enable --now popcorn-pilot.service popcorn-pilot-update.timer popcorn-pilot-update.path popcorn-pilot-backup.timer');
     expect(out).toContain('PP_MASTER_KEY_FILE=/etc/popcorn-pilot/master.key');
+    // PP5: AdGuard Home for the arm64 Pi, its admin page only on the Pi, and its login left for the secret store.
+    expect(out).toContain('AdGuardHome_linux_arm64.tar.gz');
+    expect(out).toContain('/opt/AdGuardHome/AdGuardHome -s install');
+    expect(out).toContain('admin page 127.0.0.1:3053, DNS 0.0.0.0:53');
+    expect(out).toContain('write /var/lib/popcorn-pilot/adguard-credentials.json (mode 0600, owner popcorn)');
     // Every command is printed, not run.
     for (const line of out.split('\n').filter((l) => /^\s+(apt-get|useradd|install|systemctl|runuser)\b/.test(l))) expect(line).toContain('[dry run]');
   });

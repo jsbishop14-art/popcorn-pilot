@@ -10,6 +10,7 @@ on:
       - pp2-browse
       - pp3-playback
       - pp4-kid-safeguards
+      - pp5-routines-album-adblock
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -17,7 +18,8 @@ concurrency:
 
 env:
   NEXT_TELEMETRY_DISABLED: '1'
-  # No real outside calls from CI (TMDB and its images): the catalog refuses any address but this machine.
+  # No real outside calls from CI (TMDB and its images, iCloud, AdGuard Home): only this machine may be called; the
+  # tests use local stubs.
   PP_NO_OUTSIDE_CALLS: '1'
 
 jobs:
