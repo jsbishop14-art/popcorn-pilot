@@ -27,6 +27,8 @@ export interface LaunchRequest {
   channelId: string;
   contentId?: string;
   mediaType?: 'movie' | 'series' | 'episode' | 'season' | 'shortFormVideo' | 'tvSpecial' | 'live';
+  /** More launch parameters, handed to the channel (pairing the Popcorn Pilot channel: the hub address and token). */
+  params?: Record<string, string>;
 }
 
 export interface SearchLaunchRequest {

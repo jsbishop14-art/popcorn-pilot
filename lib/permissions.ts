@@ -122,6 +122,17 @@ export const API_RULES = {
   'GET /api/channel/album': CHANNEL,
   'GET /api/channel/album/[id]': CHANNEL,
   'POST /api/channel/routines/[id]/run': CHANNEL,
+
+  // The Roku channel (PP6). Pairing a TV's channel is TV setup (Settings): Adult only. The channel, for its own TV:
+  // the profile picker (the PIN checked in the handler), starting a playlist, the picker board and picking a title
+  // (kid rules on the hub), the bridge screen's Play now and Skip, and cover art.
+  'POST /api/tvs/[id]/pair': ADULT,
+  'POST /api/channel/profile': CHANNEL,
+  'POST /api/channel/playlists/[id]/start': CHANNEL,
+  'GET /api/channel/board': CHANNEL,
+  'POST /api/channel/play': CHANNEL,
+  'POST /api/channel/bridge': CHANNEL,
+  'GET /api/channel/art/[id]': CHANNEL,
 } as const satisfies Record<string, Rule>;
 
 export type ApiRoute = keyof typeof API_RULES;

@@ -155,6 +155,7 @@ function failReason(err: unknown, viewer: Viewer): string {
  */
 async function advance(pbId: number, at: number): Promise<void> {
   const tv = getTv(playbackRow(pbId).tv_id);
+  db().prepare('UPDATE playback SET bridge_until = NULL, warn_resume_at = NULL WHERE id = ?').run(pbId);
   for (let guard = 0; guard < 1000; guard++) {
     const pb = playbackRow(pbId);
     if (pb.state !== 'playing' && pb.state !== 'paused') return;
@@ -252,6 +253,74 @@ async function launchChannel(tv: Tv, at: number): Promise<void> {
 
 /** What the Popcorn Pilot channel is opened with to play the Family Album (photos and clips, shuffled). */
 export const ALBUM_CONTENT_ID = 'family-album';
+/** The channel opened on the Now playing bridge screen between titles (handoff 6.7). */
+export const BRIDGE_CONTENT_ID = 'bridge';
+/** The channel opened on the time warning screen in the middle of an episode (handoff 9.5). */
+export const WARNING_CONTENT_ID = 'time-warning';
+/** How long the bridge screen stays up before the next title starts (the channel counts the last 5 seconds down). */
+export const BRIDGE_MS = 8_000;
+/** How long the warning screen stays up before the title is opened again. */
+export const WARNING_SCREEN_MS = 8_000;
+
+/** Run an engine step after a delay (the bridge countdown, the warning screen), on the hub only (the timer is on). */
+function wakeIn(ms: number): void {
+  if (!timer) return;
+  setTimeout(() => {
+    tick().catch((err) => console.error('playback engine:', err instanceof Error ? err.message : err));
+  }, ms + 250).unref();
+}
+
+/**
+ * A title ended by itself: with the channel paired on this TV and another title waiting, the TV shows the bridge
+ * screen first and the next title starts when its countdown ends (or Play now). Otherwise straight to the next.
+ */
+async function nextOrBridge(pbId: number, at: number): Promise<void> {
+  const pb = playbackRow(pbId);
+  const tv = getTv(pb.tv_id);
+  const pending = db().prepare("SELECT 1 FROM queue_items WHERE playback_id = ? AND status = 'pending' LIMIT 1").get(pbId);
+  const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
+  const s = rules ? timeStatus(rules, at) : null;
+  const kidStops = s !== null && (s.remainingMs <= 0 || !s.inHours);
+  if (!tv?.hasChannelToken || !pending || kidStops || pb.state !== 'playing') {
+    await advance(pbId, at);
+    return;
+  }
+  // The bridge shows the time warning when it is due, so it is not shown again in the middle of the next title.
+  if (rules && s) noteWarning(pb, rules, s, at);
+  try {
+    const id = channelAppId();
+    noteLaunch(tv.id, id, at);
+    await driverFor(tv).launch({ channelId: id, contentId: BRIDGE_CONTENT_ID });
+  } catch {
+    await advance(pbId, at);
+    return;
+  }
+  db().prepare('UPDATE playback SET bridge_until = ? WHERE id = ?').run(at + BRIDGE_MS, pbId);
+  wakeIn(BRIDGE_MS);
+}
+
+/** The time warning for a kid's playback, once (again after more time is approved): an alert for the adults. */
+function noteWarning(pb: PlaybackRow, rules: KidRules, s: TimeStatus, at: number): boolean {
+  if (pb.kid_warned_at !== null || s.remainingMs > rules.warningMinutes * MIN || s.remainingMs <= 0) return false;
+  const tv = getTv(pb.tv_id);
+  const mins = Math.max(1, Math.ceil(s.remainingMs / MIN));
+  db().prepare('UPDATE playback SET kid_warned_at = ? WHERE id = ?').run(at, pb.id);
+  addAlert({ kind: 'time_warning', profileId: rules.profileId, tvId: pb.tv_id, title: `${mins} minute${mins === 1 ? '' : 's'} left`, detail: `${rules.name} · ${tv?.name ?? 'a TV'}` }, at);
+  log(HUB, 'kid.warning', `Time warning for ${rules.name} on ${tv?.name ?? 'a TV'}: ${mins} min left`);
+  return true;
+}
+
+/** The warning screen has been up long enough: open the title again. */
+async function resumeAfterWarning(pb: PlaybackRow, cur: QueueItemsRow, at: number): Promise<void> {
+  db().prepare('UPDATE playback SET warn_resume_at = NULL WHERE id = ?').run(pb.id);
+  const tv = getTv(pb.tv_id);
+  if (!tv) return;
+  try {
+    await launchItem(viewerOf(pb), tv, cur, at);
+  } catch (err) {
+    log(HUB, 'kid.warning_resume_failed', `Could not open ${cur.name} again on ${tv.name} after the time warning: ${err instanceof Error ? err.message : 'error'}`);
+  }
+}
 
 /**
  * Put a queue item on a TV: a title on its streaming app (the best route), or the Family Album in the Popcorn Pilot
@@ -358,11 +427,18 @@ async function kidTick(pb: PlaybackRow, rules: KidRules, cur: QueueItemsRow, at:
   syncWatch(pb, at);
   const tv = getTv(pb.tv_id);
   const s = timeStatus(rules, at);
-  if (pb.kid_warned_at === null && s.remainingMs <= rules.warningMinutes * MIN) {
-    const mins = Math.max(1, Math.ceil(s.remainingMs / MIN));
-    db().prepare('UPDATE playback SET kid_warned_at = ? WHERE id = ?').run(at, pb.id);
-    addAlert({ kind: 'time_warning', profileId: rules.profileId, tvId: pb.tv_id, title: `${mins} minute${mins === 1 ? '' : 's'} left`, detail: `${rules.name} · ${tv?.name ?? 'a TV'}` }, at);
-    log(HUB, 'kid.warning', `Time warning for ${rules.name} on ${tv?.name ?? 'a TV'}: ${mins} min left`);
+  if (noteWarning(pb, rules, s, at) && tv?.hasChannelToken && cur.kind === 'title') {
+    // The warning is due in the middle of an episode: the channel's warning screen comes up briefly (a channel cannot
+    // draw over Netflix, Hulu or Prime), then the title is opened again (handoff 9.5; checked on hardware later).
+    try {
+      const id = channelAppId();
+      noteLaunch(tv.id, id, at);
+      await driverFor(tv).launch({ channelId: id, contentId: WARNING_CONTENT_ID });
+      db().prepare('UPDATE playback SET warn_resume_at = ? WHERE id = ?').run(at + WARNING_SCREEN_MS, pb.id);
+      wakeIn(WARNING_SCREEN_MS);
+    } catch {
+      // the alert is given; the title plays on
+    }
   }
   const wind = windingDown(rules, s);
   if (wind) {
@@ -482,7 +558,7 @@ async function startLocked(actor: Actor, input: StartInput, at: number): Promise
     });
     if (pl.shuffle) shufflePending(pbId);
     const who = v.profileName ? ` for ${v.profileName}` : '';
-    log(actor, 'playback.start', `Started ${name} on ${tv.name}${who}${actor.pinType === 'hub' ? ' (schedule)' : ''}`);
+    log(actor, 'playback.start', `Started ${name} on ${tv.name}${who}${actor.pinType !== 'hub' ? '' : actor.device === HUB.device ? ' (schedule)' : ' (from the TV)'}`);
     await advance(pbId, at);
     out.push(pbId);
   }
@@ -504,10 +580,13 @@ export function tick(): Promise<{ advanced: number; started: number }> {
     for (const pb of live) {
       const cur = pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
       if (!cur) {
+        // The bridge screen is up: the next title starts when its countdown ends.
+        if (pb.bridge_until !== null && at < pb.bridge_until) continue;
         await advance(pb.id, at);
         advanced++;
         continue;
       }
+      if (pb.warn_resume_at !== null && at >= pb.warn_resume_at) await resumeAfterWarning(pb, cur, at);
       const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
       if (rules && (await kidTick(pb, rules, cur, at))) {
         advanced++;
@@ -516,7 +595,7 @@ export function tick(): Promise<{ advanced: number; started: number }> {
       const mins = itemMinutes(rowFields(cur));
       if (mins !== null && playedMs(pb, at) >= mins * 60_000) {
         finishCurrent(playbackRow(pb.id), 'done', at);
-        await advance(pb.id, at);
+        await nextOrBridge(pb.id, at);
         advanced++;
       }
     }
@@ -911,7 +990,7 @@ export function playRequestedTitle(viewer: Viewer, tvId: number, titleKey: strin
  * Pilot kid home screen. The Guest PIN may switch a TV to a kid profile only, so it can never take a TV out of kid
  * mode. Whatever was playing for another profile stops.
  */
-export function switchProfile(actor: Actor, tvId: unknown, profile: unknown): Promise<string> {
+export function switchProfile(actor: Actor, tvId: unknown, profile: unknown, opts: { checkedOnTv?: boolean } = {}): Promise<string> {
   return serial(async () => {
     const at = now();
     const tv = tvOr400(tvId);
@@ -922,7 +1001,8 @@ export function switchProfile(actor: Actor, tvId: unknown, profile: unknown): Pr
       if (!got) throw new BadRequest('That profile does not exist.');
       v = got;
     }
-    if (actor.pinType === 'guest' && !v.kid) throw new HttpError(403, 'With the Guest PIN, switch a TV to a kid profile.');
+    // On the TV's profile picker the channel route has already checked the PIN for this switch (lib/channel.ts).
+    if (actor.pinType === 'guest' && !v.kid && !opts.checkedOnTv) throw new HttpError(403, 'With the Guest PIN, switch a TV to a kid profile.');
     const pb = livePlayback(tv.id);
     let stopped = '';
     if (pb && pb.profile_id !== v.profileId) {
@@ -956,6 +1036,91 @@ export function snapBackRelaunch(tvId: number, seenExpectedAt: number | null): P
     }
     await launchChannel(tv, at);
     return { what: 'channel', name: 'Popcorn Pilot' };
+  });
+}
+
+/** "3 of 6": where the title up next sits among the playback's titles (the bridge screen's "Up next · 3 of 6"). */
+export function upNextPlace(tv: Tv): string | null {
+  const pb = livePlayback(tv.id);
+  if (!pb) return null;
+  const items = queue(pb.id).filter((r) => r.status !== 'removed');
+  const i = items.findIndex((r) => r.status === 'pending');
+  return i >= 0 ? `${i + 1} of ${items.length}` : null;
+}
+
+export interface BridgeInfo {
+  /** Seconds until the next title starts. */
+  startsInSec: number;
+  /** For a kid: the time warning is due (shown on the bridge screen, handoff 9.5). */
+  warning: { leftMin: number; lastEpisode: boolean } | null;
+}
+
+/** The bridge screen on a TV, while it is up: the countdown, and for a kid the warning before the last episode. */
+export function bridgeInfo(tv: Tv, at = now()): BridgeInfo | null {
+  const pb = livePlayback(tv.id);
+  if (!pb || pb.current_item_id !== null || pb.bridge_until === null) return null;
+  const startsInSec = Math.max(0, Math.ceil((pb.bridge_until - at) / 1000));
+  const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
+  if (!rules) return { startsInSec, warning: null };
+  const s = timeStatus(rules, at);
+  const next = db().prepare("SELECT * FROM queue_items WHERE playback_id = ? AND status = 'pending' ORDER BY position, id LIMIT 1").get(pb.id) as QueueItemsRow | undefined;
+  const e = next ? episodeMs(rowFields(next)) : 30 * MIN;
+  // The last episode today: after this one, half an episode or less would be left, so the hub stops there (D-3, PP4).
+  const lastEpisode = s.remainingMs <= 1.5 * e;
+  const due = s.remainingMs <= rules.warningMinutes * MIN || lastEpisode;
+  return { startsInSec, warning: due && s.remainingMs > 0 ? { leftMin: Math.max(1, Math.ceil(s.remainingMs / MIN)), lastEpisode } : null };
+}
+
+/**
+ * The Now playing bridge screen's buttons on the TV (handoff 6.7): Play now starts the next title at once; Skip
+ * skips it, and the bridge counts down again for the one after (or the playlist moves on when none is left).
+ */
+export function bridgeAction(tvId: number, action: unknown): Promise<string> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(tvId);
+    const pb = liveOr404(tv);
+    if (pb.current_item_id !== null || pb.bridge_until === null) throw new HttpError(409, 'Nothing is waiting to start.');
+    const next = db().prepare("SELECT * FROM queue_items WHERE playback_id = ? AND status = 'pending' ORDER BY position, id LIMIT 1").get(pb.id) as QueueItemsRow | undefined;
+    const actor: Actor = { pinType: 'hub', device: `${tv.name} TV` };
+    let words: string;
+    if (action === 'play') {
+      await advance(pb.id, at);
+      words = `Play now on ${tv.name}: ${next?.name ?? 'the next title'} (${pb.name})`;
+    } else if (action === 'skip') {
+      if (next) db().prepare("UPDATE queue_items SET status = 'skipped' WHERE id = ?").run(next.id);
+      const more = db().prepare("SELECT 1 FROM queue_items WHERE playback_id = ? AND status = 'pending' LIMIT 1").get(pb.id);
+      if (more) {
+        db().prepare('UPDATE playback SET bridge_until = ? WHERE id = ?').run(at + BRIDGE_MS, pb.id);
+        wakeIn(BRIDGE_MS);
+      } else {
+        await advance(pb.id, at);
+      }
+      words = `Skipped ${next?.name ?? 'the next title'} on ${tv.name} (${pb.name}, from the TV)`;
+    } else {
+      throw new BadRequest('Action is play or skip.');
+    }
+    log(actor, `bridge.${action}`, words);
+    return words;
+  });
+}
+
+/**
+ * A TV with the channel paired was turned on (not by a routine, with nothing playing): the TV goes to its default
+ * profile (kid mode for a kid profile) and the Popcorn Pilot channel opens, so it starts on the Popcorn Pilot home
+ * screen (handoff 9.4). Returns what happened, or null when nothing was done.
+ */
+export function openAtPowerOn(tvId: number): Promise<string | null> {
+  return serial(async () => {
+    const at = now();
+    const tv = getTv(tvId);
+    if (!tv || livePlayback(tv.id)) return null;
+    const v = tv.defaultProfileId !== null ? viewerForProfile(tv.defaultProfileId) : null;
+    if (v) setTvProfile(tv.id, v.profileId, 'hub', at);
+    await launchChannel(tv, at);
+    const words = `${tv.name} was turned on: opened Popcorn Pilot${v ? ` on ${v.profileName}${v.kid ? ' (kid mode)' : ''}` : ''}`;
+    log(HUB, 'tv.power_on', words);
+    return words;
   });
 }
 

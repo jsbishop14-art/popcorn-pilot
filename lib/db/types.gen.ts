@@ -130,6 +130,8 @@ export interface PlaybackRow {
   kid_warned_at: number | null;
   kid_wind_down_at: number | null;
   kid_volume_at: number | null;
+  bridge_until: number | null;
+  warn_resume_at: number | null;
 }
 
 export interface PlaylistItemsRow {

@@ -390,6 +390,11 @@ function playlistProfile(def: Definition, tv: Tv): number | undefined {
 
 const busy = new Set<number>();
 
+/** Whether a routine is running on this TV now (the power-on watcher leaves such a TV to the routine). */
+export function routineRunning(tvId: number): boolean {
+  return busy.has(tvId);
+}
+
 export interface RunResult {
   runId: number;
   ok: boolean;

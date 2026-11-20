@@ -50,7 +50,44 @@ None (spec section 5). Production is the Pi; never touched.
 
 ## Decided without asking
 
-(filled in as the build goes)
+- D-1: Pairing. Settings > TV has "Pair the channel" (Adult PIN only): the hub makes a new channel token and opens
+  the channel on that TV with the hub address and the token as launch parameters (Roku ECP launch); the channel
+  keeps both in its own storage. No PIN is stored on the TV. If the TV does not answer, the old token is put back.
+  The hub address is this machine's home network address and port (PP_HUB_URL overrides). The old "Make channel
+  token" stays as a fallback; the channel has a screen to type the address and token by hand. Reason: no typing on
+  the TV in the normal case; anyone on the home network could already control the Rokus by ECP (accepted in PP1).
+- D-2: The TV profile picker: in kid mode every switch needs the Adult PIN (leaving kid mode). Out of kid mode: a
+  kid profile needs no PIN; an adult profile needs the Adult PIN; "Guest" (no profile, mockup ProfilePicker) takes
+  the Adult or Guest PIN. Reason: mockup ("Grown-up profiles ask for the PIN", lock badge on Family and Guest);
+  handoff 3.4; the Guest PIN can never take a TV out of kid mode, so no access widens. Wrong PINs count toward the
+  hub-wide lockout.
+- D-3: The Kid picker board: the titles in the household's playlists that the kid may watch (set on the phone or
+  computer; the remote picks, idea 3), in playlist order, then filled from the catalog's titles the kid may watch,
+  taking from each platform in turn. 6 tiles for a kid, 12 for an adult profile (6 across, 2 rows at 1080p). The
+  hub sends only allowed titles and refuses any other title picked (kid rules on the hub).
+- D-4: Kid home "Keep watching" starts the playlist this kid played last (any TV), from the start. Reason: the hub
+  does not know where a streaming app left off; starting the list again is the plain choice. Hidden when the kid
+  has not played a playlist yet.
+- D-5: The Now playing bridge (handoff 6.7): only on a TV with the channel paired, only when a title ends by itself
+  and another is waiting. The hub opens the channel on the bridge screen and the next title starts after 8 seconds
+  (the channel counts the last 5 down, mockup "Starting in 5 seconds"), or at once with Play now; Skip skips the
+  title up next and counts down again for the one after. Skips from the app go straight on as before. TVs without
+  the channel paired behave exactly as in PP3 to PP5 (so nothing changes until the channel is installed).
+- D-6: The time warning (handoff 9.5): on the bridge screen when the warning is due or the next title is the last
+  one today (after it, half an episode or less would be left: PP4 D-3); that counts as the warning. Still due in the
+  middle of an episode: the hub opens the channel's warning screen for 8 seconds, then opens the title again (on
+  Netflix this may restart the episode or resume it; checked on hardware, already in Waits on hardware).
+- D-7: Power on (handoff 9.4): the hub asks each paired TV not in kid mode whether it is on (every 2 seconds, with
+  snap back); a change from standby to on sets the TV to its default profile (kid mode for a kid) and opens the
+  channel, unless a routine is running there or something is playing. Kid mode TVs: snap back already opens the
+  channel when they are turned on (PP4). This completes PP4 D-1.
+- D-8: Things done on the TV without a PIN (a kid picking a title or a profile, starting a playlist, Play now, Skip)
+  are in Activity history as the hub, with the device "<TV name> TV" and "(from the TV)".
+- D-9: Migration 006 adds two columns to playback (bridge_until, warn_resume_at). The migration checker now reads
+  back columns ("-- expect: column table.column"), with a control test that a dropped column is reported.
+- D-10: Cover art for the channel comes from a channel route (GET /api/channel/art/[id]); the channel's home,
+  board and now playing send those addresses. The two PP5 tests that expected the app's art address and the old
+  now-playing shape were changed to the new rule.
 
 ## Questions
 
@@ -59,8 +96,10 @@ None (spec section 5). Production is the Pi; never touched.
 ## Progress
 
 - Step 0: branch created from origin/main 48fe879; this status file.
+- Step 1: hub API for the channel: pairing, TV profile picker, playlists from the TV, picker board, picking a title,
+  bridge, warning screen, power on, channel art; migration 006 (2 expected columns). test/unit/channel-api.test.ts
+  (check 3, 31 tests). Unit 553/553, type-check 0, lint 0.
 
 ## PICK UP HERE
 
-Step 1: hub API for the channel (pairing, profile switching on the TV, playlists, kid picker, bridge, warning
-screen, power on), with contract tests.
+Step 2: the Roku channel source under roku/ (manifest, source, components, key handling), built with bsc.

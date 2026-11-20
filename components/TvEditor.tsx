@@ -25,6 +25,7 @@ export default function TvEditor({ tv, profiles }: { tv: Tv; profiles: { id: num
   const [profileId, setProfileId] = useState<string>(tv.defaultProfileId ? String(tv.defaultProfileId) : '');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [pairMsg, setPairMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
 
   async function save() {
@@ -41,6 +42,17 @@ export default function TvEditor({ tv, profiles }: { tv: Tv; profiles: { id: num
   async function makeToken() {
     const r = await api<{ token: string }>(`/api/tvs/${tv.id}/channel-token`, { method: 'POST', body: {} });
     setToken(r.token);
+  }
+
+  async function pair() {
+    setPairMsg(null);
+    try {
+      const r = await api<{ message: string }>(`/api/tvs/${tv.id}/pair`, { method: 'POST', body: {} });
+      setPairMsg({ ok: true, text: `${r.message}. The TV now shows the Popcorn Pilot home screen.` });
+      router.refresh();
+    } catch (e) {
+      setPairMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not pair the channel.' });
+    }
   }
 
   async function remove() {
@@ -91,8 +103,18 @@ export default function TvEditor({ tv, profiles }: { tv: Tv; profiles: { id: num
       <span className="lbl">Popcorn Pilot channel</span>
       <div className="card">
         <span className="s">
-          The TV channel arrives in PP6. It pairs with this TV using a token. {tv.hasChannelToken ? 'This TV has a token.' : 'No token yet.'}
+          The Popcorn Pilot channel on the TV shows the home screen, kid screens and Now playing. Pair it once the channel is
+          installed (install guide). {tv.hasChannelToken ? 'This TV is paired.' : 'Not paired yet.'}
         </span>
+        <button type="button" className="btn pri" onClick={() => void pair()}>
+          {tv.hasChannelToken ? 'Pair the channel again' : 'Pair the channel'}
+        </button>
+        {pairMsg && (
+          <p className={`msg ${pairMsg.ok ? 'ok' : 'err'}`} role="status">
+            {pairMsg.text}
+          </p>
+        )}
+        <span className="s">If pairing cannot reach the TV, a token can be typed into the channel by hand instead.</span>
         {token ? (
           <div className="col" role="status">
             <span className="t">New channel token (shown once)</span>

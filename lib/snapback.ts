@@ -9,8 +9,9 @@ import { getTv } from './tvs';
 import { driverFor } from './devices';
 import { logActivity } from './activity';
 import { addAlert, kidRules } from './safeguards';
-import { channelAppId } from './tvstate';
-import { snapBackRelaunch } from './playback';
+import { channelAppId, kidModeProfile } from './tvstate';
+import { openAtPowerOn, snapBackRelaunch } from './playback';
+import { routineRunning } from './routines';
 
 /** After the hub launches something, how long the TV gets to show it before a different app counts as a change. */
 export const LAUNCH_GRACE_MS = 6_000;
@@ -129,6 +130,47 @@ export async function snapBackPass(): Promise<SnapBack[]> {
   return out;
 }
 
+// ---------------------------------------------------------------------------------------------- power on
+
+const power = new Map<number, 'on' | 'standby'>();
+
+/** Tests only: forget what the power-on watcher knew about each TV. */
+export function resetPowerOnForTests(): void {
+  power.clear();
+}
+
+/**
+ * The hub opens the Popcorn Pilot channel when a TV is turned on (handoff 9.4), so the TV starts on the Popcorn Pilot
+ * home screen on its default profile. For TVs with the channel paired and not in kid mode (snap back handles those):
+ * each pass asks the TV whether it is on; a change from standby to on opens the channel, unless a routine is running
+ * there (it sets the TV up itself) or something is playing. The first look at a TV only records its state.
+ */
+export async function powerOnPass(): Promise<string[]> {
+  const rows = getDb().prepare('SELECT id FROM tvs WHERE deleted_at IS NULL AND channel_token_hash IS NOT NULL').all() as { id: number }[];
+  const out: string[] = [];
+  for (const { id } of rows) {
+    const tv = getTv(id);
+    if (!tv) continue;
+    let mode: 'on' | 'standby';
+    try {
+      mode = (await driverFor(tv, 1500).deviceInfo()).powerMode === 'standby' ? 'standby' : 'on';
+    } catch {
+      continue;
+    }
+    const was = power.get(id);
+    power.set(id, mode);
+    if (was !== 'standby' || mode !== 'on') continue;
+    if (kidModeProfile(id) !== null || routineRunning(id)) continue;
+    try {
+      const words = await openAtPowerOn(id);
+      if (words) out.push(words);
+    } catch (err) {
+      logActivity({ pinType: 'hub', device: 'Hub', action: 'tv.power_on_failed', summary: `${tv.name} was turned on; could not open Popcorn Pilot: ${err instanceof Error ? err.message : 'error'}` });
+    }
+  }
+  return out;
+}
+
 let timer: NodeJS.Timeout | null = null;
 let running = false;
 
@@ -140,6 +182,8 @@ export function startSnapBackWatcher(ms = Number(process.env.PP_SNAPBACK_MS ?? 2
     running = true;
     snapBackPass()
       .catch((err) => console.error('snap back:', err instanceof Error ? err.message : err))
+      .then(() => powerOnPass())
+      .catch((err) => console.error('power on:', err instanceof Error ? err.message : err))
       .finally(() => {
         running = false;
       });

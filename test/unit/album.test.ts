@@ -13,7 +13,7 @@ import { listActivity } from '@/lib/activity';
 import { newChannelToken, getTv } from '@/lib/tvs';
 import { EVERYONE } from '@/lib/catalog';
 import { albumFields, appendItem, createPlaylist, titleFields } from '@/lib/playlists';
-import { ALBUM_CONTENT_ID, control, setClockForTests, startPlaylist, tick, tvView, type Actor } from '@/lib/playback';
+import { ALBUM_CONTENT_ID, BRIDGE_CONTENT_ID, BRIDGE_MS, control, setClockForTests, startPlaylist, tick, tvView, type Actor } from '@/lib/playback';
 import { albumDir, syncDue } from '@/lib/album';
 import { albumToken, partitionHost, pickDerivative } from '@/lib/album/icloud';
 import { readSecrets } from '@/lib/secrets';
@@ -219,7 +219,12 @@ describe('the album on the TV', () => {
     const np = await call({ channel: token }, 'GET', '/api/channel/now-playing');
     expect(np.body.nowPlaying.title.name).toBe('Family Album');
     expect(listActivity({ limit: 1 })[0].summary).toBe('Started the Family Album on Living room (Photos then cartoons, photos and clips, shuffled)');
+    // This TV's channel is paired (PP6): the Now playing bridge comes first, then the next title.
     T += 10 * MIN;
+    await tick();
+    expect(roku.calls.filter((c) => c.path.startsWith('/launch/')).map((c) => c.query.contentId).slice(-1)).toEqual([BRIDGE_CONTENT_ID]);
+    expect(tvView(getTv(tv)!, T).playback?.now).toBeNull();
+    T += BRIDGE_MS;
     await tick();
     expect(tvView(getTv(tv)!, T).playback?.now?.item.name).toBe('Rocket Pals');
     await control(ADULT, tv, 'stop');
