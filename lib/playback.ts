@@ -192,7 +192,8 @@ async function advance(pbId: number, at: number): Promise<void> {
       db().prepare("UPDATE queue_items SET status = 'playing', launch_route = ? WHERE id = ?").run(r.route, next.id);
       db().prepare("UPDATE playback SET current_item_id = ?, item_played_ms = 0, item_resumed_at = ?, state = 'playing', kid_ep_seen = -1 WHERE id = ?").run(next.id, at, pbId);
       openWatch(playbackRow(pbId), next, at);
-      log(HUB, 'playback.next', `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
+      // A one-title playback (a kid's "Play on a TV", an approved title) is logged by whoever started it.
+      if (pb.playlist_id !== null) log(HUB, 'playback.next', `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
       return;
     } catch (err) {
       const reason = failReason(err, viewer);
