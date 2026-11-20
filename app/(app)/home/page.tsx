@@ -15,7 +15,10 @@ export default function HomePage() {
   const auth = pageAuth();
   const isAdult = auth.role === 'adult';
   const at = now();
-  const profiles = listProfiles().map((p) => ({ id: p.id, name: p.name, kid: p.type === 'kid' }));
+  // The Guest PIN switches a TV to a kid profile only, so it gets only those.
+  const profiles = listProfiles()
+    .map((p) => ({ id: p.id, name: p.name, kid: p.type === 'kid' }))
+    .filter((p) => isAdult || p.kid);
   // Requests and alerts are for the Adult PIN only (the Guest PIN cannot approve; the hub refuses it too).
   const today = isAdult ? alertsToday(at) : 0;
   const latest = isAdult && today ? listAlerts({ limit: 1 })[0] : null;

@@ -127,7 +127,14 @@ None (spec section 5). Production is the Pi; never touched.
 - Step 8: smoke check covers requests, alerts, tasks and the channel kid route; CI branch list; install guide step 7
   (kid mode); chain.md Waits on hardware.
 
+- The Guest PIN's Dashboard gets kid profile names only (the TV profile picker).
+- Local checks before the CI push (caches removed, fresh npm ci, each exit code read on its own line): npm ci 0,
+  lint 0, typecheck 0, gen-types --check 0, migrate 0 (44 expected objects, 0 missing), shellcheck 0, install dry
+  run 0, unit 0 (406/406), build 0, e2e 0 (55/55; HTTP permission map 372 answers), smoke 0 on a fresh production
+  build (control against a port with nothing on it: 1).
+
 ## PICK UP HERE
 
-Run the local checks (fresh npm ci, lint, typecheck, gen-types --check, migrate, shellcheck, install dry run, unit,
-build, e2e, smoke on a fresh production build), then the one deliberate CI run (ALLOW_CI=1), then land.
+The deliberate CI run (run 1 of 5) was pushed with ALLOW_CI=1. Check its result on GitHub Actions for the branch
+pp4-kid-safeguards. Green: rebase check against origin/main, record the checks, land with "[Merge] PP4 (". Red:
+classify from the log (process.md section 7) before any re-run.
