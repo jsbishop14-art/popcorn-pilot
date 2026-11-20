@@ -184,7 +184,8 @@ select.field { appearance: auto; }
 .step { display: flex; align-items: center; gap: 10px; }
 .step .v { min-width: 44px; text-align: center; font-family: var(--heading); font-size: 22px; font-weight: 600; }
 /* Kid safeguards (PP4): mockups ProfileEditor, Requests, Alerts, Tasks, WatchLog, Profiles, PhoneDashboard. */
-.step .v.kid-v { min-width: 84px; font-size: 18px; }
+.step .v.kid-v { min-width: 72px; font-size: 18px; }
+.kid-step, .kid-step .mini { flex-shrink: 0; }
 .kidbar, .kidbar > span { height: 10px; border-radius: 5px; }
 .taskpic { width: 48px; height: 48px; border-radius: 12px; background: var(--ground); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
 .chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; align-items: end; height: 120px; }

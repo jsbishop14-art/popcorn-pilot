@@ -96,9 +96,10 @@ export async function snapBackPass(): Promise<SnapBack[]> {
     }
     const justTurnedOn = w.standby;
     w.standby = false;
-    let back: { what: 'title' | 'channel'; name: string };
+    let back: { what: 'title' | 'channel'; name: string } | null;
     try {
-      back = await snapBackRelaunch(tv.id);
+      back = await snapBackRelaunch(tv.id, r.expected_at);
+      if (!back) continue; // the hub launched something meanwhile
     } catch (err) {
       if (!w.failing) {
         logActivity({ pinType: 'hub', device: 'Hub', action: 'snapback.failed', summary: `Snap back on ${tv.name} could not relaunch: ${err instanceof Error ? err.message : 'error'}` });

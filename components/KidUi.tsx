@@ -11,7 +11,7 @@ export function Toggle({ on, label, onChange }: { on: boolean; label: string; on
 
 export function Stepper({ value, label, step, min, max, words, onChange }: { value: number; label: string; step: number; min: number; max: number; words: (v: number) => string; onChange: (v: number) => void }) {
   return (
-    <div className="step">
+    <div className="step kid-step">
       <button type="button" className="mini" aria-label={`Less ${label}`} disabled={value <= min} onClick={() => onChange(Math.max(min, value - step))}>
         −
       </button>

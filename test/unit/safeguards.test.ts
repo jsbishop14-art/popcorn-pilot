@@ -12,7 +12,7 @@ import { createProfile } from '@/lib/profiles';
 import { listActivity } from '@/lib/activity';
 import { EVERYONE, viewerForProfile } from '@/lib/catalog';
 import { appendItem, createPlaylist, titleFields } from '@/lib/playlists';
-import { control, setClockForTests, startPlaylist, startTitle, switchProfile, tick, tvView, type Actor } from '@/lib/playback';
+import { control, setClockForTests, snapBackRelaunch, startPlaylist, startTitle, switchProfile, tick, tvView, type Actor } from '@/lib/playback';
 import { barColor, kidRules, listAlerts, timeStatus, updateRules, watchWeek } from '@/lib/safeguards';
 import { resetSnapBackForTests, snapBackPass, startSnapBackWatcher, stopSnapBackWatcher } from '@/lib/snapback';
 import { tvState } from '@/lib/tvstate';
@@ -328,6 +328,20 @@ describe('check 2: snap back', () => {
     expect(await snapBackPass()).toEqual([]);
     roku2.state.power = 'on';
     expect((await snapBackPass()).map((m) => `${m.from} -> ${m.to} ${m.alerted}`)).toEqual(['Prime Video -> Popcorn Pilot false']);
+    expect(listAlerts()).toHaveLength(0);
+  });
+
+  it('a launch by the hub while the watcher looks is not undone (no second launch, no alert)', async () => {
+    T = local(31, 14);
+    await switchProfile(ADULT, tv1, kid); // kid home screen: the hub expects Popcorn Pilot
+    const seen = tvState(tv1)?.expected_at ?? null;
+    T += 10 * SEC;
+    // The hub starts a playlist; the watcher had read the TV's state before it, and now sees Netflix.
+    const id = await playlist('Race', [{ key: RP }]);
+    await startPlaylist(GUEST, { playlistId: id, tvIds: [tv1], profile: kid });
+    roku1.calls.length = 0;
+    expect(await snapBackRelaunch(tv1, seen)).toBeNull();
+    expect(launches(roku1)).toEqual([]);
     expect(listAlerts()).toHaveLength(0);
   });
 

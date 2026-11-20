@@ -904,10 +904,13 @@ export function switchProfile(actor: Actor, tvId: unknown, profile: unknown): Pr
  * Snap back (handoff 5.7): the TV is showing something the hub did not start. Relaunch what should be on: the
  * playlist's current title, or the Popcorn Pilot channel when nothing is playing. Returns what was relaunched.
  */
-export function snapBackRelaunch(tvId: number): Promise<{ what: 'title' | 'channel'; name: string }> {
+export function snapBackRelaunch(tvId: number, seenExpectedAt: number | null): Promise<{ what: 'title' | 'channel'; name: string } | null> {
   return serial(async () => {
     const at = now();
     const tv = tvOr400(tvId);
+    // The hub launched something on this TV since the watcher looked (a start, a skip, a stop): what the watcher saw
+    // was that launch, not a change by the kid. Nothing to undo.
+    if ((tvState(tv.id)?.expected_at ?? null) !== seenExpectedAt) return null;
     const pb = livePlayback(tv.id);
     const cur = pb && pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
     if (pb && cur && cur.title_key) {

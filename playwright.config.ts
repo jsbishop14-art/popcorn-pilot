@@ -24,7 +24,10 @@ export default defineConfig({
     // Playlists and playback (PP3) after Browse; they add the second fake Roku as "Bedroom".
     { name: 'playback-phone', testMatch: /playback\.spec\.ts/, dependencies: ['browse-desktop'], use: { ...devices['Pixel 7'] } },
     { name: 'playback-desktop', testMatch: /playback\.spec\.ts/, dependencies: ['playback-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['playback-desktop'] },
+    // Kid safeguards (PP4) after playback: the PP2 and PP3 tests played titles for the kid (the watch log).
+    { name: 'kid-phone', testMatch: /kid\.spec\.ts/, dependencies: ['playback-desktop'], use: { ...devices['Pixel 7'] } },
+    { name: 'kid-desktop', testMatch: /kid\.spec\.ts/, dependencies: ['kid-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['kid-desktop'] },
     { name: 'lockout', testMatch: /lockout\.spec\.ts/, dependencies: ['http-map'], use: { ...devices['Pixel 7'] } },
   ],
   webServer: [
