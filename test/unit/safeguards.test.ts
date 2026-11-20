@@ -275,6 +275,8 @@ describe('check 2: snap back', () => {
     expect(took).toBeLessThan(5_000);
     expect(launches(roku1)).toEqual(['12:81000001']); // back to the playlist's title
     expect(roku1.state.activeApp.id).toBe('12');
+    // The hub writes the alert just after the relaunch returns: wait for it (the fake Roku sees the launch first).
+    expect(await waitFor(() => alertsOf('left_playlist').length > 0, 2_000)).toBeGreaterThanOrEqual(0);
     const a = alertsOf('left_playlist');
     expect(a).toHaveLength(1);
     expect(a[0].title).toBe('Left the playlist');
@@ -286,6 +288,7 @@ describe('check 2: snap back', () => {
     roku1.calls.length = 0;
     roku1.state.activeApp = { id: null, name: 'Roku' };
     expect(await waitFor(() => launches(roku1).length > 0, 6_000)).toBeLessThan(5_000);
+    expect(await waitFor(() => alertsOf('home').length > 0, 2_000)).toBeGreaterThanOrEqual(0);
     expect(alertsOf('home').map((x) => x.title)).toEqual(['Pressed Home']);
     stopSnapBackWatcher();
   });

@@ -71,6 +71,19 @@ test('TV editor: rename, room, default profile, channel token', async ({ page })
   const other = await page.request.get('/api/profiles', { headers: { authorization: `Bearer ${token}`, cookie: '' } });
   expect(other.status()).toBe(403);
 
+  // PP6: Pair the channel. The hub opens the Popcorn Pilot channel on the TV with its address and a new token; the
+  // token made above stops working and the new one (handed to the TV, never shown) opens the channel's routes.
+  const before = ((await (await page.request.get('http://127.0.0.1:18061/calls')).json()) as { path: string }[]).length;
+  await page.getByRole('button', { name: /^Pair the channel/ }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Paired' })).toHaveText('Paired the Popcorn Pilot channel on Living room. The TV now shows the Popcorn Pilot home screen.');
+  const sent = ((await (await page.request.get('http://127.0.0.1:18061/calls')).json()) as { path: string; query: Record<string, string> }[]).slice(before);
+  const pair = sent.find((c) => c.path === '/launch/dev' && c.query.contentId === 'pair');
+  expect(pair?.query.pp_hub).toMatch(/^http:\/\/[0-9.]+:\d+$/);
+  expect(pair?.query.pp_token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+  expect((await page.request.get('/api/channel/hello', { headers: { authorization: `Bearer ${token}`, cookie: '' } })).status()).toBe(401);
+  expect((await page.request.get('/api/channel/hello', { headers: { authorization: `Bearer ${pair?.query.pp_token}`, cookie: '' } })).status()).toBe(200);
+  await expect(page.getByText('This TV is paired.')).toBeVisible();
+
   await page.getByRole('link', { name: 'Back' }).click();
   await page.getByRole('link', { name: /Activity history/ }).click();
   const changes = page.getByLabel('Changes');
@@ -78,6 +91,20 @@ test('TV editor: rename, room, default profile, channel token', async ({ page })
   await expect(changes).toContainText('Added TV Guest room at 127.0.0.1:1 (offline)');
   await expect(changes).toContainText('Renamed TV Fake living room Roku to Living room, set the room of Living room to Living room, set the default profile of Living room to Kid placeholder');
   await expect(changes).toContainText('Made a new channel token for Living room');
+  await expect(changes).toContainText('Paired the Popcorn Pilot channel on Living room');
+});
+
+test('Guest PIN: no Settings, so no Pair the channel; the hub refuses pairing', async ({ page }) => {
+  await signIn(page, GUEST);
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  await expect(nav.getByRole('link', { name: 'Home', exact: true })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Settings', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Pair the channel/ })).toHaveCount(0);
+  const tvs = (await (await page.request.get('/api/tvs')).json()) as { tvs: { id: number; name: string }[] };
+  const living = tvs.tvs.find((t) => t.name === 'Living room');
+  expect(living).toBeTruthy();
+  const r = await page.request.post(`/api/tvs/${living?.id}/pair`, { data: {} });
+  expect(r.status()).toBe(403);
 });
 
 test('Settings: change the Guest PIN, and the old one stops working', async ({ page }) => {

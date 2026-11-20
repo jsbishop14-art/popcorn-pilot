@@ -116,6 +116,16 @@ const EXPECTED: Record<string, Answer> = {
   'GET /api/channel/album': A(false, false, false, true),
   'GET /api/channel/album/[id]': A(false, false, false, true),
   'POST /api/channel/routines/[id]/run': A(false, false, false, true),
+  // PP6 the Roku channel. Pairing a TV's channel is TV setup (Settings): Adult only, never the Guest PIN or the
+  // channel itself. The channel token, for its own TV: the profile picker (PIN checked in the handler), starting a
+  // playlist, the picker board and picking a title, the bridge screen's buttons, cover art. No PIN reaches these.
+  'POST /api/tvs/[id]/pair': ADULT_ONLY,
+  'POST /api/channel/profile': A(false, false, false, true),
+  'POST /api/channel/playlists/[id]/start': A(false, false, false, true),
+  'GET /api/channel/board': A(false, false, false, true),
+  'POST /api/channel/play': A(false, false, false, true),
+  'POST /api/channel/bridge': A(false, false, false, true),
+  'GET /api/channel/art/[id]': A(false, false, false, true),
 };
 
 const EXPECTED_PAGES: Record<string, Answer> = {

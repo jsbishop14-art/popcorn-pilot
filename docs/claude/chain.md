@@ -9,7 +9,7 @@
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
-| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
+| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Landed 2026-11-20 |
 
 ## Grants
 
@@ -41,6 +41,16 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   change in the album shows after Sync now, and that iPhone clips (iCloud's 720p copy) play on the Roku. The album as
   the TV home background and as a playlist item needs the channel (PP6).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
+- The Popcorn Pilot channel on the real Rokus (PP6, docs/install-pi.md step 11): developer mode, then
+  scripts/roku-sideload.sh from the Pi with the developer password, then Settings > the TV > Pair the channel (the
+  hub hands the channel its address and token by a Roku launch with parameters). Check: the Rooibos key tests on a
+  Roku (build/popcorn-pilot-channel-tests.zip; checked here by the compiler and by the brs interpreter only); every
+  TV screen against its mockup (checked here by code review only, no screenshots); in kid mode only arrows, OK and
+  volume act; the PIN pad; picture loads with the channel token (cover art, album photos, clips); the album clips
+  play in the Roku video player; power on opens the channel on the TV's default profile (the hub polls each paired
+  TV every 2 s and ignores TVs it woke itself in the last 30 s); the Now playing bridge between titles (8 s); the
+  mid-episode warning screen and whether Netflix, Hulu and Prime resume or restart the episode when the hub opens
+  the title again.
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
   PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.
 - Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
@@ -113,3 +123,9 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   passed (numbers in docs/sessions/PP5-status.md). Migration 005 (12 expected objects) lands with the code and is
   applied by the Pi updater. The iCloud album link waits on Josh; AdGuard Home on the Pi, router DNS, routines and
   the album with real devices wait on hardware.
+- PP6 (the Popcorn Pilot Roku channel): landed 2026-11-20 by the merge commit "[Merge] PP6 (" on main. CI run
+  44705799534 green (test job and arm64 job) on the branch, which contained current main (48fe879); the channel
+  zip is that run's artifact "popcorn-pilot-channel". Checks 1 to 3 passed and check 4 was done by code review
+  (numbers and the layout table in docs/sessions/PP6-status.md). Migration 006 (2 expected columns) lands with the
+  code and is applied by the Pi updater. Installing the channel on the Rokus (developer mode, sideload, pairing) and
+  everything it does on a real TV wait on hardware.

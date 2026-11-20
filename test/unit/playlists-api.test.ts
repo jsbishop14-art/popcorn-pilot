@@ -207,7 +207,8 @@ describe('the Roku channel API', () => {
     expect(h.body.routines).toEqual([]);
     expect(h.body.background).toEqual([]);
     expect(h.body.playlists.map((p: any) => p.name)).toEqual(['Tonight']); // "Grown ups" has only a TV-MA title
-    expect(h.body.playlists[0].covers[0]).toMatch(/^\/api\/catalog\/art\//);
+    // PP6: the channel loads cover art from its own route (the channel token cannot read the app's art route).
+    expect(h.body.playlists[0].covers[0]).toMatch(/^\/api\/channel\/art\//);
     // Control: a TV with an adult default profile sees both.
     getDb().prepare('UPDATE tvs SET default_profile_id = ? WHERE id = ?').run(grown, tv2);
     const token2 = newChannelToken(tv2) as string;
@@ -222,7 +223,7 @@ describe('the Roku channel API', () => {
     expect(n.body.nowPlaying.position).toBe('1 of 3');
     expect(n.body.upNext).toMatchObject({ name: 'Bubble Bakery', service: 'Hulu', position: '2 of 3' });
     const other = await call({ channel: newChannelToken(tv2) as string }, 'GET', '/api/channel/now-playing');
-    expect(other.body).toEqual({ nowPlaying: null, upNext: null });
+    expect(other.body).toEqual({ nowPlaying: null, upNext: null, bridge: null });
     expect((await call({ channel: 'wrong' }, 'GET', '/api/channel/now-playing')).status).toBe(401);
   });
 });

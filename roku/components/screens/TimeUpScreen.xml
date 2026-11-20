@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Time is up (mockup TimeUp): All done for today; Earn more time; Ask a grown-up. -->
+<component name="TimeUpScreen" extends="Group">
+  <interface>
+    <field id="data" type="assocarray" onChange="render" />
+    <field id="action" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="TimeUpScreen.brs" />
+  <script type="text/brightscript" uri="../lib/Ui.brs" />
+  <script type="text/brightscript" uri="../lib/KeyPolicy.brs" />
+</component>

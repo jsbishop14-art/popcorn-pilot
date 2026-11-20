@@ -1,0 +1,15 @@
+{
+  "rootDir": ".",
+  "files": [
+    "manifest",
+    "source/**/*",
+    "components/**/*",
+    { "src": "../build/roku-assets/**/*", "dest": "" }
+  ],
+  "stagingDir": "../build/roku-staging",
+  "retainStagingDir": true,
+  "createPackage": true,
+  "outFile": "../build/popcorn-pilot-channel.zip",
+  "sourceMap": false,
+  "diagnosticFilters": []
+}

@@ -81,6 +81,7 @@ export class RokuDriver implements TvDriver {
     const q = new URLSearchParams();
     if (req.contentId) q.set('contentId', req.contentId);
     if (req.mediaType) q.set('mediaType', req.mediaType);
+    for (const [k, v] of Object.entries(req.params ?? {})) q.set(k, v);
     const qs = q.toString();
     await this.call('POST', `/launch/${encodeURIComponent(req.channelId)}${qs ? `?${qs}` : ''}`);
   }

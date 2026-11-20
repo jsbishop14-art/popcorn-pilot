@@ -1,0 +1,69 @@
+' PP6 check 2 on a Roku: key handling in kid mode (Rooibos). The cases are in KeyCases.brs, shared with the brs
+' interpreter run in CI (test/unit/roku-keys.test.ts).
+import "pkg:/components/lib/KeyPolicy.brs"
+import "pkg:/components/lib/Router.brs"
+import "pkg:/source/tests/KeyCases.brs"
+
+namespace tests
+    @suite("Popcorn Pilot key handling")
+    class KeyPolicyTests extends rooibos.BaseTestSuite
+
+        @describe("ppKeyDecision")
+
+        @it("in kid mode only arrows, OK and volume act; every other key is ignored")
+        function _()
+            for each c in ppKeyCases()
+                m.assertEqual(ppKeyDecision(c.key, c.kid), c.want, "key " + c.key)
+            end for
+        end function
+
+        @it("arrows and OK act in kid mode")
+        @params("up")
+        @params("down")
+        @params("left")
+        @params("right")
+        @params("OK")
+        function _(key)
+            m.assertEqual(ppKeyDecision(key, true), "act")
+        end function
+
+        @it("Back, Options, Play, Rewind, Fast forward and Instant replay are ignored in kid mode")
+        @params("back")
+        @params("options")
+        @params("play")
+        @params("rev")
+        @params("fwd")
+        @params("replay")
+        function _(key)
+            m.assertEqual(ppKeyDecision(key, true), "ignore")
+        end function
+
+        @describe("focus, PIN pad and screens")
+
+        @it("grid focus moves")
+        function _()
+            for each c in ppGridCases()
+                m.assertEqual(ppGridMove(c.i, c.n, c.cols, c.key), c.want)
+            end for
+        end function
+
+        @it("the PIN pad")
+        function _()
+            for each c in ppPinCases()
+                r = ppPinPress(c.d, c.k)
+                m.assertEqual(r.digits, c.want)
+                m.assertEqual(r.send, c.send)
+            end for
+        end function
+
+        @it("which screen comes up, and which screens kid mode allows")
+        function _()
+            for each c in ppRouteCases()
+                m.assertEqual(ppRoute(c.s), c.want)
+            end for
+            for each c in ppScreenCases()
+                m.assertEqual(ppScreenAllowed(c.screen, c.kid), c.want, "screen " + c.screen)
+            end for
+        end function
+    end class
+end namespace

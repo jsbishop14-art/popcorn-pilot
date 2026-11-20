@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- TV home screen (mockup Main): the album photos behind (MainScene), room, clock, the current profile button,
+     Routines and Playlists. Not in kid mode. -->
+<component name="HomeScreen" extends="Group">
+  <interface>
+    <field id="data" type="assocarray" onChange="render" />
+    <field id="action" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="HomeScreen.brs" />
+  <script type="text/brightscript" uri="../lib/Ui.brs" />
+  <script type="text/brightscript" uri="../lib/KeyPolicy.brs" />
+</component>

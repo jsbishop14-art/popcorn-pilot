@@ -1,0 +1,22 @@
+{
+  "rootDir": ".",
+  "files": [
+    "manifest",
+    "source/**/*",
+    "components/**/*",
+    { "src": "tests/KeyCases.brs", "dest": "source/tests/KeyCases.brs" },
+    { "src": "tests/KeyPolicy.spec.bs", "dest": "source/tests/KeyPolicy.spec.bs" },
+    { "src": "../build/roku-assets/**/*", "dest": "" }
+  ],
+  "stagingDir": "../build/roku-tests-staging",
+  "retainStagingDir": true,
+  "createPackage": true,
+  "outFile": "../build/popcorn-pilot-channel-tests.zip",
+  "sourceMap": false,
+  "plugins": ["rooibos-roku"],
+  "rooibos": {
+    "codeCoverage": false,
+    "failFast": false,
+    "showOnlyFailures": false
+  }
+}

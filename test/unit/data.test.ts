@@ -31,6 +31,18 @@ describe('migrations', () => {
     expect(verify(db, MIG).missing).toContain('table activity (001_init.sql)');
   });
 
+  it('reads back an added column, and reports one that is missing (control)', () => {
+    const db = new Database(':memory:');
+    migrate(db, MIG);
+    expect(listMigrations(MIG).find((m) => m.file === '006_channel.sql')?.expected).toEqual([
+      { type: 'column', name: 'playback.bridge_until' },
+      { type: 'column', name: 'playback.warn_resume_at' },
+    ]);
+    expect(verify(db, MIG).missing).toEqual([]);
+    db.exec('ALTER TABLE playback DROP COLUMN warn_resume_at');
+    expect(verify(db, MIG).missing).toEqual(['column playback.warn_resume_at (006_channel.sql)']);
+  });
+
   it('generated types are up to date', () => {
     const out = execFileSync('node', ['scripts/gen-types.mjs', '--check'], { encoding: 'utf8' });
     expect(out).toContain('up to date');

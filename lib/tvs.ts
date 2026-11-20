@@ -154,3 +154,13 @@ export function newChannelToken(id: number): string | null {
   getDb().prepare('UPDATE tvs SET channel_token_hash = ? WHERE id = ?').run(channelTokenHash(token), id);
   return token;
 }
+
+/** The stored token hash of a TV's channel (to put it back when pairing could not reach the TV). */
+export function channelTokenHashOf(id: number): string | null {
+  const r = getDb().prepare('SELECT channel_token_hash FROM tvs WHERE id = ?').get(id) as { channel_token_hash: string | null } | undefined;
+  return r?.channel_token_hash ?? null;
+}
+
+export function restoreChannelTokenHash(id: number, hash: string | null): void {
+  getDb().prepare('UPDATE tvs SET channel_token_hash = ? WHERE id = ?').run(hash, id);
+}
