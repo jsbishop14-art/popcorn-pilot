@@ -9,10 +9,39 @@ export interface ActivityRow {
   summary: string;
 }
 
+export interface AlertsRow {
+  id: number;
+  at: number;
+  kind: string;
+  profile_id: number | null;
+  tv_id: number | null;
+  title: string;
+  detail: string;
+}
+
 export interface CatalogCacheRow {
   key: string;
   body: string;
   fetched_at: number;
+}
+
+export interface KidRequestsRow {
+  id: number;
+  profile_id: number;
+  tv_id: number | null;
+  kind: string;
+  minutes: number | null;
+  title_key: string | null;
+  title_name: string | null;
+  service: string | null;
+  rating: string | null;
+  task_id: number | null;
+  status: string;
+  created_at: number;
+  decided_at: number | null;
+  decided_by: string | null;
+  decided_device: string | null;
+  outcome: string | null;
 }
 
 export interface KidSafeguardsRow {
@@ -67,6 +96,10 @@ export interface PlaybackRow {
   started_at: number;
   ended_at: number | null;
   message: string | null;
+  kid_ep_seen: number;
+  kid_warned_at: number | null;
+  kid_wind_down_at: number | null;
+  kid_volume_at: number | null;
 }
 
 export interface PlaylistItemsRow {
@@ -159,6 +192,31 @@ export interface SettingsRow {
   value: string;
 }
 
+export interface TasksRow {
+  id: number;
+  name: string;
+  minutes: number;
+  picture: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface TimeGrantsRow {
+  id: number;
+  profile_id: number;
+  day: string;
+  week: string;
+  source: string;
+  minutes: number;
+  asked: number;
+  task_id: number | null;
+  request_id: number | null;
+  at: number;
+  by_pin: string;
+  device: string;
+}
+
 export interface TitleTagsRow {
   title_key: string;
   name: string;
@@ -168,6 +226,16 @@ export interface TitleTagsRow {
   blocked: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface TvStateRow {
+  tv_id: number;
+  profile_id: number | null;
+  set_at: number;
+  set_by: string;
+  expected_app: string | null;
+  expected_at: number | null;
+  volume_steps: number;
 }
 
 export interface TvsRow {
@@ -187,4 +255,22 @@ export interface TvsRow {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+}
+
+export interface WatchLogRow {
+  id: number;
+  profile_id: number;
+  tv_id: number;
+  playback_id: number;
+  queue_item_id: number;
+  title_key: string | null;
+  name: string;
+  service: string | null;
+  title_kind: string | null;
+  episode_minutes: number | null;
+  day: string;
+  started_at: number;
+  ended_at: number | null;
+  base_ms: number;
+  played_ms: number;
 }

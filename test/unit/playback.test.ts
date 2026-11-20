@@ -27,6 +27,7 @@ import {
   type Actor,
 } from '@/lib/playback';
 import { getTv } from '@/lib/tvs';
+import { updateRules } from '@/lib/safeguards';
 import { startFakeRoku, type FakeRoku } from '../fake-roku/server';
 
 const ADULT: Actor = { pinType: 'adult', device: 'Computer' };
@@ -81,6 +82,10 @@ beforeAll(async () => {
   roku1 = await startFakeRoku({ name: 'Living room' });
   roku2 = await startFakeRoku({ name: 'Guest room' });
   kid = createProfile({ name: 'Kid one', color: '#7FC8A9', type: 'kid' }).id;
+  // PP4: these are the PP3 engine checks, so the kid may watch at any hour and has 12 hours a day (the time rules
+  // are checked in safeguards.test).
+  const allDay = Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, 720]));
+  updateRules(kid, { hoursStart: '00:00', hoursEnd: '24:00', dailyLimits: allDay });
   grown = createProfile({ name: 'Family', color: '#FFC94A', type: 'adult' }).id;
   const ins = getDb().prepare('INSERT INTO tvs (name, room, address, port, online) VALUES (?, ?, ?, ?, 1)');
   tv1 = Number(ins.run('Living room', 'Living room', '127.0.0.1', roku1.port).lastInsertRowid);

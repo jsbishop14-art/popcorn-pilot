@@ -10,6 +10,7 @@ import { getDb } from '@/lib/db';
 import { listActivity } from '@/lib/activity';
 import { newChannelToken } from '@/lib/tvs';
 import { setClockForTests } from '@/lib/playback';
+import { updateRules } from '@/lib/safeguards';
 import { startFakeRoku, type FakeRoku } from '../fake-roku/server';
 
 type Handler = (req: Request, ctx: { params: Record<string, string> }) => Promise<Response>;
@@ -48,6 +49,8 @@ beforeAll(async () => {
     cookies[role] = `${SESSION_COOKIE}=${encodeURIComponent(r.token)}`;
   }
   kid = createProfile({ name: 'Kid one', color: '#7FC8A9', type: 'kid' }).id;
+  // PP4: this file runs on the real clock, so the kid may watch all day (viewing hours are tested in safeguards.test).
+  updateRules(kid, { hoursStart: '00:00', hoursEnd: '24:00', dailyLimits: Object.fromEntries(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((d) => [d, 720])) });
   grown = createProfile({ name: 'Family', color: '#FFC94A', type: 'adult' }).id;
   roku = await startFakeRoku({ name: 'Living room' });
   const ins = getDb().prepare('INSERT INTO tvs (name, address, port, online, default_profile_id) VALUES (?, ?, ?, 1, ?)');
