@@ -1,11 +1,13 @@
 'use client';
-// The Dashboard (mockup PhoneDashboard): requests first (PP4), then each TV with whether it is online, what it is
+// The Dashboard (mockup PhoneDashboard): requests first (PP4, Adult PIN), then each TV with whether it is online,
+// kid mode and that kid's time left (the bar fades green to yellow to red), the profile on the TV, what it is
 // playing (title, service, playlist, place in the playlist), progress, and its controls. Refreshes every 10 seconds.
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import type { TvView } from '@/lib/playback';
 import { PauseIcon, PlayIcon, PowerIcon, QueueIcon, SendIcon, SkipIcon } from './icons';
+import { TimeBar } from './KidUi';
 
 export function nowLine(v: TvView): { title: string; sub: string } | null {
   const pb = v.playback;
@@ -43,7 +45,50 @@ export function usePlayback(initial: TvView[] | null) {
   return { tvs, setTvs, load };
 }
 
-export default function Dashboard({ initial, isAdult }: { initial: TvView[]; isAdult: boolean }) {
+export interface DashProfile {
+  id: number;
+  name: string;
+  kid: boolean;
+}
+
+/** Which profile a TV is on. The Guest PIN may only pick kid profiles (the hub refuses the rest). */
+function ProfilePicker({ v, profiles, isAdult, onPick }: { v: TvView; profiles: DashProfile[]; isAdult: boolean; onPick: (id: number | null) => void }) {
+  const choices = profiles.filter((p) => isAdult || p.kid);
+  const current = v.profile?.id ?? null;
+  const known = current === null || choices.some((p) => p.id === current);
+  return (
+    <label className="row">
+      <span className="s">Profile on this TV</span>
+      <select
+        className="field"
+        style={{ width: 'auto', minWidth: 160 }}
+        aria-label={`Profile on ${v.tv.name}`}
+        value={current === null ? (isAdult ? '' : 'none') : String(current)}
+        onChange={(e) => onPick(e.target.value === '' ? null : Number(e.target.value))}
+      >
+        {isAdult && <option value="">No profile</option>}
+        {!isAdult && current === null && (
+          <option value="none" disabled>
+            Pick a kid profile
+          </option>
+        )}
+        {!known && v.profile && (
+          <option value={String(v.profile.id)} disabled>
+            {v.profile.name}
+          </option>
+        )}
+        {choices.map((p) => (
+          <option key={p.id} value={String(p.id)}>
+            {p.name}
+            {p.kid ? ' (Kid)' : ''}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+export default function Dashboard({ initial, isAdult, profiles = [], requests }: { initial: TvView[]; isAdult: boolean; profiles?: DashProfile[]; requests?: React.ReactNode }) {
   const { tvs, setTvs, load } = usePlayback(initial);
   const [checking, setChecking] = useState(true);
   const [msg, setMsg] = useState<{ tv: number; ok: boolean; text: string } | null>(null);
@@ -72,12 +117,7 @@ export default function Dashboard({ initial, isAdult }: { initial: TvView[]; isA
   const list = tvs ?? [];
   return (
     <>
-      <section className="card" aria-label="Requests">
-        <div className="row">
-          <h2 className="h2">Requests</h2>
-        </div>
-        <span className="s">Requests for more time or a new title come from the kid screens on the TV (PP4).</span>
-      </section>
+      {requests}
       {!list.length && (
         <div className="card">
           <span className="t">No TVs yet</span>
@@ -96,7 +136,7 @@ export default function Dashboard({ initial, isAdult }: { initial: TvView[]; isA
                 <h2 className="h2">{v.tv.name}</h2>
               </div>
               <div className="chips">
-                {pb?.kid && <span className="badge ok">Kid mode</span>}
+                {v.profile?.kid && <span className="badge ok">Kid mode</span>}
                 <span className={`badge ${v.tv.online ? 'ok' : 'off'}`}>{checking ? 'Checking…' : v.tv.online ? 'Online' : 'Offline'}</span>
               </div>
             </div>
@@ -146,6 +186,16 @@ export default function Dashboard({ initial, isAdult }: { initial: TvView[]; isA
                 )}
               </>
             )}
+            {v.kidTime && (
+              <div className="col" style={{ gap: 6 }} aria-label={`${v.tv.name} time left`}>
+                <div className="row">
+                  <span className="s">{v.kidTime.name} · time left today</span>
+                  <span className="t">{v.kidTime.inHours ? `${v.kidTime.leftMin} min` : 'Outside viewing hours'}</span>
+                </div>
+                <TimeBar percent={v.kidTime.percent} color={v.kidTime.color} label={`${v.kidTime.name} time left today`} />
+              </div>
+            )}
+            <ProfilePicker v={v} profiles={profiles} isAdult={isAdult} onPick={(id) => void act(v.tv.id, 'profile', { profileId: id })} />
             <div className="btns">
               <Link href={`/tvs/${v.tv.id}/queue`} className="btn">
                 <QueueIcon size={16} /> Queue

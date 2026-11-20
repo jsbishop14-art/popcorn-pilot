@@ -1,10 +1,11 @@
 'use client';
-// Profile editor (mockup ProfileEditor): name, Adult or Kid, color. The kid safeguard editor arrives in PP4; the
-// safeguards are already stored with their defaults.
+// Profile editor (mockup ProfileEditor): name, Adult or Kid, color, and for a kid profile every safeguard (PP4).
+// A new kid profile starts with the default safeguards; they are changed after it is saved.
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import { TrashIcon } from './icons';
+import SafeguardsEditor, { type Rules } from './SafeguardsEditor';
 
 const COLORS = ['#FFC94A', '#FF8A65', '#7FC8A9', '#8FB3FF', '#C9A7F5'];
 
@@ -23,13 +24,19 @@ export default function ProfileEditor({ profile }: { profile: EditableProfile })
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const rules = useRef<Rules | null>(null);
+  const onRules = useCallback((r: Rules | null) => {
+    rules.current = r;
+  }, []);
 
   async function save() {
     setBusy(true);
     setError(null);
     try {
-      if (profile.id) await api(`/api/profiles/${profile.id}`, { method: 'PATCH', body: { name, type, color } });
-      else await api('/api/profiles', { method: 'POST', body: { name, type, color } });
+      if (profile.id) {
+        await api(`/api/profiles/${profile.id}`, { method: 'PATCH', body: { name, type, color } });
+        if (type === 'kid' && profile.type === 'kid' && rules.current) await api(`/api/profiles/${profile.id}/safeguards`, { method: 'PATCH', body: { ...rules.current } });
+      } else await api('/api/profiles', { method: 'POST', body: { name, type, color } });
       router.push('/profiles');
       router.refresh();
     } catch (e) {
@@ -77,10 +84,11 @@ export default function ProfileEditor({ profile }: { profile: EditableProfile })
           </div>
         </div>
       </div>
-      {type === 'kid' && (
+      {type === 'kid' && profile.id && profile.type === 'kid' && <SafeguardsEditor profileId={profile.id} onChange={onRules} />}
+      {type === 'kid' && !(profile.id && profile.type === 'kid') && (
         <div className="note" role="note">
           <span className="t">Kid safeguards</span>
-          <span className="s">Allowed ratings TV-Y, TV-Y7, TV-G and G; 60 min on weekdays; viewing between 7:00 AM and 7:30 PM; snap back on. These defaults are saved now; changing them arrives in PP4.</span>
+          <span className="s">Starts with allowed ratings TV-Y, TV-Y7, TV-G and G; 60 min on weekdays; viewing between 7:00 AM and 7:30 PM; snap back on. Save, then open the profile again to change them.</span>
         </div>
       )}
       {error && (

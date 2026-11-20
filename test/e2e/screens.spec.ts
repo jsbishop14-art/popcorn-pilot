@@ -30,7 +30,9 @@ test.describe('Adult PIN', () => {
     await page.getByLabel('Name').fill(name);
     await page.getByRole('radio', { name: 'Kid' }).click();
     await page.getByRole('radio', { name: 'Color #7FC8A9' }).click();
-    await expect(page.getByText('These defaults are saved now; changing them arrives in PP4.')).toBeVisible();
+    // PP4: the safeguards are changed after saving (inverted from PP1's "changing them arrives in PP4").
+    await expect(page.getByText('Save, then open the profile again to change them.')).toBeVisible();
+    await expect(page.getByText('arrives in PP4')).toHaveCount(0);
     await page.getByRole('button', { name: 'Save' }).click();
     await expect(page.getByRole('heading', { name: 'Profiles' })).toBeVisible();
     const card = page.getByRole('link', { name: `Edit ${name}` });
