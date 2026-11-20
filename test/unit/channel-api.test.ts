@@ -11,7 +11,8 @@ import { lockState, setUpPins, signInWithPin, SESSION_COOKIE } from '@/lib/auth'
 import { createProfile } from '@/lib/profiles';
 import { getDb } from '@/lib/db';
 import { listActivity } from '@/lib/activity';
-import { newChannelToken } from '@/lib/tvs';
+import { getTv, newChannelToken } from '@/lib/tvs';
+import { driverFor, resetHubWakesForTests } from '@/lib/devices';
 import { EVERYONE } from '@/lib/catalog';
 import { appendItem, createPlaylist, titleFields } from '@/lib/playlists';
 import { BRIDGE_MS, WARNING_SCREEN_MS, control, setClockForTests, tick, type Actor } from '@/lib/playback';
@@ -395,7 +396,7 @@ describe('the time warning (handoff 9.5)', () => {
 describe('the channel opens when a TV is turned on (handoff 9.4)', () => {
   it('a paired TV turned on goes to its default profile and opens Popcorn Pilot; an unpaired one is left alone', async () => {
     resetPowerOnForTests();
-    await call('adult', 'POST', `/api/channel/profile`, {}).catch(() => undefined);
+    resetHubWakesForTests();
     getDb().prepare('UPDATE tvs SET default_profile_id = ? WHERE id = ?').run(kid, tv2);
     setTvProfile(tv2, grown, 'adult', T);
     getDb().prepare('UPDATE tvs SET channel_token_hash = NULL WHERE id = ?').run(tv);
@@ -412,5 +413,19 @@ describe('the channel opens when a TV is turned on (handoff 9.4)', () => {
     expect(kidModeProfile(tv2)).toBe(kid);
     // Already on: nothing more.
     expect(await powerOnPass()).toEqual([]);
+  });
+
+  it('a TV the hub woke itself (a trailer, a playlist, a routine) is left alone', async () => {
+    resetPowerOnForTests();
+    resetHubWakesForTests();
+    setTvProfile(tv2, grown, 'adult', T);
+    roku2.state.power = 'standby';
+    expect(await powerOnPass()).toEqual([]);
+    // The hub opens YouTube for a trailer, which turns the TV on.
+    await driverFor(getTv(tv2)!).launch({ channelId: '837', contentId: 'abc' });
+    const before = roku2.calls.length;
+    expect(await powerOnPass()).toEqual([]);
+    expect(launches({ ...roku2, calls: since(roku2.calls, before) })).toEqual([]);
+    expect(kidModeProfile(tv2)).toBeNull();
   });
 });

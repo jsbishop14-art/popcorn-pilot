@@ -23,6 +23,11 @@ type Call = { method: string; path: string; query: Record<string, string> };
 async function calls(page: Page, tv: 1 | 2): Promise<Call[]> {
   return (await page.request.get(`http://127.0.0.1:18061/${tv === 1 ? 'calls' : 'calls2'}`)).json();
 }
+/**
+ * What the hub told a TV to do (keys, launches), without its status reads: since PP6 the hub also asks each paired TV
+ * whether it is on (GET /query/device-info, the power-on watcher), at any moment.
+ */
+const commandsOf = (cs: Call[]) => cs.filter((c) => c.method === 'POST').map((c) => c.path);
 const launchesOf = (cs: Call[]) =>
   cs.filter((c) => c.method === 'POST' && (c.path.startsWith('/launch/') || c.path === '/search/browse')).map((c) => (c.path === '/search/browse' ? `search ${c.query.keyword}` : `${c.path} ${c.query.contentId ?? ''}`));
 
@@ -186,7 +191,7 @@ test.describe('Adult PIN', () => {
     await expect(living.getByRole('status').last()).toHaveText(`Sent ${name} from Living room to Bedroom`);
     await expect(living).toContainText('Paused');
     await expect(living).toContainText('Sent to Bedroom');
-    expect((await calls(page, 1)).slice(keys1).map((c) => c.path)).toEqual(['/keypress/Play']);
+    expect(commandsOf((await calls(page, 1)).slice(keys1))).toEqual(['/keypress/Play']);
     expect(launchesOf((await calls(page, 2)).slice(sent2))).toEqual(['/launch/12 81000001']);
     await expect(bedroom).toContainText('Rocket Pals');
     await expect(bedroom).toContainText('Kid mode'); // the Living room profile went with it
@@ -258,7 +263,7 @@ test.describe('Adult PIN', () => {
     await expect(page.getByRole('button', { name: 'Send to Bedroom' })).toBeVisible();
     await page.getByRole('button', { name: 'Turn off TV' }).click();
     await expect(page.getByRole('status')).toHaveText('Pressed Turn off on Living room (remote) and stopped what it was playing');
-    expect((await calls(page, 1)).slice(before).map((c) => c.path)).toEqual([
+    expect(commandsOf((await calls(page, 1)).slice(before))).toEqual([
       '/keypress/Up',
       '/keypress/Select',
       '/keypress/VolumeUp',

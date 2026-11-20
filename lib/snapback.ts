@@ -6,7 +6,7 @@
 import { getDb } from './db';
 import { now } from './clock';
 import { getTv } from './tvs';
-import { driverFor } from './devices';
+import { driverFor, lastHubWake } from './devices';
 import { logActivity } from './activity';
 import { addAlert, kidRules } from './safeguards';
 import { channelAppId, kidModeProfile } from './tvstate';
@@ -134,6 +134,9 @@ export async function snapBackPass(): Promise<SnapBack[]> {
 
 const power = new Map<number, 'on' | 'standby'>();
 
+/** A TV that comes on within this long after the hub opened something on it or turned it on was woken by the hub. */
+export const HUB_WAKE_GRACE_MS = 30_000;
+
 /** Tests only: forget what the power-on watcher knew about each TV. */
 export function resetPowerOnForTests(): void {
   power.clear();
@@ -161,6 +164,9 @@ export async function powerOnPass(): Promise<string[]> {
     power.set(id, mode);
     if (was !== 'standby' || mode !== 'on') continue;
     if (kidModeProfile(id) !== null || routineRunning(id)) continue;
+    // The hub woke it itself (a trailer, a playlist, a routine): not a person turning it on.
+    const woke = lastHubWake(tv);
+    if (woke !== null && Date.now() - woke < HUB_WAKE_GRACE_MS) continue;
     try {
       const words = await openAtPowerOn(id);
       if (words) out.push(words);

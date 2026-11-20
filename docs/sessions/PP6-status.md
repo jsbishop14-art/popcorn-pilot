@@ -113,10 +113,44 @@ None (spec section 5). Production is the Pi; never touched.
 - D-18: test/unit/safeguards.test.ts (PP4, snap back with the real-time watcher) read the alert the moment the fake
   Roku saw the relaunch; the hub writes the alert just after. It failed once in the full suite under load (passes
   alone 3 of 3). The test now waits for the alert (up to 2 s). Wrong test, proven by the order in lib/snapback.ts.
+- D-19: The power-on watcher ignores a TV the hub itself woke in the last 30 seconds (a trailer, a playlist or a
+  routine opens an app, which turns a Roku on). Every hub launch and Turn on is noted by the device layer
+  (lib/devices/index.ts). Without this, a trailer sent to a TV that was off would have been replaced by the
+  Popcorn Pilot home screen. Unit test with a control.
+- D-20: Sideloading: scripts/roku-sideload.sh runs on the Pi (it has the code and the build tools): it builds the
+  zip from the code there, refuses any address outside the home network, takes the Roku developer password from
+  ROKU_DEV_PASSWORD for that run only (passed to curl on standard input, never written), and posts the zip to the
+  Roku's developer installer. Install guide step 11. Only the dry run and the refusals are tested here (no Roku).
+- D-21: The smoke check (scripts/smoke.mjs) also checks that the channel's home screen and picker board refuse a
+  call without a channel token.
 
 ## Questions
 
 (none)
+
+## Layout review against the mockups (check 4)
+
+Screenshots need a Roku, so the layout was checked by reading each screen's code against its mockup file. Every
+screen's code is written in the mockup's own pixels (1280x720) and scaled 1.5x to 1920x1080 in one helper
+(roku/components/lib/Ui.brs, ppS), so the numbers below can be compared directly. The screen harness
+(test/unit/roku-screens.test.ts) confirms each screen draws and that its buttons do what the mockup says.
+
+| Screen (mockup) | Matches the mockup | Differs, and why |
+| --- | --- | --- |
+| Home (Main) | Ground #0F1B33; album photos full screen behind (placeholder #3A4A6B with "Family photo / Slideshow from your iCloud shared album" when the album is empty); fade 490 high to the ground; header at 32/56: logo 52 (radius 16, accent) with "Popcorn Pilot" Fredoka 28 and the room Nunito 15 #D6DDEA; clock Fredoka 30; profile button 52 high, avatar 38, name Nunito 18; "Routines" and "Playlists" Fredoka 22 #E4E9F2; routine pills 56 high, radius 28, Nunito 19; 4 playlist cards across (gap 20, radius 22), cover strip 118 with up to 3 covers and the count badge, name Fredoka 22, meta Nunito 15 #4A5878; focused card: accent border, 1.04 bigger; dots and "Arrows to move · OK to start" at the bottom | A last card "Pick a show" opens the adult picker board (D-11). More than 4 cards scroll |
+| Kid home (KidHome) | Ground #16264A; photos behind (placeholder #4A6B8F "Family photo slideshow"); fade 430; badge 68 with white ring and "Hi <name>!" Fredoka 44; time pill (72 high, clock in a #FFF3C4 circle, "35 min left" Fredoka 28, bar 200x16 fading green to yellow to red from the hub's color); three buttons 190 high, radius 34, yellow / blue / white, Fredoka 28, Keep watching with the playlist name Nunito 18; focused: yellow ring, 1.05 bigger; "Not me" ghost button 52 high and the arrows/OK hint at the bottom | Icons drawn by the build (the mockup's are SVG placeholders). Keep watching says "Pick a show first" when the kid has no playlist yet (D-4) |
+| Profile picker (ProfilePicker) | Blobs; "Who's watching?" Fredoka 52; circles 190 (gap 56) with the initial Fredoka 88 and the name Fredoka 30; lock badge 48 on the ones that ask for the PIN; Guest as a #C5CEDF circle with "+"; focused: yellow ring 7, 1.08 bigger, glow; hint Nunito 18 | Back button (D-12); in kid mode the hint says leaving kid mode asks for the PIN and every other profile has the lock (D-2); more than 5 scroll |
+| PIN (TvPin) | Left column 420 wide: lock, "Grown-up PIN" Fredoka 46, the reason Nunito 22 #D6DDEA, 4 boxes 70x84 (radius 18; white with a navy dot when typed, #1E3260 when not); 90 gap; pad 3 across, 380 wide, keys 84 high, radius 24, Fredoka 36, 1 to 9, Clear, 0, OK; focused key: yellow border 6 | The reason line says what this PIN is for ("To open Family", "To leave kid mode", "To say yes on this TV"); a wrong PIN shows its message in coral under the boxes; Back button (D-12) |
+| Picker board (KidPicker) | Padding 30/64; badge 68 and "Pick a show!" Fredoka 40; time pill with a 210 bar; 3 across, 2 down, gap 24; tiles radius 28, border 7, shadow 10, cover over the tile's color, title band white Fredoka 24; focused: accent border, 1.05 bigger; footer "Earn more time" 64 high, radius 32, Fredoka 26, and the arrows/OK hint | Back button in the footer (D-12). Adult profiles: 6 across, 2 down, title 18, no time pill or Earn button (D-3). With the stub catalog the covers show the tile color, a TV icon and the platform (D-16) |
+| Earn time (EarnTime) | Padding 36/64; star and "Do a job, earn more TV!" Fredoka 42; 4 bonus stars (this week's bonus of the cap); 4 cards across, gap 24, radius 32, border 7, picture in a 110 #FFF3C4 circle, name Fredoka 28, "+15 min" Fredoka 26 #C2410C, chip Nunito 18: "Waiting for a grown-up" #E4E9F2, "I did it!" #FFC94A, "Done! +5 min" #7FC8A9; focused: yellow border, 1.05 bigger; Back ghost button 60 high and the hint | Task pictures are drawn icons (a Roku font cannot draw the app's emoji, D-15); more than 4 tasks scroll |
+| Time warning (TimeWarning) | Card top 40, right 40, 470 wide, radius 30: clock in an 86 #FDECEA circle, "5 minutes left!" Fredoka 32, "This is the last episode for today." Nunito 19 #2B3D63, bar 300x14 | Behind the card: "<title> comes back in a moment" on #2B3D63, because a channel cannot draw over Netflix, Hulu or Prime (handoff 9.5); the same card is on the Now playing bridge when the warning is due there |
+| Time up (TimeUp) | Ground #0F1B33, blobs; 170 circle #1E3260 with the moon; "All done for today!" Fredoka 60; Nunito 26 line; "Earn more time" (focused) and "Ask a grown-up" kid buttons | The line is "See you tomorrow, <name>." (or the viewing hours), not "TV turns off in 10 seconds", because the hub turns the TV off at once (D-13). "Ask a grown-up" only when the kid may ask |
+| Request sent (RequestSent) | 170 white circle with the hand; "Asked a grown-up!" Fredoka 56; chip #1E3260 radius 34, Fredoka 32 ("+20 minutes", or the job's name); 3 dots 26 (yellow, coral, mint) gap 16; "A grown-up can say yes on their phone, or with the PIN here." Nunito 22; Back (focused) and Grown-up PIN | None |
+| Now playing bridge (NowPlaying) | Padding 56/80; cover 360x540, radius 30, shadow 18; 70 gap; "UP NEXT · 3 OF 6" Nunito 22 yellow; title Fredoka 72; meta Nunito 26 #D6DDEA; countdown ring 96 (border 8, yellow) with the number Fredoka 40 and "Starting in 5 seconds" Nunito 24; "Play now" (focused) and "Skip" ghost; "Saturday Cartoons · Living room" hint | The meta line is the service and the title's playlist setting ("Prime Video · 1 episode"): the hub does not know the next episode's season and number. Letter spacing is not available on a Roku label. The countdown is the hub's (8 s, D-5) |
+
+All screens: the blur shadows of the mockup are drawn as solid offset or see-through boxes; Fredoka 600/700 and
+Nunito 700/800 are bundled. Pairing and the Family Album player have no mockup (PP6 additions) and use the same
+style.
 
 ## Progress
 

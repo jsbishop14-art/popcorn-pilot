@@ -11,6 +11,7 @@ on:
       - pp3-playback
       - pp4-kid-safeguards
       - pp5-routines-album-adblock
+      - pp6-roku-channel
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -43,9 +44,19 @@ jobs:
       - name: Migrations apply and every expected object reads back
         run: PP_DATA_DIR=$RUNNER_TEMP/migrate node scripts/migrate.mjs
       - name: Shellcheck
-        run: shellcheck --version && shellcheck --severity=style scripts/install-pi.sh scripts/update.sh
+        run: shellcheck --version && shellcheck --severity=style scripts/install-pi.sh scripts/update.sh scripts/roku-sideload.sh
       - name: Install script dry run
         run: bash scripts/install-pi.sh --dry-run
+      # PP6: the Roku channel, compiled by the BrighterScript compiler (and again with its Rooibos tests), packaged as
+      # the sideload zip and read back (manifest, components, source, images, fonts). Exit 1 on any compile error.
+      - name: Roku channel build (bsc) and zip check
+        run: node scripts/roku-build.mjs
+      - name: Keep the channel zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: popcorn-pilot-channel
+          path: build/popcorn-pilot-channel.zip
+          retention-days: 30
       - name: Unit tests
         run: npx vitest run
       - name: Build
@@ -78,6 +89,9 @@ jobs:
         run: uname -m && node -p process.arch
       - name: Shellcheck available
         run: command -v shellcheck || (sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck)
+      # PP6: the Pi builds the channel zip itself before sideloading (scripts/roku-sideload.sh).
+      - name: Roku channel build (bsc) and zip check
+        run: node scripts/roku-build.mjs
       - name: Unit tests
         run: npx vitest run
       - name: Build
