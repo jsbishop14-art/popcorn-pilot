@@ -67,6 +67,10 @@ function removeFile(file: string) {
 
 // ---------------------------------------------------------------------------------------------- sync
 
+export function plural(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? '' : 's'}`;
+}
+
 export interface SyncResult {
   ok: boolean;
   added: number;
@@ -107,7 +111,7 @@ async function doSync(by: { pinType: 'adult' | 'hub'; device: string }): Promise
       .prepare('UPDATE album_syncs SET ended_at = ?, result = ?, added = ?, updated = ?, removed = ?, skipped = ?, photos = ?, clips = ?, message = ? WHERE id = ?')
       .run(now(), r.ok ? 'ok' : 'error', r.added, r.updated, r.removed, r.skipped, r.photos, r.clips, r.message, syncId);
     const what = r.ok
-      ? `Synced the Family Album: ${r.added} added, ${r.updated} updated, ${r.removed} removed (${r.photos} photos, ${r.clips} clips)`
+      ? `Synced the Family Album: ${r.added} added, ${r.updated} updated, ${r.removed} removed (${plural(r.photos, 'photo')}, ${plural(r.clips, 'clip')})`
       : `The Family Album sync failed: ${r.message}`;
     // Only syncs that changed something or failed go into Activity history (the schedule runs every few hours).
     if (!r.ok || r.added || r.updated || r.removed || by.pinType === 'adult') logActivity({ pinType: by.pinType, device: by.device, action: r.ok ? 'album.sync' : 'album.sync_failed', summary: what });
