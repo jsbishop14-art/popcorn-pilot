@@ -57,6 +57,31 @@ export const API_RULES = {
   'POST /api/catalog/titles/[id]/calm': ADULT,
   'POST /api/catalog/titles/[id]/block': ADULT,
   'GET /api/catalog/calm': ADULT,
+
+  // Playlists and playback (PP3). Guest is "kid mode and playlists": it sees and starts playlists for a kid profile
+  // (checked in the handler), uses the quick playlist, and pauses, resumes, skips or stops what a TV plays. Making,
+  // editing, saving and deleting playlists, editing a live queue, Send to and the remote are Adult only.
+  'GET /api/playlists': PEOPLE,
+  'POST /api/playlists': ADULT,
+  'GET /api/playlists/[id]': PEOPLE,
+  'PATCH /api/playlists/[id]': ADULT,
+  'DELETE /api/playlists/[id]': ADULT,
+  'POST /api/playlists/[id]/items': ADULT,
+  'POST /api/playlists/[id]/start': PEOPLE,
+  'GET /api/quick': PEOPLE,
+  'DELETE /api/quick': PEOPLE,
+  'POST /api/quick/items': PEOPLE,
+  'POST /api/quick/start': PEOPLE,
+  'POST /api/quick/save': ADULT,
+  'GET /api/playback': PEOPLE,
+  'POST /api/tvs/[id]/playback': PEOPLE,
+  'POST /api/tvs/[id]/queue': ADULT,
+  'POST /api/tvs/[id]/send': ADULT,
+  'POST /api/tvs/[id]/remote': ADULT,
+
+  // The Roku channel (PP6) for its own TV: home screen data, and now playing with up next.
+  'GET /api/channel/home': CHANNEL,
+  'GET /api/channel/now-playing': CHANNEL,
 } as const satisfies Record<string, Rule>;
 
 export type ApiRoute = keyof typeof API_RULES;
@@ -71,6 +96,12 @@ export const PAGE_RULES = {
   '/browse/suggestions': PEOPLE,
   '/browse/[id]': PEOPLE,
   '/playlists': PEOPLE,
+  '/playlists/new': ADULT,
+  '/playlists/quick': PEOPLE,
+  '/playlists/[id]': PEOPLE,
+  '/playlists/[id]/edit': ADULT,
+  '/tvs/[id]/queue': PEOPLE,
+  '/tvs/[id]/remote': ADULT,
   '/profiles': ADULT,
   '/profiles/new': ADULT,
   '/profiles/[id]': ADULT,

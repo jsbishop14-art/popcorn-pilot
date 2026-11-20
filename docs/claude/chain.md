@@ -6,7 +6,7 @@
 | --- | --- | --- | --- | --- | --- |
 | 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
-| 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Queued |
+| 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Queued |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
@@ -34,6 +34,10 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
   YouTube video id).
 - Confirm the time warning behavior over streaming apps (handoff 9.5).
+- Playlists on the real Rokus (PP3, docs/install-pi.md step 6): each of Netflix, Prime Video and Hulu opens its title
+  from a playlist (the launch log records direct link or search launch per title); Pause and Resume (the Roku
+  play/pause key) pause the streaming app; Stop (Home key) leaves it; Send to starts the title on the other TV; how
+  far the hub's estimated episode ends are from the real ones.
 
 ## Sources
 
@@ -78,3 +82,7 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   Checks 1 to 5 passed (numbers in docs/sessions/PP2-status.md). Migration 002 (10 expected objects) lands with the
   code and is applied by the Pi updater. Until Josh enters a TMDB key (Waits on Josh), Browse shows the sample
   catalog.
+- PP3 (playlists, playback engine, queue, remote and dashboard): landed 2026-11-20 by the merge commit "[Merge] PP3
+  (" on main. CI run 44683080963 green (test job and arm64 job) on the branch, which contained current main
+  (1504db0). Checks 1 to 6 passed (numbers in docs/sessions/PP3-status.md). Migration 003 (11 expected objects)
+  lands with the code and is applied by the Pi updater. Playlists on the real Rokus wait on hardware.
