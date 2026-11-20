@@ -116,8 +116,13 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   on hardware from docs/next-builds, plus this build's hardware items), CI windows and macos jobs. Browser 70/70.
   Unit 590/590 (22 files). hub-check.mjs against a local build started as a Windows hub: all passed; control (the
   same hub checked as a Mac): 2 failed, exit 1.
+- Local checks (branch contains origin/main 8b5b5fe), caches removed (.next, node_modules/.cache, build,
+  tsconfig.tsbuildinfo), each exit code read on its own: lint 0; type-check 0; generated types current 0; migrate 0
+  (58 expected objects, 0 missing); roku build 0; shellcheck 0 (Pi scripts and the new Mac scripts); Pi install dry
+  run 0; Mac install dry run 0; unit 590/590 (--no-cache, 22 files); PSScriptAnalyzer 0 findings on the three
+  PowerShell files; production build 0; browser 70/70 on the production build. Then CI run 1 (deliberate).
 
 ## PICK UP HERE
 
-Step 6: local checks (unit, lint, type-check, build, each exit code read), then the one deliberate CI run
-(ALLOW_CI=1), then land.
+Step 6: read CI run 1 (jobs test, arm64, windows, macos). Green: land (merge message "[Merge] PP7 (", record in
+chain.md and here). Red: classify from the log (process.md section 7); budget 2 infrastructure re-runs, 2 fix runs.
