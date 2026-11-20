@@ -157,7 +157,12 @@ test.describe('Adult PIN', () => {
     await expect(earlier).toContainText('Approved by Adult PIN');
     expect((await (await ch.get('/api/channel/kid')).json()).time.bonusMin).toBe(after.time.bonusMin);
 
-    // Snap back on the running hub: the kid presses the Hulu button; Popcorn Pilot comes back within 5 s.
+    // Snap back on the running hub: the kid presses the Hulu button; Popcorn Pilot comes back within 5 s. First wait
+    // until the watcher asks the TV which app is on (after the hub's own launch has had its few seconds to land).
+    const n0 = ((await (await page.request.get(`${FAKE}/calls`)).json()) as { path: string }[]).length;
+    await expect
+      .poll(async () => ((await (await page.request.get(`${FAKE}/calls`)).json()) as { path: string }[]).slice(n0).some((c) => c.path === '/query/active-app'), { timeout: 15_000, intervals: [250] })
+      .toBe(true);
     await page.request.post(`${FAKE}/app?id=2285&name=Hulu`);
     await expect.poll(async () => (await (await page.request.get(`${FAKE}/state`)).json()).activeApp.id, { timeout: 5_000, intervals: [250] }).toBe('dev');
     await page.getByRole('link', { name: 'Back' }).click();

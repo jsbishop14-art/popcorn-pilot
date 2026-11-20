@@ -133,12 +133,12 @@ export default function SafeguardsEditor({ profileId, onChange }: { profileId: n
 
       <section className="card" aria-label="Viewing hours">
         <span className="lbl">Viewing hours</span>
-        <div className="row">
+        <div className="row kid-wrap">
           <span className="t">Allowed between</span>
-          <div className="lft">
-            <input className="field" type="time" aria-label="Viewing hours start" value={rules.hoursStart} onChange={(e) => set({ hoursStart: e.target.value })} style={{ width: 120 }} />
+          <div className="lft" style={{ gap: 8 }}>
+            <input className="field" type="time" aria-label="Viewing hours start" value={rules.hoursStart} onChange={(e) => set({ hoursStart: e.target.value })} style={{ width: 118 }} />
             <span className="s">to</span>
-            <input className="field" type="time" aria-label="Viewing hours end" value={rules.hoursEnd === '24:00' ? '23:59' : rules.hoursEnd} onChange={(e) => set({ hoursEnd: e.target.value === '23:59' ? '24:00' : e.target.value })} style={{ width: 120 }} />
+            <input className="field" type="time" aria-label="Viewing hours end" value={rules.hoursEnd === '24:00' ? '23:59' : rules.hoursEnd} onChange={(e) => set({ hoursEnd: e.target.value === '23:59' ? '24:00' : e.target.value })} style={{ width: 118 }} />
           </div>
         </div>
         <span className="s">A start outside these hours is refused and shows in Alerts.</span>
