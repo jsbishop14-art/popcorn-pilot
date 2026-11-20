@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- The Popcorn Pilot channel's one scene: it keeps the pairing (hub address and channel token), asks the hub for
+     what each screen shows, puts one screen up at a time, and is the only place remote keys arrive (the kid mode key
+     policy, components/lib/KeyPolicy.brs, is applied here before any screen sees a key). -->
+<component name="MainScene" extends="Scene">
+  <interface>
+    <!-- Launch parameters (at start and when the hub opens the channel again while it runs): contentId (bridge,
+         time-warning, family-album, pair), pp_hub, pp_token. -->
+    <field id="launchArgs" type="assocarray" onChange="onLaunchArgs" />
+  </interface>
+  <script type="text/brightscript" uri="MainScene.brs" />
+  <script type="text/brightscript" uri="lib/Ui.brs" />
+  <script type="text/brightscript" uri="lib/KeyPolicy.brs" />
+  <script type="text/brightscript" uri="lib/Router.brs" />
+  <children>
+    <Rectangle id="ground" width="1920" height="1080" color="0x16264AFF" />
+    <Group id="slides" visible="false">
+      <Poster id="slideA" width="1920" height="1080" loadDisplayMode="scaleToZoom" />
+      <Poster id="slideB" width="1920" height="1080" loadDisplayMode="scaleToZoom" opacity="0" />
+    </Group>
+    <Group id="layer" />
+    <Group id="toastLayer" visible="false" translation="[0, 960]">
+      <Poster id="toastBox" uri="pkg:/images/rr36.9.png" blendColor="0xFFFFFFFF" height="84" />
+      <Label id="toast" height="84" vertAlign="center" horizAlign="center" color="0x16264AFF" />
+    </Group>
+    <Timer id="poll" duration="5" repeat="true" />
+    <Timer id="slideTimer" duration="8" repeat="true" />
+    <Timer id="clockTimer" duration="20" repeat="true" />
+    <Timer id="toastTimer" duration="5" repeat="false" />
+  </children>
+</component>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- One call to the hub on the home network (a Task runs off the screen thread). The channel token goes in the
+     Authorization header; the channel talks to nothing but the hub (handoff 9.1). -->
+<component name="HubTask" extends="Task">
+  <interface>
+    <field id="hub" type="string" />
+    <field id="token" type="string" />
+    <field id="method" type="string" value="GET" />
+    <field id="path" type="string" />
+    <field id="body" type="assocarray" />
+    <field id="cb" type="string" />
+    <field id="ctx" type="assocarray" />
+    <!-- { status: integer (0 when the hub did not answer), body: object or invalid } -->
+    <field id="response" type="assocarray" />
+  </interface>
+  <script type="text/brightscript" uri="HubTask.brs" />
+</component>
