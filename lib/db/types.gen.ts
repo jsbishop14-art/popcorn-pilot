@@ -51,6 +51,60 @@ export interface PinLockoutRow {
   locked_until: number;
 }
 
+export interface PlaybackRow {
+  id: number;
+  tv_id: number;
+  playlist_id: number | null;
+  name: string;
+  profile_id: number | null;
+  state: string;
+  loop: number;
+  shuffle: number;
+  current_item_id: number | null;
+  item_played_ms: number;
+  item_resumed_at: number | null;
+  started_by: string;
+  started_at: number;
+  ended_at: number | null;
+  message: string | null;
+}
+
+export interface PlaylistItemsRow {
+  id: number;
+  playlist_id: number;
+  position: number;
+  kind: string;
+  title_key: string | null;
+  title_kind: string | null;
+  service: string | null;
+  name: string;
+  rating: string | null;
+  poster: string | null;
+  episode_minutes: number | null;
+  runtime_minutes: number | null;
+  mode: string;
+  episodes: number;
+  minutes: number;
+  start_from: string | null;
+}
+
+export interface PlaylistsRow {
+  id: number;
+  name: string;
+  quick: number;
+  loop: number;
+  shuffle: number;
+  schedule_on: number;
+  schedule_days: string;
+  schedule_time: string | null;
+  schedule_tv_id: number | null;
+  schedule_profile_id: number | null;
+  schedule_last_run: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 export interface ProfilesRow {
   id: number;
   name: string;
@@ -60,6 +114,28 @@ export interface ProfilesRow {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+}
+
+export interface QueueItemsRow {
+  id: number;
+  playback_id: number;
+  position: number;
+  kind: string;
+  title_key: string | null;
+  title_kind: string | null;
+  service: string | null;
+  name: string;
+  rating: string | null;
+  poster: string | null;
+  episode_minutes: number | null;
+  runtime_minutes: number | null;
+  mode: string;
+  episodes: number;
+  minutes: number;
+  start_from: string | null;
+  status: string;
+  launch_route: string | null;
+  note: string | null;
 }
 
 export interface SchemaMigrationsRow {
