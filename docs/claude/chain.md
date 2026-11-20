@@ -8,7 +8,7 @@
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
-| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
+| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
 
 ## Grants
@@ -108,3 +108,8 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   PP4 (" on main. CI run 44691753827 green (test job and arm64 job) on the branch, which contained current main
   (24965d6). Checks 1 to 6 passed (numbers in docs/sessions/PP4-status.md). Migration 004 (14 expected objects)
   lands with the code and is applied by the Pi updater. Kid mode on the real Rokus waits on hardware.
+- PP5 (routines, Family Album, ad blocking): landed 2026-11-20 by the merge commit "[Merge] PP5 (" on main. CI run
+  44697841978 green (test job and arm64 job) on the branch, which contained current main (c142ce1). Checks 1 to 4
+  passed (numbers in docs/sessions/PP5-status.md). Migration 005 (12 expected objects) lands with the code and is
+  applied by the Pi updater. The iCloud album link waits on Josh; AdGuard Home on the Pi, router DNS, routines and
+  the album with real devices wait on hardware.

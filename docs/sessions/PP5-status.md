@@ -129,7 +129,43 @@ None (spec section 5). Production is the Pi; never touched.
   run 0, unit 0 (493/493), build 0, e2e 0 (67/67; HTTP permission map 440 answers), smoke 0 on a fresh production
   build (control against a port with nothing on it: 1). The branch contains current main (c142ce1).
 
+- CI run 1 (deliberate, run 44697841978, commit a04a848): green. test job: unit 493/493, e2e 67/67 (HTTP
+  permission map 440 answers), lint, typecheck, gen-types, migrate (56 objects), shellcheck, install dry run,
+  build. arm64 job (aarch64): unit 493/493, build. 1 of 5 CI runs used.
+- Checks (spec section 3), all passed:
+  1. A routine runs its steps in order on the fake Roku; a scheduled routine starts at its time (fake clock): unit
+     routines.test 11/11 (Run: Turn on, the profile switch, Volume down 100 times then up 18 (the fake Roku ends at
+     18), the playlist's first title, the timer; the timer turns the TV off at 10:45 and not before; the schedule
+     starts at 7:00 on a weekday, not at 6:59, not twice, not on Saturday, not at 7:30; a step that fails stops the
+     run at that step with "stopped at step 4 (Playlist): ..." and no timer; a TV that does not answer stops at step
+     1; Test now does not set the timer; timers cancel and replace; the editor's refusals; edit and delete; Guest
+     403; the channel only for its own TV and never in kid mode). Controls: not stopping at a failed step failed;
+     the schedule ignoring its time failed.
+  2. Album sync from the stub adds, updates and removes items; a broken link shows an error in Settings, not a
+     crash: unit album.test 13/13 (first sync 4 added (3 photos, 1 clip); a sync with nothing new downloads
+     nothing; the changed album: 1 added, 1 updated (new file and checksum), 1 removed (file deleted); a broken
+     link: 200 with the error in plain words, shown in Settings with the last good sync, the 4 items kept; iCloud
+     unreachable and a real iCloud address refused here; the album as a playlist item opens the channel with
+     "family-album", then the next title; the home background; files with byte ranges; Guest 403). e2e at both
+     widths (Save link, counts, Sync now, the broken link's error). Control: a sync that never removes failed.
+  3. Ad blocking status reads from the stub; off state shows correctly: unit adblock.test 7/7 (on with 1,284
+     blocked today; off; the switch off and on, logged; today counts only the hours since midnight; not answering
+     and a refused login shown as unavailable in plain words; the install login file moved into the secret store;
+     Guest 403). e2e at both widths (the switch turns the stub off and on). Control: status read from "running"
+     failed.
+  4. Browser tests reach every new screen from the menus with each PIN: e2e routines.spec 12/12 (6 phone, 6
+     desktop): Playlists > Routines, New routine (every step kind, Add step, move, schedule, Test now, Save), Run,
+     Cancel timer, Edit, Delete, a failed step's message, Home > Start routine, Settings > Family Album and Ad
+     blocking; Guest: Routines and Start routine absent, no Settings, the pages and routes answer 403. Phone-width
+     checks pass. Control: the Routines button shown to the Guest PIN failed the Guest test.
+  Must stay true: no real iCloud or AdGuard Home call in tests or CI (PP_NO_OUTSIDE_CALLS=1 refuses any address but
+  this machine; a unit test shows a real iCloud address refused); routine steps run in order and stop with a clear
+  message (check 1).
+- Landing: CI green on a branch containing current main (c142ce1, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP5-status.md (this record). Merged to main with "[Merge] PP5 (".
+  Migration 005 (12 expected objects) lands with the code; the Pi updater applies it and reads back its objects.
+  Deploy and smoke are the Pi updater's (the Pi is not bought yet).
+
 ## PICK UP HERE
 
-Step 7: the one deliberate CI run (push with ALLOW_CI=1). If green, record the run, the check numbers and land per
-CLAUDE.md section 3 ("[Merge] PP5 ("). If red, classify it from the log before any re-run.
+PP5 has landed. Nothing left for PP5. Do not start PP6 from this session.
