@@ -22,9 +22,10 @@ export function route(key: ApiRoute, handler: Handler) {
   return async (req: Request, ctx?: Ctx): Promise<Response> => {
     const auth = authFromRequest(req);
     if (!rule[auth.role]) {
+      const denied = { 'x-pp-denied': auth.role };
       return auth.role === 'signed_out'
-        ? fail(401, auth.idleLocked ? 'Locked after no use. Enter your PIN.' : 'Enter your PIN.')
-        : fail(403, auth.role === 'guest' ? 'Not available with the Guest PIN.' : 'Not allowed.');
+        ? json({ error: auth.idleLocked ? 'Locked after no use. Enter your PIN.' : 'Enter your PIN.' }, 401, denied)
+        : json({ error: auth.role === 'guest' ? 'Not available with the Guest PIN.' : 'Not allowed.' }, 403, denied);
     }
     try {
       return await handler(req, auth, ctx ?? { params: {} });

@@ -40,6 +40,8 @@ export function isSetUp(): boolean {
   return Boolean(s.adult_pin_hash && s.guest_pin_hash);
 }
 
+export const LOCK_CHOICES = [1, 2, 5, 10, 15, 30, 60] as const;
+
 export function lockMinutes(): number {
   const n = Number(getSetting('lock_minutes', '5'));
   return Number.isFinite(n) && n >= 1 ? n : 5;
