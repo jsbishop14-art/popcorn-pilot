@@ -1,0 +1,2 @@
+# The updater (running as popcorn) may stop and start the app service, and nothing else.
+popcorn ALL=(root) NOPASSWD: /usr/bin/systemctl stop popcorn-pilot, /usr/bin/systemctl start popcorn-pilot, /usr/bin/systemctl restart popcorn-pilot

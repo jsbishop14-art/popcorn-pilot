@@ -44,6 +44,7 @@ button:disabled { cursor: default; opacity: 0.55; }
 .nav { position: fixed; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(var(--tabs, 5), minmax(0, 1fr)); background: var(--card); border-top: 1px solid var(--line); padding: 8px 4px 22px; z-index: 10; }
 .nav a { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: 11px; font-weight: 700; }
 .nav a.on { color: var(--navy); font-weight: 800; }
+.nav a.brand { color: var(--navy); }
 
 @media (min-width: 900px) {
   .shell { flex-direction: row; }
@@ -66,10 +67,11 @@ button:disabled { cursor: default; opacity: 0.55; }
 .s { font-size: 13px; font-weight: 700; color: var(--muted); }
 .lbl { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 6px; }
 .btn { height: 44px; padding: 0 16px; border-radius: 12px; border: 0; background: var(--ground); font-size: 14px; font-weight: 800; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
-.card .btn { background: var(--ground); }
-.btn.pri { background: var(--accent); }
-.btn.dark { background: var(--navy); color: #fff; }
-.btn.danger { background: var(--warn-bg); color: var(--warn-fg); }
+.main > .btn, .main > .btns .btn { background: var(--card); box-shadow: 0 1px 3px rgba(15, 27, 51, 0.1); }
+.card .btn { background: var(--ground); box-shadow: none; }
+.btn.pri, .main > .btn.pri, .main > .btns .btn.pri { background: var(--accent); }
+.btn.dark, .main > .btn.dark { background: var(--navy); color: #fff; }
+.btn.danger, .main > .btns .btn.danger { background: var(--warn-bg); color: var(--warn-fg); }
 .btn.wide { width: 100%; }
 .btns { display: flex; gap: 10px; flex-wrap: wrap; }
 .btns .btn { flex: 1 1 140px; }
