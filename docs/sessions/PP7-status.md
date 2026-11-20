@@ -43,7 +43,8 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 
 ### Later rulings
 
-(none)
+- The full 06:30 wording (chain.md, from docs/next-builds): "can this be used without the pi? turns out a pi is more expensive than i thought. looked at the pi website and they were under 100. but the only way to buy is from a reseller and theyre nearly 200. for now id like to control with my computer and phone straight to the roku. is that possible?"
+- No new rulings during this build.
 
 ## Decided without asking
 
@@ -81,6 +82,15 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 - D-11: Mac firewall: the Mac has no per-port rule like Windows. Only when the macOS firewall is on, the install adds
   the hub's own Node copy to the allowed apps (socketfilterfw --add/--unblockapp); the uninstall removes it. When the
   firewall is off nothing is changed.
+- D-12: The Roku channel from Windows: no bash on Windows for scripts/roku-sideload.sh, so the guide builds the zip
+  with the hub's Node and uploads it on the Roku's own developer page in a browser (docs/install-windows.md step
+  8). The Mac runs scripts/roku-sideload.sh as it is (bash 3.2 has what it uses).
+- D-13: The handoff (docs/specs/POPCORN-PILOT-HANDOFF.md, the chat session's document) is not edited; the spec names
+  CLAUDE.md for the wording change. Handoff section 11.4 named by the spec does not exist; 11.1 to 11.3 and the spec
+  were followed.
+- D-14: Browser tests: the main test hub now says it is a Pi (PP_HOST=pi), so the PP5 ad blocking tests run as on
+  the Pi; a second test hub (port 3101, PP_HOST=windows, own empty data folder) runs test/e2e/hub-windows.spec.ts.
+  The Mac screen is the same code path with "Mac": covered by test/unit/host.test.ts and the CI macOS job.
 
 ## Questions
 
@@ -100,8 +110,14 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   here (no Windows in the codespace): the CI Windows job runs them.
 - Step 4: scripts/install-mac.sh, scripts/uninstall-mac.sh, test/install/mac-check.sh. shellcheck --severity=style:
   exit 0. install-mac.sh --dry-run here: exit 0 (15 dry run lines). Real run: CI macOS job.
+- Step 5: Settings > Hub browser tests (screens.spec.ts: Pi, address, QR read back at phone and desktop width;
+  hub-windows.spec.ts: Windows PC, address, QR, sleep note, ad blocking not set up, Guest absent and 403),
+  docs/install-windows.md, docs/install-mac.md, CLAUDE.md sections 1, 3, 6, chain.md (PP7 row, rulings and Waits
+  on hardware from docs/next-builds, plus this build's hardware items), CI windows and macos jobs. Browser 70/70.
+  Unit 590/590 (22 files). hub-check.mjs against a local build started as a Windows hub: all passed; control (the
+  same hub checked as a Mac): 2 failed, exit 1.
 
 ## PICK UP HERE
 
-Step 5: browser tests (Settings > Hub from the menus, Adult and Guest; a second test hub with PP_HOST=windows for
-ad blocking not set up), docs/install-windows.md, docs/install-mac.md, CLAUDE.md, chain.md, CI jobs.
+Step 6: local checks (unit, lint, type-check, build, each exit code read), then the one deliberate CI run
+(ALLOW_CI=1), then land.

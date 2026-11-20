@@ -41,7 +41,9 @@ if [ "$STAGE" = installed ]; then
   pid="$(listener_pid)"
   check "something listens on port $PORT" test -n "$pid"
   if [ -n "$pid" ]; then
-    check "the app is next start from the app folder" sh -c "ps -o command= -p $pid | grep -F '$ROOT/' | grep -q next"
+    # Next renames its process "next-server", so the app folder is read from its working directory.
+    check "the app is next-server" sh -c "ps -o command= -p $pid | grep -q next"
+    check "the app runs from the app folder" sh -c "lsof -a -p $pid -d cwd -Fn | grep -qxF 'n$ROOT/app'"
     ppid="$(ps -o ppid= -p "$pid" | tr -d ' ')"
     check "the app was started by the hub service" sh -c "ps -o command= -p $ppid | grep -q hub-service.mjs"
     check "the app runs as the installing user" sh -c "test \"\$(ps -o user= -p $pid | tr -d ' ')\" != root"

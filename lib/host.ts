@@ -11,7 +11,7 @@ export const HOST_LABEL: Record<HostKind, string> = {
   linux: 'Linux computer',
 };
 
-export function hostKind(env: NodeJS.ProcessEnv = process.env, platform: string = process.platform, arch: string = process.arch): HostKind {
+export function hostKind(env: Record<string, string | undefined> = process.env, platform: string = process.platform, arch: string = process.arch): HostKind {
   const set = env.PP_HOST?.trim().toLowerCase();
   if (set === 'windows' || set === 'mac' || set === 'pi' || set === 'linux') return set;
   if (platform === 'win32') return 'windows';
@@ -58,7 +58,7 @@ export function homeAddress(ifaces: Ifaces = os.networkInterfaces()): string | n
  * The address to open on a phone and the one the Roku channel calls: PP_HUB_URL when set, else this computer's home
  * network address and the app's port (no port when it is 80).
  */
-export function hubUrl(env: NodeJS.ProcessEnv = process.env, ifaces?: Ifaces): string {
+export function hubUrl(env: Record<string, string | undefined> = process.env, ifaces?: Ifaces): string {
   const set = env.PP_HUB_URL?.trim();
   if (set) return set.replace(/\/+$/, '');
   const port = env.PORT || '3000';

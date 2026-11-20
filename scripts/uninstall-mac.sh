@@ -57,6 +57,12 @@ if pgrep -f "$HUB_PROCS" >/dev/null 2>&1; then
   sleep 2
   pkill -9 -f "$HUB_PROCS" || true
 fi
+# The app renames its process "next-server"; one still running from the app folder is ended too.
+for pid in $(pgrep -f 'next-server' || true); do
+  if lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | grep -qxF "n$ROOT/app"; then
+    kill -9 "$pid" 2>/dev/null || true
+  fi
+done
 echo "  no hub process left"
 
 if [ -d "$ROOT" ]; then

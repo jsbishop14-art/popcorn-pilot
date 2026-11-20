@@ -32,3 +32,25 @@ export async function lock(page: Page) {
 export function alert(page: Page) {
   return page.locator('[role="alert"]:not(#__next-route-announcer__)');
 }
+
+/**
+ * Read a QR code on the page the way a phone camera would (PP7): draw the element as the browser shows it onto a
+ * canvas, then decode the pixels with jsQR (in the test, not the app).
+ */
+export async function readQr(page: Page, label: string): Promise<string | null> {
+  const img = await page.getByRole('img', { name: label }).evaluate(async (el) => {
+    const svg = new XMLSerializer().serializeToString(el);
+    const size = 400;
+    const pic = new Image();
+    pic.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    await pic.decode();
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const ctx = c.getContext('2d')!;
+    ctx.drawImage(pic, 0, 0, size, size);
+    return { size, data: Array.from(ctx.getImageData(0, 0, size, size).data) };
+  });
+  const { default: jsQR } = await import('jsqr');
+  return jsQR(Uint8ClampedArray.from(img.data), img.size, img.size)?.data ?? null;
+}
