@@ -34,6 +34,7 @@ BUILDS = [
     ("PP5", "pp5-routines-album-adblock", "docs/specs/PP5-BUILD-SPEC.md", ""),
     ("PP6", "pp6-roku-channel", "docs/specs/PP6-BUILD-SPEC.md", ""),
     ("PP7", "pp7-windows-mac-hub", "docs/specs/PP7-BUILD-SPEC.md", ""),
+    ("PP8", "pp8-desktop-icon", "docs/specs/PP8-BUILD-SPEC.md", ""),
 ]
 
 

@@ -181,18 +181,10 @@ coded to Google DNS, so the install guide covers a router rule. CI uses a stub.
    failure (the Command Center updater pattern). Daily check plus a Check for updates now button in Settings.
 3. Install guide steps Josh does by hand: flash the Pi, plug it in, run one command, set the router DNS, turn on Roku
    developer mode and "Control by mobile apps", enter the TMDB key and iCloud album link in Settings.
-4. Hub on Windows or a Mac (added 2026-11-20, PP7). The hub can run on Josh's Windows PC now, and on a Mac or the Pi
-   later, from the same code. Windows is the host for now; the Pi scripts stay for when he buys one. On Windows and Mac:
-   no ad blocking (skipped for now; the Pi keeps it), the app starts when the computer starts, the same updater
-   behavior (daily plus Check for updates now, roll back on failure), nightly backup, the same secret store, and an
-   uninstall that removes everything it added. The Windows PC is Josh's main work computer: the install changes
-   nothing beyond what the hub needs (its folder, a start-on-boot entry, a firewall rule for the app's port on private
-   networks only) and never changes power, sleep or other system settings. When the host computer is asleep or off,
-   kid limits, snap back, schedules and routines pause until it is back; the guide says so plainly.
 
 ## 12. Where process.md is adapted
 
-1. Production is the hub computer: Josh's Windows PC for now (11.4), the Raspberry Pi later. Build sessions never touch either. There is no production database to migrate from a
+1. Production is the Raspberry Pi. Build sessions never touch it. There is no production database to migrate from a
    build session; migrations land with the code and the Pi updater applies them. Process.md's third landing condition
    (migrations already on production) does not apply.
 2. Landing without Josh when CI is green on the branch rebased onto current main (or green with only docs/ or root
