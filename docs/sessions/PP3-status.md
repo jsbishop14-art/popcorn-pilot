@@ -113,8 +113,33 @@ None (spec section 5). Production is the Pi; never touched.
   run 0, unit 0 (318/318), build 0, e2e 0 (45/45; HTTP permission map 296 answers), smoke 0 on a fresh production
   build (control against a port with nothing on it: 1).
 
+- CI run 1 (deliberate, run 44683080963, commit 5ad6969): green. test job: unit 318/318, e2e 45/45 (HTTP
+  permission map 296 answers), lint, typecheck, gen-types, migrate (30 objects), shellcheck, install dry run, build.
+  arm64 job (aarch64): unit 318/318, build. 1 of 5 CI runs used.
+- Checks (spec section 3), all passed:
+  1. A 3-title playlist plays through on the fake Roku in order with each mode, fake clock: unit playback.test
+     "check 1" 6/6 (number of episodes, time on show, stay on show, run indefinitely, whole movie with pause, Family
+     Album skipped with a note; launch route recorded per title). Control: time on show stopping mid-episode failed.
+  2. Loop and shuffle; a scheduled playlist starts at its time on the right TV: unit "check 2" 4/4 (loop, no loop
+     control, shuffle and reshuffle on loop, schedule on the Guest room TV for its kid profile, once, not late, not
+     when off).
+  3. Same playlist on both TVs; Send to: unit "check 3" 2/2; e2e at both widths (both fake Rokus launched; Living
+     room paused with Play, Bedroom launched the same title).
+  4. Quick playlist: unit "check 4" 1/1 and playlists-api "check 4 over the API" 1/1; e2e at both widths (first pick
+     opens Start now?, later picks append to the list and the live queue, Save as playlist makes a 3-title playlist).
+  5. A failed launch shows a message and moves on: unit "check 5" 2/2; e2e at both widths (Prime Video made to fail
+     on the fake Roku; Home shows "Could not start Puddle Jumpers on Living room: the TV did not start it. Moved to
+     the next title." and Bubble Bakery playing).
+  6. Browser tests reach every new screen from the menus with each PIN: e2e playback.spec 14/14 (7 phone, 7
+     desktop); Guest: New playlist, Edit playlist, Remote, Send to, queue edits and Save as playlist absent; those
+     pages and routes answer 403. Control: Remote shown to the Guest PIN failed.
+  Must stay true: kid rules on the hub (unit "kid rules" 3/3, playlists-api kid filtering and channel home; control
+  with the filter off failed 4 tests); every control action in Activity history (unit, exact list of 11 entries).
+- Landing: CI green on a branch containing current main (1504db0, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP3-status.md (this record). Merged to main with "[Merge] PP3 (". Migration
+  003 (11 expected objects) lands with the code; the Pi updater applies it and reads back its objects. Deploy and
+  smoke are the Pi updater's (the Pi is not bought yet).
+
 ## PICK UP HERE
 
-The CI run (the one deliberate run) is pushed with this commit. Read its result: green on both jobs → record it
-here, merge to main with "[Merge] PP3 (", record the landing in chain.md and here. Red → classify from the log
-(docs/process.md section 7) before any re-run.
+PP3 has landed. Nothing left for PP3. Do not start PP4 from this session.
