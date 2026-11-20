@@ -58,9 +58,8 @@ end sub
 ' The background photos come from the hub with the channel token.
 sub setAgent()
     for each p in [m.slideA, m.slideB]
-        agent = CreateObject("roHttpAgent")
-        if m.token <> "" then agent.addHeader("Authorization", "Bearer " + m.token)
-        p.setHttpAgent(agent)
+        agent = ppAgent(m.token)
+        if agent <> invalid then p.setHttpAgent(agent)
     end for
 end sub
 
@@ -168,7 +167,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if ppKeyDecision(key, isKid()) = "ignore" then return true
     if m.screen <> invalid then
         handled = m.screen.callFunc("handleKey", { key: key })
-        if handled = true then return true
+        if ppIs(handled) then return true
     end if
     if key = "back" then return goBack()
     return false
@@ -184,6 +183,8 @@ sub onAction()
     if k = "go" then
         if a.screen = "KidPicker" then
             request("GET", "/api/channel/board", invalid, "board", {})
+        else if a.screen = "ProfilePicker" then
+            request("GET", "/api/channel/hello", invalid, "hello", {})
         else
             go(a.screen, params)
         end if
@@ -286,9 +287,15 @@ sub onResponse(e as object)
         else
             toast(errorWords(status, b, "The shows did not load."))
         end if
+    else if cb = "hello" then
+        if status = 200 then
+            go("ProfilePicker", { profiles: b.profiles })
+        else
+            toast(errorWords(status, b, "The profiles did not load."))
+        end if
     else if cb = "started" or cb = "routine" then
         if status = 200 then
-            if cb = "routine" and b.result <> invalid and b.result.ok = false then
+            if cb = "routine" and b.result <> invalid and not ppIs(b.result.ok) then
                 toast(b.result.words)
             else
                 toast("Starting...")

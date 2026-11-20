@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- The time warning in the middle of an episode (mockup TimeWarning): the hub opens this for a few seconds, then
+     opens the title again (a channel cannot draw over Netflix, Hulu or Prime, handoff 9.5). -->
+<component name="TimeWarningScreen" extends="Group">
+  <interface>
+    <field id="data" type="assocarray" onChange="render" />
+    <field id="action" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="TimeWarningScreen.brs" />
+  <script type="text/brightscript" uri="../lib/Ui.brs" />
+  <script type="text/brightscript" uri="../lib/KeyPolicy.brs" />
+  <children>
+    <Timer id="done" duration="12" repeat="false" />
+  </children>
+</component>

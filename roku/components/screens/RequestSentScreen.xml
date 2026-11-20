@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Request sent (mockup RequestSent): Asked a grown-up; Back; Grown-up PIN to say yes here. -->
+<component name="RequestSentScreen" extends="Group">
+  <interface>
+    <field id="data" type="assocarray" onChange="render" />
+    <field id="action" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="RequestSentScreen.brs" />
+  <script type="text/brightscript" uri="../lib/Ui.brs" />
+  <script type="text/brightscript" uri="../lib/KeyPolicy.brs" />
+</component>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- The Now playing bridge between titles (mockup NowPlaying): up next, countdown, Play now, Skip; for a kid, the
+     time warning before the last episode (handoff 9.5). -->
+<component name="NowPlayingScreen" extends="Group">
+  <interface>
+    <field id="data" type="assocarray" onChange="render" />
+    <field id="action" type="assocarray" alwaysNotify="true" />
+    <function name="handleKey" />
+  </interface>
+  <script type="text/brightscript" uri="NowPlayingScreen.brs" />
+  <script type="text/brightscript" uri="../lib/Ui.brs" />
+  <script type="text/brightscript" uri="../lib/KeyPolicy.brs" />
+  <children>
+    <Timer id="tick" duration="1" repeat="true" />
+  </children>
+</component>

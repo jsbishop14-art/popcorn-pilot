@@ -110,7 +110,7 @@ function ppText(parent as object, text as string, x as float, y as float, w as f
 end function
 
 ' The width of a text in mockup pixels (for pills and buttons that fit their words).
-function ppTextWidth(text as string, face as string, size as float) as float
+function ppTextWidth(text as string, face as string, size as float) as dynamic
     l = CreateObject("roSGNode", "Label")
     l.font = ppFont(face, size)
     l.text = text
@@ -126,7 +126,7 @@ end sub
 
 ' A kid button (mockup .kbtn): white pill, 72 high, Fredoka 28, a shadow 8 below; focused: a yellow ring and 5% bigger.
 ' Returns its width. opts: { icon, ghost, h, size, padX, bg, fg, focused }.
-function ppKidButton(parent as object, x as float, y as float, text as string, opts as object) as float
+function ppKidButton(parent as object, x as float, y as float, text as string, opts as object) as dynamic
     c = ppColors()
     h = 72
     if opts.h <> invalid then h = opts.h
@@ -136,7 +136,7 @@ function ppKidButton(parent as object, x as float, y as float, text as string, o
     if opts.padX <> invalid then padX = opts.padX
     bg = c.white
     fg = c.ink
-    if opts.ghost = true then
+    if ppIs(opts.ghost) then
         bg = c.blob
         fg = c.white
     end if
@@ -147,14 +147,14 @@ function ppKidButton(parent as object, x as float, y as float, text as string, o
     w = padX * 2 + iconW + ppTextWidth(text, "fd", size)
     g = parent.createChild("Group")
     g.translation = [ppS(x), ppS(y)]
-    if opts.focused = true then
+    if ppIs(opts.focused) then
         g.scaleRotateCenter = [ppS(w / 2), ppS(h / 2)]
         g.scale = [1.05, 1.05]
         ppBox(g, -12, -12, w + 24, h + 24, h / 2 + 12, c.yellow, 0.35)
     end if
-    if opts.ghost <> true or opts.focused = true then ppBox(g, 0, 8, w, h, h / 2, c.shadow)
+    if not ppIs(opts.ghost) or ppIs(opts.focused) then ppBox(g, 0, 8, w, h, h / 2, c.shadow)
     ppBox(g, 0, 0, w, h, h / 2, bg)
-    if opts.focused = true then
+    if ppIs(opts.focused) then
         ppBox(g, 0, 0, w, h, h / 2, c.yellow)
         ppBox(g, 6, 6, w - 12, h - 12, h / 2 - 6, bg)
     end if
@@ -169,7 +169,7 @@ end function
 
 ' The time left pill (mockup KidHome and KidPicker): clock, "35 min left" and a bar fading green to yellow to red.
 ' Returns the pill width. pct 0 to 100; color is the hub's "hsl(h, s%, l%)" made into a Roku color.
-function ppTimePill(parent as object, right as float, y as float, leftMin as integer, pct as float, hsl as string, barW = 200 as float) as float
+function ppTimePill(parent as object, right as float, y as float, leftMin as integer, pct as float, hsl as string, barW = 200 as float) as dynamic
     c = ppColors()
     words = StrI(leftMin).Trim() + " min left"
     tw = ppTextWidth(words, "fd", 28)
@@ -193,11 +193,11 @@ end function
 ' "hsl(70, 72%, 45%)" -> "0xRRGGBBFF" (the hub sends the time bar color as CSS hsl).
 function ppHslColor(hsl as string) as string
     r = CreateObject("roRegex", "hsl\(\s*([0-9.]+)\s*,\s*([0-9.]+)%\s*,\s*([0-9.]+)%\s*\)", "")
-    m = r.match(hsl)
-    if m.count() < 4 then return ppC("#7FC8A9")
-    h = Val(m[1]) / 360.0
-    s = Val(m[2]) / 100.0
-    l = Val(m[3]) / 100.0
+    parts = r.match(hsl)
+    if parts.count() < 4 then return ppC("#7FC8A9")
+    h = Val(parts[1]) / 360.0
+    s = Val(parts[2]) / 100.0
+    l = Val(parts[3]) / 100.0
     if l < 0.5 then q = l * (1 + s) else q = l + s - l * s
     p = 2 * l - q
     rgb = [ppHue(p, q, h + 1 / 3.0), ppHue(p, q, h), ppHue(p, q, h - 1 / 3.0)]
@@ -237,6 +237,14 @@ sub ppAvatar(parent as object, x as float, y as float, d as float, color as stri
     ppText(parent, initial, x, y, d, d, "fd", d * 0.47, c.ink, "center")
 end sub
 
+' The HTTP agent that adds the channel token to picture loads from the hub (invalid where there is none).
+function ppAgent(token as string) as dynamic
+    a = CreateObject("roHttpAgent")
+    if type(a) <> "roHttpAgent" then return invalid
+    a.addHeader("Authorization", "Bearer " + token)
+    return a
+end function
+
 ' A cover art picture from the hub (with the channel token), loaded over a colored placeholder box.
 function ppCover(parent as object, uri as dynamic, x as float, y as float, w as float, h as float, agent as object) as object
     p = parent.createChild("Poster")
@@ -248,6 +256,37 @@ function ppCover(parent as object, uri as dynamic, x as float, y as float, w as 
     if uri <> invalid and uri <> "" then p.uri = uri
     return p
 end function
+
+' The time warning card (mockup TimeWarning): top right, white, the minutes left, "last episode", and the time bar.
+' On the warning screen and on the Now playing bridge (handoff 9.5).
+sub ppWarningCard(parent as object, leftMin as integer, last as boolean, d as object)
+    c = ppColors()
+    x = 1280 - 40 - 470
+    y = 40
+    h = 130
+    ppBox(parent, x, y + 12, 470, h, 30, "#000000", 0.3)
+    ppBox(parent, x, y, 470, h, 30, c.white)
+    ppCircle(parent, x + 26, y + (h - 86) / 2, 86, c.pink)
+    ppIcon(parent, "clock", x + 26 + 21, y + (h - 86) / 2 + 21, 44, "#D64545")
+    unit = " minutes left!"
+    if leftMin = 1 then unit = " minute left!"
+    ppText(parent, StrI(leftMin).Trim() + unit, x + 26 + 86 + 20, y + 20, 330, 38, "fd", 32, c.ink)
+    line = "Time is almost up for today."
+    if last then line = "This is the last episode for today."
+    ppText(parent, line, x + 26 + 86 + 20, y + 20 + 38 + 8, 330, 24, "nx", 19, c.slate)
+    pct = 0
+    hsl = "hsl(10, 72%, 45%)"
+    if d.kid <> invalid and d.kid.time <> invalid then
+        pct = d.kid.time.percent
+        hsl = d.kid.time.color
+    end if
+    by = y + 20 + 38 + 8 + 24 + 8
+    ppBox(parent, x + 26 + 86 + 20, by, 300, 14, 7, c.softer)
+    fw = 300 * pct / 100
+    if fw < 14 then fw = 14
+    bar = ppBox(parent, x + 26 + 86 + 20, by, fw, 14, 7, c.coral)
+    bar.blendColor = ppHslColor(hsl)
+end sub
 
 ' Clock for the home screen header: "7:12 PM", local time.
 function ppClock() as string

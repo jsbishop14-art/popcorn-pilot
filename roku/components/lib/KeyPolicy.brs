@@ -10,6 +10,19 @@
 ' Pure functions, no SceneGraph: MainScene's onKeyEvent (the only key handler in the channel) asks ppKeyDecision
 ' first, and the tests run these with the Rooibos framework and the brs interpreter (roku/tests).
 
+' True only for a real true. Comparing a missing value (invalid) with true stops a channel with a type mismatch,
+' so optional flags are read through this.
+function ppIs(v as dynamic) as boolean
+    if type(v) = "Boolean" or type(v) = "roBoolean" then return v
+    return false
+end function
+
+' A string, or "" for a missing value (the same type mismatch for comparing invalid with a string).
+function ppStr(v as dynamic) as string
+    if type(v) = "String" or type(v) = "roString" then return v
+    return ""
+end function
+
 ' The keys that act in kid mode, as the Roku names them in onKeyEvent.
 function ppKidKeys() as object
     return ["up", "down", "left", "right", "OK"]
@@ -21,8 +34,8 @@ function ppVolumeKeys() as object
 end function
 
 ' What the channel does with a key: "act" (the screen handles it) or "ignore" (taken, nothing happens).
-function ppKeyDecision(key as string, kidMode as boolean) as string
-    if not kidMode then return "act"
+function ppKeyDecision(key as string, inKidMode as boolean) as string
+    if not inKidMode then return "act"
     for each k in ppKidKeys()
         if k = key then return "act"
     end for

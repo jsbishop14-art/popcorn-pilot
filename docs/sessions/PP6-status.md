@@ -88,6 +88,31 @@ None (spec section 5). Production is the Pi; never touched.
 - D-10: Cover art for the channel comes from a channel route (GET /api/channel/art/[id]); the channel's home,
   board and now playing send those addresses. The two PP5 tests that expected the app's art address and the old
   now-playing shape were changed to the new rule.
+- D-11: The adult picker board is reached from the TV home screen by a last card "Pick a show" in the Playlists row
+  (mockup Main has no place for it; handoff 9.2 asks for it). Reason: no new row; same card shape as the mockup's.
+- D-12: In kid mode the remote's Back key does nothing (check 2), so kid screens whose mockup has no on-screen way
+  out (Profile picker, PIN, picker board) get a "Back" button in the footer, styled as the mockup's other footer
+  buttons (EarnTime's Back, KidHome's Not me).
+- D-13: Time is up (mockup TimeUp says "TV turns off in 10 seconds"): the hub turns the TV off at once (PP4 D-5),
+  so the screen is what a kid sees if the TV is turned on again that day: "All done for today! See you tomorrow,
+  <name>." (or the viewing hours when those ended). "Ask a grown-up" asks for 20 minutes and is shown only when the
+  kid's rules allow asking.
+- D-14: Kid title requests (asking for a title the kid may not watch) are not on the TV: the board only shows
+  allowed titles, so there is nothing to ask for there. The hub API for them (PP4) stays.
+- D-15: Fonts: Fredoka and Nunito TTF (SIL Open Font License) from the @expo-google-fonts npm packages, copied into
+  the channel at build time; pictures (rounded boxes, circles, icons, the channel icon and splash) are drawn by
+  scripts/roku-assets.mjs at build time. No binary files in the repo. Task pictures are drawn icons (a Roku font
+  cannot show the app's emoji).
+- D-16: The stub catalog's cover art is SVG, which a Roku cannot show: with the stub the tiles show their color, the
+  platform and the title; real TMDB posters are JPEG and show.
+- D-17: Besides Rooibos (runs on a Roku), the channel is run in CI by the brs BrightScript interpreter: the key
+  policy and routing cases (test/unit/roku-keys.test.ts, the same case table as the Rooibos suite, with a control
+  that a policy letting Back through fails), and every screen drawn with sample hub data and driven by remote keys
+  (test/unit/roku-screens.test.ts, 33 scenarios). This found two bugs before any Roku: a variable named m in the
+  color helper, and integer and float return types.
+- D-18: test/unit/safeguards.test.ts (PP4, snap back with the real-time watcher) read the alert the moment the fake
+  Roku saw the relaunch; the hub writes the alert just after. It failed once in the full suite under load (passes
+  alone 3 of 3). The test now waits for the alert (up to 2 s). Wrong test, proven by the order in lib/snapback.ts.
 
 ## Questions
 
@@ -100,6 +125,12 @@ None (spec section 5). Production is the Pi; never touched.
   bridge, warning screen, power on, channel art; migration 006 (2 expected columns). test/unit/channel-api.test.ts
   (check 3, 31 tests). Unit 553/553, type-check 0, lint 0.
 
+- Step 2a (133d785): channel scaffold, asset generator, build script, Rooibos spec, brs runner.
+- Step 2b: all 12 screens (Home, KidHome, ProfilePicker, Pin, KidPicker, EarnTime, TimeUp, RequestSent,
+  NowPlaying, TimeWarning, Album, Pair); roku build 0 errors in both builds, zip 94 files with manifest,
+  components, source, images, fonts; screen harness 33 scenarios. Unit 566/566, type-check 0, lint 0.
+
 ## PICK UP HERE
 
-Step 2: the Roku channel source under roku/ (manifest, source, components, key handling), built with bsc.
+Step 3: CI steps for the channel build, deploy script and install guide steps, TvEditor browser test, layout
+review against the mockups (check 4), chain.md Waits on hardware.

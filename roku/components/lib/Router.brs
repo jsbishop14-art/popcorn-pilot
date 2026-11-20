@@ -2,12 +2,12 @@
 ' kidMode, timeUp }. content is what the hub opened the channel with: "bridge" (the Now playing bridge between
 ' titles), "time-warning", "family-album", or "" (the home screen).
 function ppRoute(s as object) as string
-    if s.paired <> true then return "Pair"
-    if s.content = "bridge" and s.bridgeUp = true then return "NowPlaying"
-    if s.content = "time-warning" and s.kidMode = true then return "TimeWarning"
+    if not ppIs(s.paired) then return "Pair"
+    if s.content = "bridge" and ppIs(s.bridgeUp) then return "NowPlaying"
+    if s.content = "time-warning" and ppIs(s.kidMode) then return "TimeWarning"
     if s.content = "family-album" then return "Album"
-    if s.kidMode = true and s.timeUp = true then return "TimeUp"
-    if s.kidMode = true then return "KidHome"
+    if ppIs(s.kidMode) and ppIs(s.timeUp) then return "TimeUp"
+    if ppIs(s.kidMode) then return "KidHome"
     return "Home"
 end function
 

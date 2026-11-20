@@ -109,8 +109,7 @@ sub render()
     if m.col.r2 < m.first then m.first = m.col.r2
     if m.col.r2 > m.first + 3 then m.first = m.col.r2 - 3
     colors = [c.yellow, c.coral, c.mint, c.blue]
-    agent = CreateObject("roHttpAgent")
-    agent.addHeader("Authorization", "Bearer " + d.token)
+    agent = ppAgent(d.token)
     cw4 = (1168 - 60) / 4
     for k = 0 to 3
         i = m.first + k
