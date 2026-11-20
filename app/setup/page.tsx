@@ -7,9 +7,13 @@ function PinField({ id, label, hint, value, onChange }: { id: string; label: str
   return (
     <label className="col" htmlFor={id} style={{ gap: 6 }}>
       <span className="t">{label}</span>
-      <span className="s">{hint}</span>
+      <span className="s" id={`${id}-hint`}>
+        {hint}
+      </span>
       <input
         id={id}
+        aria-label={label}
+        aria-describedby={`${id}-hint`}
         className="field"
         type="password"
         inputMode="numeric"
