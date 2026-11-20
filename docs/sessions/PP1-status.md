@@ -98,9 +98,26 @@ None (spec section 6). Production is the Pi; never touched.
   unit 0 (146/146), next build 0, e2e 0 (17/17; HTTP permission map 144 answers). Controls that must fail: map
   entry flipped (2 unit fails), rollback restore removed (1 updater fail), planted shellcheck issue (caught), Settings
   tab shown to Guest (e2e fails).
-- CI run 1 (deliberate): pushed with ALLOW_CI=1.
+- CI run 1 (deliberate, run 44673857800): green. test job: unit 146/146, e2e 17/17 (HTTP permission map 144
+  answers), lint, typecheck, gen-types, migrate, shellcheck, install dry run, build. arm64 job (aarch64): unit
+  146/146, build. 1 of 5 CI runs used.
+- Checks (spec section 4), all passed:
+  1. First run, lockout, idle lock: unit auth.test.ts 12/12; e2e first-run 1/1, idle 3/3, lockout 1/1 (real
+     60 s wait).
+  2. Permission map, every route and role, deny and allow: unit permissions.test.ts 101/101 (24 routes x 4 roles
+     plus pages); e2e http-map 144 answers over HTTP (24 routes and 12 pages x 4 roles).
+  3. Menus: e2e screens 8/8 (4 at phone width, 4 at desktop width): Profiles, Profile editor, Settings, TV,
+     Activity reached by clicking with the Adult PIN; with the Guest PIN the entries are absent and the pages 403.
+  4. Roku driver against the fake Roku: unit roku-driver 10/10 driver tests (keypress, launch with content id,
+     search launch, active app, device info, media player, power off and on, offline, refused control, address).
+  5. Discovery finds the fake Roku; add by address; offline shows offline: unit 3/3 discovery + 5/5 TVs; e2e tvs 3/3.
+  6. Updater rollback in temp git repos: unit updater 6/6 (failed smoke and failed build roll back and restore the
+     database).
+  7. Install script: unit install 5/5 (shellcheck clean, dry run exit 0, every command printed not run).
+- Landing: CI green on a branch containing current main (e9dbc46, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP1-status.md (this record). Merged to main with "[Merge] PP1 (".
+  Deploy and smoke are the Pi updater's (the Pi is not bought yet; first install per docs/install-pi.md).
 
 ## PICK UP HERE
 
-Read the result of CI run 1 on pp1-foundation (gh run list --branch pp1-foundation). Green: land per CLAUDE.md
-section 3. Red: classify from the log (infrastructure re-run, or fix with a test that goes red first).
+PP1 has landed. Nothing left for PP1. Do not start PP2 from this session.
