@@ -35,7 +35,16 @@ test('every API route and page answers per the map, for every role', async () =>
     for (const role of ROLES) {
       // A fresh context per call: lock and PIN routes end or change sessions.
       const ctx = await contextFor(role, await freshToken());
-      const id = method === 'DELETE' ? '999' : path.includes('profiles') ? String(profiles[0].id) : String(tvId);
+      const id =
+        method === 'DELETE'
+          ? '999'
+          : path.startsWith('/api/catalog/art/')
+            ? 'stub-9001.svg'
+            : path.startsWith('/api/catalog/')
+              ? 'tv-9001'
+              : path.includes('profiles')
+                ? String(profiles[0].id)
+                : String(tvId);
       const url = path.replace('[id]', id);
       const data = key === 'POST /api/auth/pin' ? { pin: ADULT } : {};
       const res = await ctx.fetch(url, { method, data: method === 'GET' ? undefined : data });
@@ -49,7 +58,10 @@ test('every API route and page answers per the map, for every role', async () =>
   }
 
   for (const [pattern, rule] of Object.entries(PAGE_RULES)) {
-    const path = pattern.replace('/profiles/[id]', `/profiles/${profiles[0].id}`).replace('/settings/tvs/[id]', `/settings/tvs/${tvId}`);
+    const path = pattern
+      .replace('/profiles/[id]', `/profiles/${profiles[0].id}`)
+      .replace('/settings/tvs/[id]', `/settings/tvs/${tvId}`)
+      .replace('/browse/[id]', '/browse/tv-9001');
     for (const role of ROLES) {
       const ctx = await contextFor(role, await freshToken());
       const res = await ctx.get(path, { maxRedirects: 0 });
