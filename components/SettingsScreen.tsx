@@ -1,11 +1,13 @@
 'use client';
 // Settings (mockup Settings): TVs, the Family Album link (counts and last sync), PINs and lock time, ad blocking (on
-// or off and blocked today), titles and cover art, hub status.
+// or off and blocked today; on a Windows or Mac hub "Not set up on this computer"), titles and cover art, the hub:
+// which computer it runs on and the address to open on a phone, with a QR code (PP7).
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import { ChevronIcon, HistoryIcon, HubIcon, LockIcon, MoonIcon, PlusIcon, ShieldIcon, TvIcon, WifiIcon } from './icons';
 import { Toggle } from './PlaylistEditor';
+import QrCode from './QrCode';
 
 interface Tv {
   id: number;
@@ -24,6 +26,9 @@ interface Found {
   added: boolean;
 }
 interface Hub {
+  host: 'windows' | 'mac' | 'pi' | 'linux';
+  hostLabel: string;
+  address: string;
   version: string;
   builtAt: string | null;
   uptimeSeconds: number;
@@ -52,7 +57,7 @@ interface Album {
 }
 
 interface AdBlock {
-  state: 'on' | 'off' | 'unavailable';
+  state: 'on' | 'off' | 'unavailable' | 'not_set_up';
   blockedToday: number | null;
   queriesToday: number | null;
   message: string | null;
@@ -74,6 +79,7 @@ function albumWords(a: Album): string {
 }
 
 function adWords(a: AdBlock): string {
+  if (a.state === 'not_set_up') return a.message ?? 'Not set up on this computer';
   if (a.state === 'unavailable') return a.message ?? 'Ad blocking is not answering on the hub.';
   if (a.state === 'off') return `Off: home screen ads are not blocked${a.blockedToday !== null ? ` (${n(a.blockedToday, 'request')} blocked earlier today)` : ''}`;
   return a.blockedToday !== null ? `${n(a.blockedToday, 'request')} blocked today` : 'On';
@@ -485,8 +491,9 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
               </span>
             </div>
           </div>
-          {adblock && adblock.state !== 'unavailable' && <Toggle on={adblock.state === 'on'} label="Ad blocking" onChange={(on) => void setAdblockOn(on)} />}
+          {adblock && (adblock.state === 'on' || adblock.state === 'off') && <Toggle on={adblock.state === 'on'} label="Ad blocking" onChange={(on) => void setAdblockOn(on)} />}
           {adblock?.state === 'unavailable' && <span className="badge off">Not answering</span>}
+          {adblock?.state === 'not_set_up' && <span className="badge off">Not set up</span>}
         </div>
         {adMsg && (
           <p className="msg err" role="alert">
@@ -528,12 +535,12 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
       </div>
 
       <span className="lbl">Hub</span>
-      <div className="card" style={{ gap: 0 }}>
+      <div className="card" style={{ gap: 0 }} aria-label="Hub" role="region">
         <div className="row" style={{ padding: '6px 0' }}>
           <div className="lft">
             <HubIcon />
             <div className="col">
-              <span className="t">Raspberry Pi</span>
+              <span className="t">{hub ? hub.hostLabel : 'Hub'}</span>
               <span className="s">{hub ? `Online · ${uptime(hub.uptimeSeconds)} · version ${hub.version.slice(0, 7)}` : 'Checking…'}</span>
               {hub && <span className="s">Last backup: {when(hub.lastBackup)}</span>}
               {hub && (
@@ -545,6 +552,26 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
           </div>
           <span className="badge ok">OK</span>
         </div>
+        {hub && (
+          <>
+            <div className="sep" />
+            <div className="row" style={{ padding: '10px 0', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+              <div className="col" style={{ flex: '1 1 180px' }}>
+                <span className="t">Open on a phone</span>
+                <span className="s">On the home Wi-Fi, open this address or point the phone camera at the code.</span>
+                <span className="t" aria-label="Hub address" style={{ wordBreak: 'break-all' }}>
+                  {hub.address}
+                </span>
+              </div>
+              <QrCode text={hub.address} label={`QR code for ${hub.address}`} />
+            </div>
+            {hub.host === 'windows' || hub.host === 'mac' ? (
+              <span className="s" role="note" style={{ paddingBottom: 10 }}>
+                While this {hub.hostLabel} sleeps or is off, kid limits, snap back, schedules and routines pause until it is back.
+              </span>
+            ) : null}
+          </>
+        )}
         <div className="sep" />
         <div style={{ padding: '10px 0' }}>
           <button type="button" className="btn wide" onClick={() => void checkUpdates()} disabled={hub?.updateRequested}>

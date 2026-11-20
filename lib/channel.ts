@@ -3,7 +3,6 @@
 // up next (the Now playing bridge screen), the picker board of titles, and switching the TV's profile from the
 // TV's profile picker. Kid rules apply on the hub: with a kid profile on the TV, only the titles it may watch are
 // sent, no routines, and leaving kid mode needs the Adult PIN.
-import os from 'node:os';
 import { EVERYONE, SERVICE_INFO, artUrl, browse, viewerForProfile, type Viewer } from './catalog';
 import { listPlaylists } from './playlists';
 import { bridgeInfo, switchProfile, tvView, upNextPlace, type Actor } from './playback';
@@ -18,6 +17,7 @@ import { logActivity } from './activity';
 import { getDb } from './db';
 import { BadRequest, HttpError } from './route';
 import { now } from './clock';
+import { hubUrl } from './host';
 
 /** The profile the TV is on: the one the hub set there (a start, a switch), else the TV's default profile. */
 export function currentProfileId(tv: Tv): number | null {
@@ -204,20 +204,6 @@ export async function channelSwitchProfile(tv: Tv, b: Record<string, unknown>): 
 }
 
 // ---------------------------------------------------------------------------------------------- pairing
-
-/**
- * The hub's address on the home network, which the channel calls: PP_HUB_URL when set, else this machine's first
- * home network (IPv4) address and the app's port.
- */
-export function hubUrl(): string {
-  const set = process.env.PP_HUB_URL?.trim();
-  if (set) return set.replace(/\/+$/, '');
-  const port = process.env.PORT || '3000';
-  for (const list of Object.values(os.networkInterfaces())) {
-    for (const a of list ?? []) if (a.family === 'IPv4' && !a.internal) return `http://${a.address}:${port}`;
-  }
-  return `http://127.0.0.1:${port}`;
-}
 
 /**
  * Pair the Popcorn Pilot channel on a TV: a new channel token (the old one stops working), handed to the channel

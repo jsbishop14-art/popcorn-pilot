@@ -47,7 +47,14 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 
 ## Decided without asking
 
-(none yet)
+- D-1: Address, not a name. Settings > Hub and the guides give http://<the computer's home network address>:<port>.
+  A name like http://popcorn.local on Windows needs an mDNS responder on UDP 5353 (a second firewall rule, and it
+  competes with Windows' own mDNS service), and Android phones do not reliably resolve .local names. The spec allows
+  the address when a name cannot be offered without changing system settings. The address picks the real home
+  adapter over virtual ones (WSL, Hyper-V, VPN, Docker), preferring 192.168.x.x, then 10.x.x.x, then 172.16 to 31.
+- D-2: QR code with the package qrcode-generator (MIT, no dependencies) in the app; jsqr (Apache 2.0, no
+  dependencies) only in tests, to decode the code as a phone would. Both from npm; no outside service.
+- D-3: On the Pi the address drops ":80" (http://<address> instead of http://<address>:80). Same place.
 
 ## Questions
 
@@ -56,8 +63,11 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 ## Progress
 
 - Step 0: branch from origin/main 8b5b5fe, spec brought from origin/docs/next-builds, this status file.
+- Step 1: lib/host.ts (host kind, home address, hub URL), Settings > Hub shows the host, the address and a QR code,
+  ad blocking "Not set up on this computer" on Windows and Mac (GET says so, PATCH 409). Unit: host 9/9, adblock
+  7/7, channel-api 32/32.
 
 ## PICK UP HERE
 
-Step 1: read the app's host detection points (Settings > Hub, Settings > Ad blocking, secret store, backup, updater
-request) and add the host kind and address.
+Step 2: the cross-platform hub service (scripts/hub-service.mjs: runs the app, restarts it, backup 3:00, updater
+4:00 and on request) and updater (scripts/hub-update.mjs) with the rollback test.
