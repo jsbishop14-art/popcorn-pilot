@@ -133,8 +133,40 @@ None (spec section 5). Production is the Pi; never touched.
   run 0, unit 0 (406/406), build 0, e2e 0 (55/55; HTTP permission map 372 answers), smoke 0 on a fresh production
   build (control against a port with nothing on it: 1).
 
+- CI run 1 (deliberate, run 44691753827, commit f479be8): green. test job: unit 406/406, e2e 55/55 (HTTP permission
+  map 372 answers), lint, typecheck, gen-types, migrate (44 objects), shellcheck, install dry run, build. arm64 job
+  (aarch64): unit 406/406, build. 1 of 5 CI runs used.
+- Checks (spec section 3), all passed:
+  1. Fake clock: limit by day, viewing hours, warning at the set time, stop at the episode boundary nearest the
+     limit, TV off: unit safeguards.test "check 1" 8/8 (Monday 60 min stops at 66 with 22 min episodes; Tuesday 50
+     stops at 44; Friday 90 stops at 88; a 6:30 AM start refused and alerted, viewing hours ending at 7:30 stop at
+     7:22; finish the episode off stops at 60; adult profile control; bar color green to yellow to red; a kid's Play
+     on a TV under the same rules). Control: stopping only at the limit failed.
+  2. Snap back: unit "check 2" 5/5 (the fake Roku switched to Hulu in kid mode is relaunched in under 5 s with a "Left
+     the playlist" alert, Home likewise; nothing playing opens Popcorn Pilot; adult mode: not even polled, no alert;
+     snap back off and a TV in standby left alone; a hub launch seen mid-pass not undone; alert off). e2e on the
+     running hub at both widths (Hulu put on the fake Roku returns to Popcorn Pilot within 5 s; the alert shows in
+     Alerts and on Home). Control: no relaunch failed.
+  3. Request flow: unit kid-api "check 3" 5/5 (20 min asked on the TV, approved: time left +20; denied: no change;
+     both in the request record and Activity history; Adult PIN on the TV, Guest PIN and wrong PIN refused, the
+     wrong one counting toward the lockout; title request). e2e at both widths. Control: no grant failed 2 tests.
+  4. Task flow: unit kid-api "check 4" 3/3 (15 + 20 + 25 of 30 = cap 60; the next day 0 added; Monday resets).
+     e2e: new task with a picture, Mark done. Control: uncapped failed.
+  5. Wind-down: unit "check 5" 2/2 (only calm titles start in the last 15 min, one not calm skipped; VolumeDown at
+     55, 58, 61 and 64 min, PowerOff at 66; the next start sends VolumeUp 4 times; a calm title added when none is
+     left). Control: not skipping failed.
+  6. Browser tests reach every new screen from the menus with each PIN: e2e kid.spec 10/10 (5 phone, 5 desktop):
+     profile editor safeguards, Profiles kid tools, Earn time tasks, Requests, Alerts, Watch log, Dashboard requests
+     and alerts, "Profile on this TV"; Guest: Profiles, requests and alerts absent, only kid profiles in the TV picker,
+     the four pages and the routes answer 403. Control: the requests area shown to the Guest PIN failed.
+  Must stay true: every rule is enforced on the hub (the engine, the watcher and the routes; the UI only shows
+  them); the Guest PIN cannot approve or change safeguards (unit and e2e, 403); alerts are in the app only (no
+  push, email or text code exists).
+- Landing: CI green on a branch containing current main (24965d6, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP4-status.md (this record). Merged to main with "[Merge] PP4 (".
+  Migration 004 (14 expected objects) lands with the code; the Pi updater applies it and reads back its objects.
+  Deploy and smoke are the Pi updater's (the Pi is not bought yet).
+
 ## PICK UP HERE
 
-The deliberate CI run (run 1 of 5) was pushed with ALLOW_CI=1. Check its result on GitHub Actions for the branch
-pp4-kid-safeguards. Green: rebase check against origin/main, record the checks, land with "[Merge] PP4 (". Red:
-classify from the log (process.md section 7) before any re-run.
+PP4 has landed. Nothing left for PP4. Do not start PP5 from this session.

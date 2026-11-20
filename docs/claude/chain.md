@@ -7,7 +7,7 @@
 | 1 | PP1 | pp1-foundation | docs/specs/PP1-BUILD-SPEC.md | 1, 2, 3, 10, 11, 12, 13 | Landed 2026-11-20 |
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
-| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | In progress |
+| 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
 
@@ -92,3 +92,7 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   (" on main. CI run 44683080963 green (test job and arm64 job) on the branch, which contained current main
   (1504db0). Checks 1 to 6 passed (numbers in docs/sessions/PP3-status.md). Migration 003 (11 expected objects)
   lands with the code and is applied by the Pi updater. Playlists on the real Rokus wait on hardware.
+- PP4 (kid safeguards, snap back, requests, earn time, watch log): landed 2026-11-20 by the merge commit "[Merge]
+  PP4 (" on main. CI run 44691753827 green (test job and arm64 job) on the branch, which contained current main
+  (24965d6). Checks 1 to 6 passed (numbers in docs/sessions/PP4-status.md). Migration 004 (14 expected objects)
+  lands with the code and is applied by the Pi updater. Kid mode on the real Rokus waits on hardware.
