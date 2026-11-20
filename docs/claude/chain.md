@@ -10,7 +10,7 @@
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Landed 2026-11-20 |
-| 7 | PP7 | pp7-windows-mac-hub | docs/specs/PP7-BUILD-SPEC.md | 1.1, 11.4, 12 | In progress |
+| 7 | PP7 | pp7-windows-mac-hub | docs/specs/PP7-BUILD-SPEC.md | 1.1, 11.4, 12 | Landed 2026-11-20 |
 
 ## Grants
 
@@ -153,3 +153,9 @@ TV. No real outside calls; no real email.
   (numbers and the layout table in docs/sessions/PP6-status.md). Migration 006 (2 expected columns) lands with the
   code and is applied by the Pi updater. Installing the channel on the Rokus (developer mode, sideload, pairing) and
   everything it does on a real TV wait on hardware.
+- PP7 (hub on Windows and Mac): landed 2026-11-20 by the merge commit "[Merge] PP7 (" on main. CI run 44735974044
+  green (test, arm64, windows and macos jobs) on the branch at 5576fb1, which contained current main (8b5b5fe); CI
+  run 1 (44734851112) was red (macos-14 image not offered; a Windows test cleanup hook) and is classified in
+  docs/sessions/PP7-status.md. Checks 1 to 6 passed (numbers in the status file). No migration. The hub now runs on
+  Josh's Windows PC: install with docs/install-windows.md (Waits on hardware). The Pi install and updater are
+  unchanged; the Mac install is there if the hub moves later.

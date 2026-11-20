@@ -131,7 +131,36 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   SIGKILL (SIGKILL is how Windows ends the task). Unit hub-service 5/5 here. The install steps after it did not run.
   Fix run 1 of 2 next (CI run 2).
 
+- CI run 2 (44735974044, 5576fb1, fix run 1 of 2): all four jobs green. test: unit 591/591 (22 files), browser
+  70/70; arm64 green; windows: PSScriptAnalyzer 0 findings x3, unit 20/20 (hub-updater, hub-service, host), install
+  in test mode with smoke ok, 23 installed items ok, hub check all passed, app killed and back (pid 6636 -> 6280)
+  with smoke ok, uninstall keeping data 7 items ok, uninstall with data 6 items ok; macos: unit 20/20, install in
+  test mode with smoke ok, 19 installed items ok, hub check all passed, app killed and back (pid 4434 -> 4630) with
+  smoke ok, kept data 6 items ok, removed 5 items ok. CI runs used: 2 (1 deliberate + 1 fix).
+- Checks:
+  1 passed: CI windows job (test-mode install; task at boot as Local Service, every 5 min, no time limit, no wake;
+    app started by the hub service as Local Service; one firewall rule, inbound TCP 3999, Private only; key closed
+    to ordinary users; smoke ok; restart after the app is killed; uninstall leaves only data, then nothing: task,
+    rule, listener, processes, folder checked).
+  2 passed: CI macos job, the same with launchd (RunAtLoad, KeepAlive, UserName the installing user, running; key
+    0600, folder 0700; daemon, plist, listener, processes, folder checked after uninstall).
+  3 passed: test/unit/hub-updater.test.ts 6/6 on Linux, Windows and macOS: a failed smoke check rolls back to the
+    previous version and restores the database; a failed build too; control: removing the restore turns it red.
+  4 passed: Settings > Hub shows the host and the address and the QR code decodes to that address (unit host 9/9;
+    browser screens.spec.ts at phone and desktop width for the Pi, hub-windows.spec.ts for Windows; hub-check.mjs
+    on the installed Windows and Mac hubs); ad blocking says "Not set up on this computer" on Windows and Mac (unit
+    and browser; PATCH refused 409 with no call to AdGuard Home).
+  5 passed: PSScriptAnalyzer 0 findings (install-windows.ps1, uninstall-windows.ps1, windows-check.ps1; locally and
+    in CI on Windows PowerShell; control snippet 3 findings); shellcheck exit 0 (Pi scripts and the Mac scripts);
+    Pi scripts and their tests unchanged (git diff origin/main on install-pi.sh, update.sh, deploy/, install-pi.md,
+    updater.test.ts, install.test.ts: 0 lines) and passing in the 591.
+  6 passed: browser tests reach Settings > Hub from the menu with the Adult PIN (screens.spec.ts, hub-windows.spec.ts);
+    with the Guest PIN the Settings entry is absent and GET /settings, /api/hub/status, POST /api/hub/update, GET
+    and PATCH /api/adblock answer 403.
+- Landed: merge commit "[Merge] PP7 (" on main (recorded in chain.md, Landings). Changed after the tested tree:
+  docs/claude/chain.md and docs/sessions/PP7-status.md only.
+
 ## PICK UP HERE
 
-Step 6b: read CI run 2 (jobs test, arm64, windows, macos). Green: land (merge message "[Merge] PP7 (", record in
-chain.md and here). Red: classify from the log (process.md section 7); budget 2 infrastructure re-runs, 2 fix runs.
+PP7 has landed. Nothing more for this build. Do not start the next build. The hub install on Josh's Windows PC waits
+on Josh (docs/install-windows.md; chain.md, Waits on hardware).
