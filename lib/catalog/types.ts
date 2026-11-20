@@ -56,3 +56,8 @@ export interface CatalogSource {
 }
 
 export class CatalogUnavailable extends Error {}
+
+/** The "?profile=" part of an app link for the "Showing for" profile. */
+export function profileQuery(profile: number | null): string {
+  return profile === null ? '' : `?profile=${profile}`;
+}
