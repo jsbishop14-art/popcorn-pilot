@@ -235,6 +235,11 @@ function windingDown(rules: KidRules, s: TimeStatus): boolean {
   return rules.windDown && s.remainingMs <= rules.windDownMinutes * MIN;
 }
 
+/** Why the kid's time ran out: the end of viewing hours when that came before the end of today's minutes. */
+function stopReason(s: TimeStatus): 'time' | 'hours' {
+  return s.leftMs > s.remainingMs ? 'hours' : 'time';
+}
+
 /** Launch the Popcorn Pilot channel on a TV (the kid home screen), and expect it there. */
 async function launchChannel(tv: Tv, at: number): Promise<void> {
   const id = channelAppId();
@@ -282,7 +287,7 @@ async function kidGate(pb: PlaybackRow, rules: KidRules, next: QueueItemsRow, f:
   // The episode aware stop: the boundary nearest the limit. Before an episode starts, that is "now" when less than
   // half of it fits; with "finish the current episode" off, time is up only at the limit itself.
   if (rules.finishEpisode ? s.remainingMs <= episodeMs(f) / 2 : s.remainingMs <= 0) {
-    await timeUp(pb.id, rules, at, 'time');
+    await timeUp(pb.id, rules, at, stopReason(s));
     return 'stopped';
   }
   if (windingDown(rules, s)) {
@@ -355,7 +360,7 @@ async function kidTick(pb: PlaybackRow, rules: KidRules, cur: QueueItemsRow, at:
   const p = playedMs(pb, at);
   if (!rules.finishEpisode) {
     if (s.remainingMs <= 0) {
-      await timeUp(pb.id, rules, at, s.inHours ? 'time' : 'hours');
+      await timeUp(pb.id, rules, at, stopReason(s));
       return true;
     }
     return false;
@@ -369,7 +374,7 @@ async function kidTick(pb: PlaybackRow, rules: KidRules, cur: QueueItemsRow, at:
       // boundary than to the next one.
       const leftAtBoundary = s.remainingMs + (p - k * e);
       if (leftAtBoundary <= e / 2) {
-        await timeUp(pb.id, rules, at, s.inHours || s.leftMs <= 0 ? 'time' : 'hours');
+        await timeUp(pb.id, rules, at, stopReason(s));
         return true;
       }
       if (wind && !isCalm(f.titleKey)) {
