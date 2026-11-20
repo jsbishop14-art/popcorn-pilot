@@ -4,7 +4,7 @@
 #   bash scripts/install-pi.sh --dry-run       print every step without changing anything
 # Installs: Node 20, the app under /opt/popcorn-pilot as the service user "popcorn", the database and backups under
 # /var/lib/popcorn-pilot, the secret store key under /etc/popcorn-pilot, the app service (starts on boot), the
-# nightly backup, and the updater (daily, plus Check for updates now). Ad blocking (AdGuard Home) is added in PP5.
+# nightly backup, the updater (daily, plus Check for updates now), and ad blocking (AdGuard Home, PP5).
 set -euo pipefail
 
 REPO_URL="https://github.com/jsbishop14-art/popcorn-pilot.git"
@@ -136,6 +136,43 @@ run cd "$APP_DIR"
 as_svc npm ci --no-audit --no-fund
 as_svc npm run build
 as_svc node scripts/migrate.mjs
+
+say "Installing ad blocking (AdGuard Home)"
+# AdGuard Home (free, open source) answers the home network's DNS and blocks Roku home screen ads and tracking. Its
+# admin page listens only on this Pi (127.0.0.1:3053); the hub reads it with a login only the hub knows, left in
+# the data folder for the hub to move into its secret store. Josh then points the router's DNS at this Pi
+# (docs/install-pi.md step 8).
+AGH_DIR="/opt/AdGuardHome"
+AGH_URL="https://static.adguard.com/adguardhome/release/AdGuardHome_linux_arm64.tar.gz"
+if [ -x "$AGH_DIR/AdGuardHome" ]; then
+  echo "  AdGuard Home is already installed; keeping its settings"
+else
+  if [ "$DRY_RUN" = 0 ] && command -v ss >/dev/null 2>&1 && ss -lnu | grep -q ':53 '; then
+    echo "  Something else already answers DNS (port 53) on this Pi. Stop it first, then run the install again." >&2
+    exit 1
+  fi
+  if [ "$DRY_RUN" = 1 ]; then
+    echo "  [dry run] curl -fsSL $AGH_URL | tar -xz -C /opt"
+  else
+    curl -fsSL "$AGH_URL" | tar -xz -C /opt
+  fi
+  run "$AGH_DIR/AdGuardHome" -s install
+  if [ "$DRY_RUN" = 1 ]; then
+    echo "  [dry run] wait for the AdGuard Home first-run setup on 127.0.0.1:3000, then send it: admin page 127.0.0.1:3053, DNS 0.0.0.0:53, user popcorn, a random password"
+    echo "  [dry run] write $DATA_DIR/adguard-credentials.json (mode 0600, owner $SVC_USER): that login, for the hub's secret store"
+  else
+    agh_pw="$(od -An -tx1 -N24 /dev/urandom | tr -d ' \n')"
+    for _ in $(seq 1 30); do
+      curl -fsS http://127.0.0.1:3000/control/install/get_addresses >/dev/null 2>&1 && break
+      sleep 1
+    done
+    # The password goes on standard input, not the command line.
+    printf '{"web":{"ip":"127.0.0.1","port":3053},"dns":{"ip":"0.0.0.0","port":53},"username":"popcorn","password":"%s"}' "$agh_pw" |
+      curl -fsS -X POST http://127.0.0.1:3000/control/install/configure -H 'Content-Type: application/json' --data-binary @-
+    printf '{"user":"popcorn","password":"%s"}\n' "$agh_pw" | write_file "$DATA_DIR/adguard-credentials.json" 0600 "$SVC_USER:$SVC_USER"
+    unset agh_pw
+  fi
+fi
 
 say "Installing the services"
 for unit in popcorn-pilot.service popcorn-pilot-update.service popcorn-pilot-update.timer popcorn-pilot-update.path \

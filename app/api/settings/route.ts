@@ -5,6 +5,7 @@ import { logActivity } from '@/lib/activity';
 import { readSecrets, updateSecrets } from '@/lib/secrets';
 import { calmCount, catalogSourceName, validTmdbKey } from '@/lib/catalog';
 import type { PinType } from '@/lib/auth';
+import { AlbumError, albumStatus, setAlbumLink } from '@/lib/album';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ function catalog() {
   return { source: catalogSourceName(), tmdbKeySet: Boolean(readSecrets().tmdb_api_key), calmCount: calmCount() };
 }
 
-export const GET = route('GET /api/settings', () => json({ lockMinutes: lockMinutes(), lockChoices: LOCK_CHOICES, catalog: catalog() }));
+export const GET = route('GET /api/settings', () => json({ lockMinutes: lockMinutes(), lockChoices: LOCK_CHOICES, catalog: catalog(), album: albumStatus() }));
 
 export const PATCH = route('PATCH /api/settings', async (req, auth) => {
   const b = await body(req);
@@ -38,5 +39,17 @@ export const PATCH = route('PATCH /api/settings', async (req, auth) => {
       logActivity({ pinType: auth.role as PinType, device: auth.device, action: 'settings.tmdb_key', summary: 'Saved a TMDB key (titles now come from TMDB)' });
     }
   }
-  return json({ lockMinutes: lockMinutes(), catalog: catalog() });
+  if (b.albumLink !== undefined) {
+    // The Family Album link (PP5). null removes it. Saving it does not sync; the app asks for a sync right after.
+    if (b.albumLink !== null && typeof b.albumLink !== 'string') throw new BadRequest('The album link is text.');
+    let words: string | null;
+    try {
+      words = setAlbumLink(b.albumLink === null || b.albumLink.trim() === '' ? null : b.albumLink);
+    } catch (err) {
+      if (err instanceof AlbumError) throw new BadRequest(err.message);
+      throw err;
+    }
+    if (words) logActivity({ pinType: auth.role as PinType, device: auth.device, action: 'settings.album_link', summary: words });
+  }
+  return json({ lockMinutes: lockMinutes(), catalog: catalog(), album: albumStatus() });
 });

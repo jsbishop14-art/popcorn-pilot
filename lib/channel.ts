@@ -1,11 +1,15 @@
-// What the Popcorn Pilot Roku channel (PP6) asks the hub for, for its own TV: the home screen (routines, playlists
-// with cover art, the current profile) and now playing with up next (the Now playing bridge screen). Kid rules apply
-// on the hub: with a kid profile on the TV, only the titles it may watch are sent.
+// What the Popcorn Pilot Roku channel (PP6) asks the hub for, for its own TV: the home screen (the Family Album
+// photos for its scrolling background, routines, playlists with cover art, the current profile) and now playing with
+// up next (the Now playing bridge screen). Kid rules apply on the hub: with a kid profile on the TV, only the titles
+// it may watch are sent, and no routines (leaving kid mode needs the Adult PIN).
 import { EVERYONE, viewerForProfile } from './catalog';
 import { listPlaylists } from './playlists';
 import { tvView } from './playback';
 import { getProfile } from './profiles';
 import type { Tv } from './tvs';
+import { routinesForTv } from './routines';
+import { kidModeProfile } from './tvstate';
+import { albumEntries } from './album';
 
 function currentProfileId(tv: Tv): number | null {
   return tvView(tv).playback?.profileId ?? tv.defaultProfileId;
@@ -18,8 +22,9 @@ export function channelHome(tv: Tv) {
   return {
     tv: { id: tv.id, name: tv.name, room: tv.room },
     profile: p ? { id: p.id, name: p.name, color: p.color, initial: p.initial, type: p.type } : null,
-    // Routines arrive in PP5; the list is empty until then.
-    routines: [] as { id: number; name: string }[],
+    // The scrolling background (handoff 8.3): the album's photos, shuffled. Empty until the album has synced.
+    background: albumEntries({ photosOnly: true }).map((e) => ({ id: e.id, url: e.url, width: e.width, height: e.height })),
+    routines: kidModeProfile(tv.id) !== null ? [] : routinesForTv(tv.id),
     playlists: listPlaylists(viewer).map((pl) => ({
       id: pl.id,
       name: pl.name,

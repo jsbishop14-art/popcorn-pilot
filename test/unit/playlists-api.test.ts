@@ -194,7 +194,9 @@ describe('check 4 over the API: quick playlist', () => {
 });
 
 describe('the Roku channel API', () => {
-  it('home: playlists with cover art for the TV profile (kid rules applied), routines placeholder, profile', async () => {
+  // PP5: routines and the album background are real now (test/unit/routines.test.ts and album.test.ts); here, with
+  // none made and no album synced, both lists are empty.
+  it('home: playlists with cover art for the TV profile (kid rules applied), no routines or album yet, profile', async () => {
     const pid = (await call('adult', 'POST', '/api/playlists', { name: 'Grown ups' })).body.playlist.id;
     await call('adult', 'POST', `/api/playlists/${pid}/items`, { titleKey: 'tv-9007' });
     const token = newChannelToken(tv) as string;
@@ -203,6 +205,7 @@ describe('the Roku channel API', () => {
     expect(h.body.tv.name).toBe('Living room');
     expect(h.body.profile.name).toBe('Kid one');
     expect(h.body.routines).toEqual([]);
+    expect(h.body.background).toEqual([]);
     expect(h.body.playlists.map((p: any) => p.name)).toEqual(['Tonight']); // "Grown ups" has only a TV-MA title
     expect(h.body.playlists[0].covers[0]).toMatch(/^\/api\/catalog\/art\//);
     // Control: a TV with an adult default profile sees both.

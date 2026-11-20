@@ -4,6 +4,7 @@ import { viewerFor } from '@/lib/catalog';
 import { listPlaylists } from '@/lib/playlists';
 import { pickerProfiles, startProfile } from '@/lib/browse-profiles';
 import { pageAuth } from '@/lib/server-auth';
+import { listRoutines } from '@/lib/routines';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,7 @@ export default function PlaylistsPage({ searchParams }: { searchParams: Record<s
   return (
     <>
       <PageTop title="Playlists" />
-      <PlaylistsScreen role={role} initial={list} profiles={profiles} profile={profile} />
+      <PlaylistsScreen role={role} initial={list} profiles={profiles} profile={profile} routineCount={role === 'adult' ? listRoutines().length : undefined} />
     </>
   );
 }

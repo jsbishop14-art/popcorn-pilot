@@ -1,10 +1,11 @@
 'use client';
-// Settings (mockup Settings): TVs, PINs and lock time, hub status. Family Album and ad blocking arrive in PP5.
+// Settings (mockup Settings): TVs, the Family Album link (counts and last sync), PINs and lock time, ad blocking (on
+// or off and blocked today), titles and cover art, hub status.
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
-import { ChevronIcon, HistoryIcon, HubIcon, LockIcon, MoonIcon, PlusIcon, TvIcon, WifiIcon } from './icons';
-import { ComingLaterInline } from './ComingLaterInline';
+import { ChevronIcon, HistoryIcon, HubIcon, LockIcon, MoonIcon, PlusIcon, ShieldIcon, TvIcon, WifiIcon } from './icons';
+import { Toggle } from './PlaylistEditor';
 
 interface Tv {
   id: number;
@@ -37,6 +38,45 @@ interface Catalog {
   source: 'tmdb' | 'stub';
   tmdbKeySet: boolean;
   calmCount: number;
+}
+
+interface Album {
+  linkSet: boolean;
+  link: string | null;
+  photos: number;
+  clips: number;
+  syncing: boolean;
+  everyHours: number;
+  lastSync: { at: number; ok: boolean; added: number; updated: number; removed: number; message: string | null } | null;
+  lastGood: number | null;
+}
+
+interface AdBlock {
+  state: 'on' | 'off' | 'unavailable';
+  blockedToday: number | null;
+  queriesToday: number | null;
+  message: string | null;
+}
+
+function n(x: number, word: string) {
+  return `${x.toLocaleString('en-US')} ${word}${x === 1 ? '' : 's'}`;
+}
+
+/** "412 photos · 24 clips · synced 6:00 PM" (mockup Settings). */
+function albumWords(a: Album): string {
+  if (!a.linkSet) return 'No album yet. In the Photos app, open the shared album, tap People, turn on Public Website and copy the link here.';
+  const counts = `${n(a.photos, 'photo')} · ${n(a.clips, 'clip')}`;
+  const good = a.lastSync?.ok ? a.lastSync.at : a.lastGood;
+  if (!good) return `${counts} · not synced yet`;
+  const d = new Date(good);
+  const today = new Date().toDateString() === d.toDateString();
+  return `${counts} · synced ${today ? d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} · every ${a.everyHours} hours`;
+}
+
+function adWords(a: AdBlock): string {
+  if (a.state === 'unavailable') return a.message ?? 'Ad blocking is not answering on the hub.';
+  if (a.state === 'off') return `Off: home screen ads are not blocked${a.blockedToday !== null ? ` (${n(a.blockedToday, 'request')} blocked earlier today)` : ''}`;
+  return a.blockedToday !== null ? `${n(a.blockedToday, 'request')} blocked today` : 'On';
 }
 
 function addr(t: { address: string; port: number }) {
@@ -82,6 +122,13 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
   const [tmdbKey, setTmdbKey] = useState('');
   const [tmdbMsg, setTmdbMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const [album, setAlbum] = useState<Album | null>(null);
+  const [albumLinkText, setAlbumLinkText] = useState('');
+  const [albumBusy, setAlbumBusy] = useState(false);
+  const [albumMsg, setAlbumMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [adblock, setAdblock] = useState<AdBlock | null>(null);
+  const [adMsg, setAdMsg] = useState<string | null>(null);
+
   const [hub, setHub] = useState<Hub | null>(null);
   const [hubMsg, setHubMsg] = useState<string | null>(null);
 
@@ -96,12 +143,17 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
 
   useEffect(() => {
     void refresh().catch(() => undefined);
-    api<{ lockMinutes: number; lockChoices: number[]; catalog: Catalog }>('/api/settings')
+    api<{ lockMinutes: number; lockChoices: number[]; catalog: Catalog; album: Album }>('/api/settings')
       .then((s) => {
         setLockMinutes(s.lockMinutes);
         setLockChoices(s.lockChoices);
         setCatalog(s.catalog);
+        setAlbum(s.album);
+        setAlbumLinkText(s.album.link ?? '');
       })
+      .catch(() => undefined);
+    api<{ adblock: AdBlock }>('/api/adblock')
+      .then((r) => setAdblock(r.adblock))
       .catch(() => undefined);
     api<{ hub: Hub }>('/api/hub/status')
       .then((r) => setHub(r.hub))
@@ -174,6 +226,51 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
     const r = await api<{ catalog: Catalog }>('/api/settings', { method: 'PATCH', body: { tmdbKey: null } });
     setCatalog(r.catalog);
     setTmdbMsg({ ok: true, text: 'TMDB key removed. Browse shows the sample catalog.' });
+  }
+
+  async function syncNow(): Promise<void> {
+    setAlbumBusy(true);
+    setAlbumMsg(null);
+    try {
+      const r = await api<{ result: { ok: boolean; added: number; updated: number; removed: number }; album: Album }>('/api/album/sync', { method: 'POST', body: {} });
+      setAlbum(r.album);
+      if (r.result.ok) setAlbumMsg({ ok: true, text: `Synced: ${r.result.added} added, ${r.result.updated} updated, ${r.result.removed} removed.` });
+    } catch (e) {
+      setAlbumMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not sync the album.' });
+    } finally {
+      setAlbumBusy(false);
+    }
+  }
+
+  async function saveAlbum(e: React.FormEvent) {
+    e.preventDefault();
+    setAlbumMsg(null);
+    try {
+      const r = await api<{ album: Album }>('/api/settings', { method: 'PATCH', body: { albumLink: albumLinkText.trim() } });
+      setAlbum(r.album);
+      setAlbumLinkText(r.album.link ?? '');
+    } catch (err) {
+      setAlbumMsg({ ok: false, text: err instanceof ApiError ? err.message : 'Could not save the link.' });
+      return;
+    }
+    await syncNow();
+  }
+
+  async function removeAlbum() {
+    setAlbumMsg(null);
+    const r = await api<{ album: Album }>('/api/settings', { method: 'PATCH', body: { albumLink: null } });
+    setAlbum(r.album);
+    setAlbumLinkText('');
+    setAlbumMsg({ ok: true, text: 'Album link removed. The photos were cleared from the hub (they stay in iCloud).' });
+  }
+
+  async function setAdblockOn(on: boolean) {
+    setAdMsg(null);
+    try {
+      setAdblock((await api<{ adblock: AdBlock }>('/api/adblock', { method: 'PATCH', body: { on } })).adblock);
+    } catch (e) {
+      setAdMsg(e instanceof ApiError ? e.message : 'Ad blocking did not answer.');
+    }
   }
 
   async function checkUpdates() {
@@ -280,7 +377,43 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
       )}
 
       <span className="lbl">Family Album</span>
-      <ComingLaterInline text="The iCloud shared album link arrives in PP5." />
+      <div className="card" aria-label="Family Album" role="region">
+        <form className="col" style={{ gap: 8 }} onSubmit={(e) => void saveAlbum(e)}>
+          <label className="col" style={{ gap: 6 }}>
+            <span className="t">iCloud shared album link</span>
+            <input className="field" type="url" autoComplete="off" value={albumLinkText} onChange={(e) => setAlbumLinkText(e.target.value)} aria-label="iCloud shared album link" placeholder="https://www.icloud.com/sharedalbum/#…" />
+          </label>
+          <span className="s" role="note">
+            {album === null ? 'Checking…' : albumWords(album)}
+          </span>
+          <div className="btns">
+            <button type="submit" className="btn pri" disabled={!albumLinkText.trim() || albumLinkText.trim() === (album?.link ?? '') || albumBusy}>
+              Save link
+            </button>
+            {album?.linkSet && (
+              <button type="button" className="btn" onClick={() => void syncNow()} disabled={albumBusy}>
+                {albumBusy ? 'Syncing…' : 'Sync now'}
+              </button>
+            )}
+            {album?.linkSet && (
+              <button type="button" className="btn" onClick={() => void removeAlbum()} disabled={albumBusy}>
+                Remove link
+              </button>
+            )}
+          </div>
+        </form>
+        {album?.lastSync && !album.lastSync.ok && (
+          <p className="msg err" role="alert">
+            Last sync failed: {album.lastSync.message}
+            {album.lastGood ? ` The photos from ${when(new Date(album.lastGood).toISOString())} are still shown.` : ''}
+          </p>
+        )}
+        {albumMsg && (
+          <p className={`msg ${albumMsg.ok ? 'ok' : 'err'}`} role="status">
+            {albumMsg.text}
+          </p>
+        )}
+      </div>
 
       <span className="lbl">PINs</span>
       <div className="card">
@@ -341,7 +474,26 @@ export default function SettingsScreen({ initialTvs }: { initialTvs: Tv[] }) {
       </div>
 
       <span className="lbl">Ad blocking</span>
-      <ComingLaterInline text="Home screen ad and tracking blocking arrives in PP5." />
+      <div className="card" aria-label="Ad blocking" role="region">
+        <div className="row">
+          <div className="lft">
+            <ShieldIcon />
+            <div className="col">
+              <span className="t">Block home screen ads and tracking</span>
+              <span className="s" role="note">
+                {adblock === null ? 'Checking…' : adWords(adblock)}
+              </span>
+            </div>
+          </div>
+          {adblock && adblock.state !== 'unavailable' && <Toggle on={adblock.state === 'on'} label="Ad blocking" onChange={(on) => void setAdblockOn(on)} />}
+          {adblock?.state === 'unavailable' && <span className="badge off">Not answering</span>}
+        </div>
+        {adMsg && (
+          <p className="msg err" role="alert">
+            {adMsg}
+          </p>
+        )}
+      </div>
 
       <span className="lbl">Titles and cover art</span>
       <div className="card" aria-label="Titles and cover art" role="region">

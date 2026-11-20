@@ -103,6 +103,25 @@ export const API_RULES = {
   'GET /api/channel/kid': CHANNEL,
   'POST /api/channel/requests': CHANNEL,
   'POST /api/channel/requests/[id]': CHANNEL,
+
+  // Routines, the Family Album and ad blocking (PP5). Routines set up a TV (power, profile, volume, playlist, timer),
+  // so making, editing, running and testing them are Adult only, like Settings; the Family Album link and its sync,
+  // and ad blocking, are Settings. The channel: the album for the TV (the home background and the album playlist
+  // item), and running a routine for its own TV from the home screen (refused in kid mode, in the handler).
+  'GET /api/routines': ADULT,
+  'POST /api/routines': ADULT,
+  'POST /api/routines/test': ADULT,
+  'GET /api/routines/[id]': ADULT,
+  'PATCH /api/routines/[id]': ADULT,
+  'DELETE /api/routines/[id]': ADULT,
+  'POST /api/routines/[id]/run': ADULT,
+  'DELETE /api/routines/[id]/timer': ADULT,
+  'POST /api/album/sync': ADULT,
+  'GET /api/adblock': ADULT,
+  'PATCH /api/adblock': ADULT,
+  'GET /api/channel/album': CHANNEL,
+  'GET /api/channel/album/[id]': CHANNEL,
+  'POST /api/channel/routines/[id]/run': CHANNEL,
 } as const satisfies Record<string, Rule>;
 
 export type ApiRoute = keyof typeof API_RULES;
@@ -121,6 +140,9 @@ export const PAGE_RULES = {
   '/playlists/quick': PEOPLE,
   '/playlists/[id]': PEOPLE,
   '/playlists/[id]/edit': ADULT,
+  '/playlists/routines': ADULT,
+  '/playlists/routines/new': ADULT,
+  '/playlists/routines/[id]': ADULT,
   '/tvs/[id]/queue': PEOPLE,
   '/tvs/[id]/remote': ADULT,
   '/profiles': ADULT,

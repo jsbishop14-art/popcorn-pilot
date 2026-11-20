@@ -8,7 +8,7 @@
 | 2 | PP2 | pp2-browse | docs/specs/PP2-BUILD-SPEC.md | 4, 5.1, 10 | Landed 2026-11-20 |
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
-| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Queued |
+| 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
 | 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
 
 ## Grants
@@ -18,7 +18,8 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 ## Waits on Josh
 
 - TMDB API key (free account at themoviedb.org) for real cover art and catalog. Until then the stub is used.
-- iCloud shared album link for the Family Album.
+- iCloud shared album link for the Family Album (entered in Settings > Family Album once the Pi runs; PP5 built the
+  sync, docs/install-pi.md step 9).
 
 ## Waits on hardware
 
@@ -27,7 +28,18 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   router; then Settings > Find TVs on the network (docs/install-pi.md step 4, PP1).
 - If the repo is private when the Pi is installed: a read-only deploy key on the Pi for the clone and the updater
   (PP1 install script clones over HTTPS).
-- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5).
+- Router DNS pointed at the Pi; Google DNS redirect rule if a Roku ignores it (PP5, docs/install-pi.md step 8).
+- Ad blocking on the real Pi (PP5): the install script downloads AdGuard Home for arm64 and answers its first-run
+  setup through its API (checked here only by shellcheck and a dry run); then Settings > Ad blocking shows On and a
+  count of requests blocked today after TV use; which Roku home screen ads it actually removes.
+- Routines on the real Rokus (PP5, docs/install-pi.md step 10): Turn on from standby (a Roku TV in deep standby may
+  not answer the network; Fast TV start), how long it takes to answer after Turn on (the hub waits up to 20 s), the
+  volume step (100 presses of Volume down, then up to the level; some TVs step by 2 or cap the range), and the timer
+  turning the TV off.
+- Family Album with a real iCloud shared album (PP5, docs/install-pi.md step 9): the sync is written to iCloud's
+  shared album web service and tested only against a stub; check a real link syncs (counts in Settings), that a
+  change in the album shows after Sync now, and that iPhone clips (iCloud's 720p copy) play on the Roku. The album as
+  the TV home background and as a playlist item needs the channel (PP6).
 - Roku developer mode and "Control by mobile apps" on both Rokus; sideload the channel (PP6).
 - Verify launch routes (deep link vs search launch) for Netflix, Prime Video and Hulu on the real Rokus (handoff 2.4).
   PP2's Play on a TV uses search launch for TMDB titles (no service content ids); the launch log records each route.
@@ -96,3 +108,8 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   PP4 (" on main. CI run 44691753827 green (test job and arm64 job) on the branch, which contained current main
   (24965d6). Checks 1 to 6 passed (numbers in docs/sessions/PP4-status.md). Migration 004 (14 expected objects)
   lands with the code and is applied by the Pi updater. Kid mode on the real Rokus waits on hardware.
+- PP5 (routines, Family Album, ad blocking): landed 2026-11-20 by the merge commit "[Merge] PP5 (" on main. CI run
+  44697841978 green (test job and arm64 job) on the branch, which contained current main (c142ce1). Checks 1 to 4
+  passed (numbers in docs/sessions/PP5-status.md). Migration 005 (12 expected objects) lands with the code and is
+  applied by the Pi updater. The iCloud album link waits on Josh; AdGuard Home on the Pi, router DNS, routines and
+  the album with real devices wait on hardware.

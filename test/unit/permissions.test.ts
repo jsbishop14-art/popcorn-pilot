@@ -99,6 +99,23 @@ const EXPECTED: Record<string, Answer> = {
   'GET /api/channel/kid': A(false, false, false, true),
   'POST /api/channel/requests': A(false, false, false, true),
   'POST /api/channel/requests/[id]': A(false, false, false, true),
+  // PP5 routines, the Family Album and ad blocking. Guest: none (routines set up a TV, like settings; the album
+  // link and ad blocking are settings). The channel: the album for its TV, and a routine for its TV from the home
+  // screen (the handler refuses it in kid mode).
+  'GET /api/routines': ADULT_ONLY,
+  'POST /api/routines': ADULT_ONLY,
+  'POST /api/routines/test': ADULT_ONLY,
+  'GET /api/routines/[id]': ADULT_ONLY,
+  'PATCH /api/routines/[id]': ADULT_ONLY,
+  'DELETE /api/routines/[id]': ADULT_ONLY,
+  'POST /api/routines/[id]/run': ADULT_ONLY,
+  'DELETE /api/routines/[id]/timer': ADULT_ONLY,
+  'POST /api/album/sync': ADULT_ONLY,
+  'GET /api/adblock': ADULT_ONLY,
+  'PATCH /api/adblock': ADULT_ONLY,
+  'GET /api/channel/album': A(false, false, false, true),
+  'GET /api/channel/album/[id]': A(false, false, false, true),
+  'POST /api/channel/routines/[id]/run': A(false, false, false, true),
 };
 
 const EXPECTED_PAGES: Record<string, Answer> = {
@@ -114,6 +131,9 @@ const EXPECTED_PAGES: Record<string, Answer> = {
   '/playlists/quick': PEOPLE,
   '/playlists/[id]': PEOPLE,
   '/playlists/[id]/edit': ADULT_ONLY,
+  '/playlists/routines': ADULT_ONLY,
+  '/playlists/routines/new': ADULT_ONLY,
+  '/playlists/routines/[id]': ADULT_ONLY,
   '/tvs/[id]/queue': PEOPLE,
   '/tvs/[id]/remote': ADULT_ONLY,
   '/profiles': ADULT_ONLY,

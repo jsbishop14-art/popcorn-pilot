@@ -1,6 +1,7 @@
 // The secret store: one file encrypted with AES-256-GCM. The key lives in a separate file readable only by the
 // service user (on the Pi: /etc/popcorn-pilot/master.key, made by the install script). Holds the PIN hashes, the
-// session secret and, later, the TMDB key. Values never go to logs or the database.
+// session secret, the TMDB key, the Family Album link (it opens the family's photos to anyone who has it) and the
+// AdGuard Home login. Values never go to logs or the database.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,6 +12,9 @@ export interface Secrets {
   guest_pin_hash?: string;
   session_secret?: string;
   tmdb_api_key?: string;
+  album_link?: string;
+  adguard_user?: string;
+  adguard_password?: string;
 }
 
 function writePrivate(file: string, data: string): void {

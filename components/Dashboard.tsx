@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import type { TvView } from '@/lib/playback';
-import { PauseIcon, PlayIcon, PowerIcon, QueueIcon, SendIcon, SkipIcon } from './icons';
+import { CalendarIcon, PauseIcon, PlayIcon, PowerIcon, QueueIcon, SendIcon, SkipIcon } from './icons';
 import { TimeBar } from './KidUi';
 
 export function nowLine(v: TvView): { title: string; sub: string } | null {
@@ -219,6 +219,11 @@ export default function Dashboard({ initial, isAdult, profiles = [], requests }:
                 <button type="button" className="btn" onClick={() => void act(v.tv.id, 'remote', { key: 'PowerOn' })}>
                   <PowerIcon size={16} /> Turn on
                 </button>
+              )}
+              {isAdult && !pb && (
+                <Link href={`/playlists/routines?tv=${v.tv.id}`} className="btn" aria-label={`Start routine on ${v.tv.name}`}>
+                  <CalendarIcon size={16} /> Start routine
+                </Link>
               )}
             </div>
             {sendFrom === v.tv.id && (
