@@ -22,6 +22,7 @@ import { logActivity, type ActivityPin } from './activity';
 import { DAYS, ITEM_COLUMNS, cleanMode, itemAllowed, itemMinutes, itemValues, modeLabel, quickId, rowFields, titleFields, type ItemFields, type ModeInput } from './playlists';
 import { addAlert, checkKidStart, kidRules, openWatch, syncWatch, timeStatus, type KidRules, type TimeStatus } from './safeguards';
 import { addVolumeSteps, channelAppId, kidModeProfile, noteLaunch, setTvProfile, tvState, type SetBy } from './tvstate';
+import { albumCount } from './album';
 
 const MIN = 60_000;
 
@@ -161,7 +162,7 @@ async function advance(pbId: number, at: number): Promise<void> {
     if (!next) {
       if (pb.loop) {
         // Titles a person played or skipped start again; ones the hub could not play (failed, not allowed, the
-        // Family Album before PP5) do not, so a loop of titles that all fail still ends.
+        // Family Album with no photos yet) do not, so a loop of titles that all fail still ends.
         const reset = db().prepare("UPDATE queue_items SET status = 'pending' WHERE playback_id = ? AND status IN ('done', 'skipped') AND note IS NULL").run(pbId);
         if (reset.changes > 0) {
           if (pb.shuffle) shufflePending(pbId);
@@ -173,10 +174,10 @@ async function advance(pbId: number, at: number): Promise<void> {
       return;
     }
     const f = rowFields(next);
-    if (f.kind === 'album') {
-      const note = 'The Family Album arrives in a later build (PP5); skipped for now.';
+    if (f.kind === 'album' && albumCount() === 0) {
+      const note = 'The Family Album has no photos yet (add the iCloud album link in Settings); skipped.';
       db().prepare("UPDATE queue_items SET status = 'skipped', note = ? WHERE id = ?").run(note, next.id);
-      db().prepare('UPDATE playback SET message = ? WHERE id = ?').run(`Skipped the Family Album: it arrives in a later build.`, pbId);
+      db().prepare('UPDATE playback SET message = ? WHERE id = ?').run('Skipped the Family Album: it has no photos yet. Add the iCloud album link in Settings.', pbId);
       continue;
     }
     const rules = pb.profile_id !== null ? kidRules(pb.profile_id) : null;
@@ -188,12 +189,13 @@ async function advance(pbId: number, at: number): Promise<void> {
     const viewer = viewerOf(pb);
     try {
       if (!tv) throw new Error('the TV was removed');
-      const r = await playOnTv(viewer, f.titleKey as string, { tvId: tv.id, service: f.service });
+      const r = await launchItem(viewer, tv, next, at);
       db().prepare("UPDATE queue_items SET status = 'playing', launch_route = ? WHERE id = ?").run(r.route, next.id);
       db().prepare("UPDATE playback SET current_item_id = ?, item_played_ms = 0, item_resumed_at = ?, state = 'playing', kid_ep_seen = -1 WHERE id = ?").run(next.id, at, pbId);
       openWatch(playbackRow(pbId), next, at);
       // A one-title playback (a kid's "Play on a TV", an approved title) is logged by whoever started it.
-      if (pb.playlist_id !== null) log(HUB, 'playback.next', `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
+      if (pb.playlist_id !== null)
+        log(HUB, 'playback.next', r.route === null ? `Started the Family Album on ${tv.name} (${pb.name}, photos and clips, shuffled)` : `Started ${f.name} on ${tv.name} (${pb.name}, ${SERVICE_INFO[r.service as keyof typeof SERVICE_INFO]?.name ?? r.service}, ${r.route === 'deep_link' ? 'direct link' : 'search launch'})`);
       return;
     } catch (err) {
       const reason = failReason(err, viewer);
@@ -246,6 +248,24 @@ async function launchChannel(tv: Tv, at: number): Promise<void> {
   const id = channelAppId();
   noteLaunch(tv.id, id, at);
   await driverFor(tv).launch({ channelId: id });
+}
+
+/** What the Popcorn Pilot channel is opened with to play the Family Album (photos and clips, shuffled). */
+export const ALBUM_CONTENT_ID = 'family-album';
+
+/**
+ * Put a queue item on a TV: a title on its streaming app (the best route), or the Family Album in the Popcorn Pilot
+ * channel (route null).
+ */
+async function launchItem(viewer: Viewer, tv: Tv, item: Pick<QueueItemsRow, 'kind' | 'title_key' | 'service'>, at: number): Promise<{ route: 'deep_link' | 'search' | null; service: string | null }> {
+  if (item.kind === 'album') {
+    const id = channelAppId();
+    noteLaunch(tv.id, id, at);
+    await driverFor(tv).launch({ channelId: id, contentId: ALBUM_CONTENT_ID });
+    return { route: null, service: null };
+  }
+  const r = await playOnTv(viewer, item.title_key as string, { tvId: tv.id, service: item.service });
+  return { route: r.route, service: r.service };
 }
 
 /**
@@ -655,7 +675,7 @@ export function sendTo(actor: Actor, fromTvId: number, toTvId: unknown): Promise
     const viewer = viewerOf(pb);
     if (current) {
       try {
-        const r = await playOnTv(viewer, current.title_key as string, { tvId: to.id, service: current.service });
+        const r = await launchItem(viewer, to, current, at);
         db().prepare("UPDATE queue_items SET status = 'playing', launch_route = ? WHERE id = ?").run(r.route, current.id);
         db().prepare('UPDATE playback SET current_item_id = ?, item_resumed_at = ? WHERE id = ?').run(current.id, at, newId);
         openWatch(playbackRow(newId), current, at);
@@ -808,6 +828,23 @@ export function remote(actor: Actor, tvId: number, k: unknown): Promise<string> 
   });
 }
 
+/**
+ * Turn a TV off for a reason (a routine's timer): what it was playing stops, then Turn off. In kid mode the hub
+ * expects the Popcorn Pilot channel when the TV comes back on, so snap back does not count that as a change.
+ */
+export function turnOff(actor: Actor, tvId: number, why: string): Promise<string> {
+  return serial(async () => {
+    const at = now();
+    const tv = tvOr400(tvId);
+    const pb = stopLive(tv, at, `${why}: the TV was turned off`);
+    if (kidModeProfile(tv.id) !== null) noteLaunch(tv.id, channelAppId(), at);
+    await key(tv, 'PowerOff');
+    const words = `${why}: turned ${tv.name} off${pb ? ` and stopped ${pb.name}` : ''}`;
+    log(actor, 'tv.timer_off', words);
+    return words;
+  });
+}
+
 // ---------------------------------------------------------------------------------------------- kid mode, one title
 
 async function startTitleLocked(actor: Actor, viewer: Viewer, tv: Tv, titleKey: unknown, service: unknown, at: number, label?: string): Promise<PlaybackRow> {
@@ -913,8 +950,8 @@ export function snapBackRelaunch(tvId: number, seenExpectedAt: number | null): P
     if ((tvState(tv.id)?.expected_at ?? null) !== seenExpectedAt) return null;
     const pb = livePlayback(tv.id);
     const cur = pb && pb.current_item_id !== null ? itemRow(pb.current_item_id) : undefined;
-    if (pb && cur && cur.title_key) {
-      await playOnTv(viewerOf(pb), cur.title_key, { tvId: tv.id, service: cur.service });
+    if (pb && cur && (cur.title_key || cur.kind === 'album')) {
+      await launchItem(viewerOf(pb), tv, cur, at);
       return { what: 'title', name: cur.name };
     }
     await launchChannel(tv, at);

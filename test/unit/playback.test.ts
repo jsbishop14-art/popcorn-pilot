@@ -226,7 +226,9 @@ describe('check 1: a 3-title playlist plays through in order with each mode', ()
     expect(launches(roku1)).toEqual(['12:81000101', L_BB]);
   });
 
-  it('a Family Album item is accepted and skipped with a note until PP5', async () => {
+  // PP5 inverted this test: the Family Album plays now (test/unit/album.test.ts); only with no photos synced yet is
+  // it skipped, with a note saying how to add them.
+  it('a Family Album item with no photos synced yet is skipped with a note saying to add the album link', async () => {
     const id = await playlist('With album', [{ key: RP, episodes: 1 }]);
     appendItem(id, albumFields({}));
     appendItem(id, await titleFields(EVERYONE, BB, undefined, { episodes: 1 }));
@@ -236,8 +238,8 @@ describe('check 1: a 3-title playlist plays through in order with each mode', ()
     await at(t0 + 22 * MIN);
     expect(launches(roku1)).toEqual([L_RP, L_BB]);
     const pb = now(tv1)!;
-    expect(pb.message).toBe('Skipped the Family Album: it arrives in a later build.');
-    expect(pb.past.find((i) => i.kind === 'album')?.note).toContain('PP5');
+    expect(pb.message).toBe('Skipped the Family Album: it has no photos yet. Add the iCloud album link in Settings.');
+    expect(pb.past.find((i) => i.kind === 'album')?.note).toContain('add the iCloud album link in Settings');
   });
 });
 

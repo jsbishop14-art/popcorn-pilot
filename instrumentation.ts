@@ -7,5 +7,10 @@ export async function register() {
     // PP4: snap back for TVs in kid mode (every 2 seconds).
     const { startSnapBackWatcher } = await import('./lib/snapback');
     startSnapBackWatcher();
+    // PP5: routine schedules and timers (every 15 seconds), and the Family Album sync check (every 10 minutes).
+    const { startRoutineTimer } = await import('./lib/routines');
+    startRoutineTimer();
+    const { startAlbumTimer } = await import('./lib/album');
+    startAlbumTimer();
   }
 }

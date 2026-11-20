@@ -9,6 +9,36 @@ export interface ActivityRow {
   summary: string;
 }
 
+export interface AlbumItemsRow {
+  id: number;
+  guid: string;
+  kind: string;
+  checksum: string;
+  file: string;
+  mime: string;
+  width: number | null;
+  height: number | null;
+  bytes: number;
+  caption: string | null;
+  taken_at: string | null;
+  added_at: number;
+  updated_at: number;
+}
+
+export interface AlbumSyncsRow {
+  id: number;
+  started_at: number;
+  ended_at: number | null;
+  result: string;
+  added: number;
+  updated: number;
+  removed: number;
+  skipped: number;
+  photos: number;
+  clips: number;
+  message: string | null;
+}
+
 export interface AlertsRow {
   id: number;
   at: number;
@@ -169,6 +199,48 @@ export interface QueueItemsRow {
   status: string;
   launch_route: string | null;
   note: string | null;
+}
+
+export interface RoutineRunsRow {
+  id: number;
+  routine_id: number | null;
+  name: string;
+  tv_id: number;
+  started_at: number;
+  ended_at: number | null;
+  status: string;
+  started_by: string;
+  test: number;
+  steps: string;
+  message: string | null;
+  timer_off_at: number | null;
+  timer_done_at: number | null;
+  timer_note: string | null;
+}
+
+export interface RoutineStepsRow {
+  id: number;
+  routine_id: number;
+  position: number;
+  kind: string;
+  profile_id: number | null;
+  volume: number | null;
+  playlist_id: number | null;
+  minutes: number | null;
+}
+
+export interface RoutinesRow {
+  id: number;
+  name: string;
+  icon: string;
+  tv_id: number | null;
+  schedule_on: number;
+  schedule_days: string;
+  schedule_time: string | null;
+  schedule_last_run: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface SchemaMigrationsRow {

@@ -81,7 +81,7 @@ export default function PlaylistEditor({ playlist, tvs, profiles }: { playlist: 
       const r = await api<{ playlist: Playlist }>(`/api/playlists/${playlist.id}/items`, { method: 'POST', body: { kind: 'album' } });
       const added = r.playlist.items.filter((x) => !items.some((y) => y.id === x.id));
       setItems((cur) => [...cur, ...added]);
-      setMsg({ ok: true, text: 'Added the Family Album (its photos arrive in a later build; until then it is skipped)' });
+      setMsg({ ok: true, text: 'Added the Family Album (photos and clips from the iCloud album in Settings, shuffled)' });
     } catch (e) {
       setMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not save.' });
     }
