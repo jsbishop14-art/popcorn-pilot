@@ -101,7 +101,28 @@ None (spec section 5). Production is the Pi; never touched.
   lint 0, typecheck 0, gen-types --check 0, migrate 0 (21 expected objects, 0 missing), shellcheck 0, install dry
   run 0, unit 0 (216/216), build 0, e2e 0 (29/29; HTTP permission map 196 answers).
 
+- CI run 1 (deliberate, run 44677555216, commit 6258496): green. test job: unit 216/216, e2e 29/29 (HTTP permission
+  map 196 answers), lint, typecheck, gen-types, migrate (21 objects), shellcheck, install dry run, build. arm64 job
+  (aarch64): unit 216/216, build. 1 of 5 CI runs used.
+- Checks (spec section 3), all passed:
+  1. Browse, a title and Suggestions reached from the menus with each PIN at phone and desktop width: e2e
+     browse.spec 12/12 (6 browse-phone, 6 browse-desktop); Guest: tag buttons absent, /settings/calm 403, tag route
+     403.
+  2. A kid profile never receives a title above its ratings or on a block list from any API route: unit
+     catalog.test "Kid filtering" 5/5 (every browse combination, suggestions, details and More like this for all 33
+     titles, with the Guest PIN and the Adult PIN; forbidden titles 404 on details, similar, play, trailer and
+     nothing reaches the TV; control with no kid profile receives every forbidden title).
+  3. All is exactly one row per platform; a platform filter returns only that service: unit "Browse rows" 5/5; e2e
+     browse check 3 at both widths.
+  4. Trailer on TV sends the YouTube launch to the fake Roku: unit (POST /launch/837 contentId=stub9001, recorded in
+     launch_log; offline TV reported as failed) and e2e at both widths (fake Roku /calls).
+  5. Tag as calm and Block for kids persist and appear in Activity history: unit "Tag as calm and Block for kids"
+     2/2; e2e at both widths (reload keeps them, Settings > Calm titles lists them, Activity history shows them).
+- Landing: CI green on a branch containing current main (84643cb, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP2-status.md (this record). Merged to main with "[Merge] PP2 (".
+  Migration 002 lands with the code; the Pi updater applies it and reads back its 10 objects. Deploy and smoke are
+  the Pi updater's (the Pi is not bought yet).
+
 ## PICK UP HERE
 
-Step 6: the deliberate CI run (push with ALLOW_CI=1, tip without [skip ci]). Then check the run, record it here and
-in chain.md, and land per CLAUDE.md section 3.
+PP2 has landed. Nothing left for PP2. Do not start PP3 from this session.
