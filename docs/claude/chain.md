@@ -9,7 +9,7 @@
 | 3 | PP3 | pp3-playback | docs/specs/PP3-BUILD-SPEC.md | 2.4, 2.5, 6, 10 | Landed 2026-11-20 |
 | 4 | PP4 | pp4-kid-safeguards | docs/specs/PP4-BUILD-SPEC.md | 5, 10 | Landed 2026-11-20 |
 | 5 | PP5 | pp5-routines-album-adblock | docs/specs/PP5-BUILD-SPEC.md | 7, 8, 10.1, 11 | Landed 2026-11-20 |
-| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Queued |
+| 6 | PP6 | pp6-roku-channel | docs/specs/PP6-BUILD-SPEC.md | 9, 2.4, 5.7, 5.8 | Landed 2026-11-20 |
 
 ## Grants
 
@@ -123,3 +123,9 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
   passed (numbers in docs/sessions/PP5-status.md). Migration 005 (12 expected objects) lands with the code and is
   applied by the Pi updater. The iCloud album link waits on Josh; AdGuard Home on the Pi, router DNS, routines and
   the album with real devices wait on hardware.
+- PP6 (the Popcorn Pilot Roku channel): landed 2026-11-20 by the merge commit "[Merge] PP6 (" on main. CI run
+  44705799534 green (test job and arm64 job) on the branch, which contained current main (48fe879); the channel
+  zip is that run's artifact "popcorn-pilot-channel". Checks 1 to 3 passed and check 4 was done by code review
+  (numbers and the layout table in docs/sessions/PP6-status.md). Migration 006 (2 expected columns) lands with the
+  code and is applied by the Pi updater. Installing the channel on the Rokus (developer mode, sideload, pairing) and
+  everything it does on a real TV wait on hardware.

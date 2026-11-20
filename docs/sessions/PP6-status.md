@@ -175,6 +175,12 @@ style.
   handler, policy first; 33 screen scenarios); 3 passed (channel-api 32 tests: 15 channel calls allowed with the
   token, denied with none, a wrong token, Adult and Guest PIN; own TV only); 4 done by code review (table above).
 
+- CI run 44705799534 (482e7dc): success, test job and arm64 job (roku build OK on both, browser 68 passed); channel
+  zip artifact "popcorn-pilot-channel" (266498 bytes). One CI run used of the budget of 5.
+- Landing: CI green on a branch containing current main (48fe879, unchanged). Changed after the tested tree: only
+  docs/claude/chain.md and docs/sessions/PP6-status.md (checked with git diff --stat 482e7dc HEAD). Merged to main
+  with "[Merge] PP6 (". Deploy and smoke are the Pi updater's (handoff 11).
+
 ## PICK UP HERE
 
-CI run 1 pushed (deliberate). Read its result: green on both jobs, then land (merge message "[Merge] PP6 (").
+PP6 has landed. Nothing left for PP6. Do not start another build from this session.
