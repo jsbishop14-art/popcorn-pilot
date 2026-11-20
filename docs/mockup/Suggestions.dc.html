@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popcorn Pilot suggestions</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F5F9}
+a{color:#0F1B33}a:hover{color:#2B3D63}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.scr{width:390px;box-sizing:border-box;overflow:hidden;background:#F3F5F9;font-family:Nunito,system-ui,sans-serif;color:#0F1B33;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding:20px 16px 12px}
+.h1{margin:0;font-family:Fredoka,Nunito,sans-serif;font-size:24px;font-weight:600;flex-grow:1}
+.h2{margin:0;font-family:Fredoka,Nunito,sans-serif;font-size:17px;font-weight:600}
+.icb{width:44px;height:44px;border-radius:22px;border:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(15,27,51,.12);flex-shrink:0}
+.main{flex-grow:1;display:flex;flex-direction:column;gap:12px;padding:0 16px 16px}
+.card{background:#FFFFFF;border-radius:18px;padding:14px 16px;box-shadow:0 1px 3px rgba(15,27,51,.1);display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lft{display:flex;align-items:center;gap:12px;min-width:0}
+.col{display:flex;flex-direction:column;gap:2px;min-width:0}
+.t{font-size:15px;font-weight:800}
+.s{font-size:13px;font-weight:700;color:#4A5878}
+.lbl{font-size:12px;font-weight:800;color:#4A5878;text-transform:uppercase;letter-spacing:.6px}
+.btn{height:44px;padding:0 16px;border-radius:12px;border:0;background:#F3F5F9;font-size:14px;font-weight:800;color:#0F1B33;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.pri{background:#FFC94A}
+.dark{background:#0F1B33;color:#FFFFFF}
+.wide{width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:36px;padding:0 14px;border-radius:18px;border:1px solid #D6DDEA;background:#FFFFFF;font-size:13px;font-weight:800;color:#0F1B33;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:#0F1B33;color:#FFFFFF;border-color:#0F1B33}
+.tog{width:50px;height:30px;border-radius:15px;border:0;padding:0;background:#C5CEDF;position:relative;flex-shrink:0}
+.tog.on{background:#2E9E6B}
+.tog span{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:12px;background:#FFFFFF}
+.tog.on span{left:23px}
+.thumb{width:48px;height:48px;border-radius:10px;flex-shrink:0}
+.poster{width:44px;height:66px;border-radius:8px;flex-shrink:0}
+.badge{font-size:12px;font-weight:800;padding:3px 9px;border-radius:9px;background:#0F1B33;color:#FFFFFF;white-space:nowrap}
+.soft{background:#F3F5F9;color:#0F1B33}
+.ok{background:#E3F4EC;color:#1F6B49}
+.warn{background:#FDECEA;color:#A1261A}
+.field{height:46px;border-radius:12px;border:1px solid #D6DDEA;padding:0 12px;background:#FFFFFF;font-size:15px;font-weight:700;color:#0F1B33;width:100%;box-sizing:border-box}
+.sep{border-top:1px solid #E4E9F2}
+.nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));background:#FFFFFF;border-top:1px solid #E4E9F2;padding:8px 4px 22px}
+.nav a{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;text-decoration:none;color:#4A5878;font-size:11px;font-weight:700}
+.nav a.on{color:#0F1B33;font-weight:800}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</helmet>
+<div class="scr" style="height: 844px">
+<header class="top"><button class="icb" aria-label="Back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M15 18l-6-6 6-6"></path></svg></button><h1 class="h1">Suggestions</h1></header>
+<main class="main">
+
+<div class="chips"><button class="chip on">For Kids Mix</button><button class="chip">For Family</button><button class="chip">Calm titles</button></div>
+<span class="s">Filtered to allowed ratings and your services</span>
+<div class="card"><div class="row"><div class="lft"><div class="poster" style="background: #B8C4DA"></div><div class="col"><span class="t">Moon Camp</span><span class="s">Netflix · TV-G</span><span class="s" style="color: #2B3D63">Similar to Rocket Pals</span></div></div>
+<button class="icb" aria-label="Add Moon Camp" style="background: #FFC94A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M12 5v14M5 12h14"></path></svg></button></div></div><div class="card"><div class="row"><div class="lft"><div class="poster" style="background: #D3C2F5"></div><div class="col"><span class="t">Puddle Jumpers</span><span class="s">Hulu · TV-Y</span><span class="s" style="color: #2B3D63">Kids who watch Ocean Friends watch this</span></div></div>
+<button class="icb" aria-label="Add Puddle Jumpers" style="background: #FFC94A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M12 5v14M5 12h14"></path></svg></button></div></div><div class="card"><div class="row"><div class="lft"><div class="poster" style="background: #9FD8C2"></div><div class="col"><span class="t">Robot Recess</span><span class="s">Prime Video · TV-Y7</span><span class="s" style="color: #2B3D63">Similar to Big Truck Town</span></div></div>
+<button class="icb" aria-label="Add Robot Recess" style="background: #FFC94A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M12 5v14M5 12h14"></path></svg></button></div></div><div class="card"><div class="row"><div class="lft"><div class="poster" style="background: #A8D8F0"></div><div class="col"><span class="t">Snow Pups</span><span class="s">Netflix · G</span><span class="s" style="color: #2B3D63">New on Netflix</span></div></div>
+<button class="icb" aria-label="Add Snow Pups" style="background: #FFC94A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M12 5v14M5 12h14"></path></svg></button></div></div>
+</main>
+<nav class="nav" aria-label="Main">
+<a href="#home" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><path d="M3 11l9-7 9 7v9H3z"></path></svg>Home</a>
+<a href="#browse" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>Browse</a>
+<a href="#playlists" class="on" aria-current="page"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0F1B33" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #0F1B33; flex-shrink: 0"><path d="M4 6h12M4 12h12M4 18h8M18 15v6l4-3z"></path></svg>Playlists</a>
+<a href="#profiles" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4 4-6 8-6s7 2 8 6"></path></svg>Profiles</a>
+<a href="#settings" class=""><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #4A5878; flex-shrink: 0"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>Settings</a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview": {"width": 390, "height": 844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
