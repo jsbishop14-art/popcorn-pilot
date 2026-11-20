@@ -105,8 +105,31 @@ None (spec section 5). Production is the Pi; never touched.
 ## Progress
 
 - Step 0: branch created from origin/main c142ce1; this status file.
+- Step 1 (659a904): migration 005 (12 expected objects: routines, routine_steps, routine_runs, album_items,
+  album_syncs, 6 indexes, 1 trigger; plus the album_sync_hours setting; migrate reads back 56 objects, 0 missing),
+  lib/routines.ts, lib/album (iCloud shared album client and sync), lib/adblock.ts, 14 API routes and 3 pages in
+  the permission map; the engine plays the Family Album. PP3's "skipped until PP5" test inverted. unit 462/462.
+  Note: the step 1 route files were written through a Python heredoc, against the "editor tools only" rule; every
+  file after that was written with the editor tools, and those files were checked by type-check, lint and tests.
+- Step 2 (96a7edf): unit routines.test (check 1) 11/11; iCloud and AdGuard Home stubs (test/stubs), album fixtures
+  (scripts/make-stub-album.mjs), a volume level on the fake Roku. Found and fixed: a timer missed while the hub was
+  not running would have turned the TV off days later. Controls: not stopping at a failed step failed 1 test; the
+  schedule ignoring its time failed 1 test.
+- Step 3 (51a2d76): unit album.test (check 2) 13/13, adblock.test (check 3) 7/7; unit 493/493. Controls: a sync that
+  never removes failed 3 tests; status read from "running" instead of protection failed 3 tests.
+- Step 4 (69b4fbb): screens: Routines, routine editor, Settings Family Album and Ad blocking, Playlists Routines
+  button, Home Start routine.
+- Step 5 (d3c15e8): install script AdGuard Home step (shellcheck 0, dry run 0), smoke check, CI branch list,
+  install guide steps 8 to 10, chain.md Waits on hardware.
+- Step 6 (5601441): e2e routines.spec (phone and desktop). Found: the test added a TV at an address another test
+  used (fixed). e2e 67/67 (HTTP permission map 440 answers). Phone-width checks on the editor, the list and
+  Settings. Control: the Routines button shown to the Guest PIN failed the Guest test (1 fail), reverted.
+- Local checks before the CI push (caches removed, fresh npm ci, each exit code read on its own line): npm ci 0,
+  lint 0, typecheck 0, gen-types --check 0, migrate 0 (56 expected objects, 0 missing), shellcheck 0, install dry
+  run 0, unit 0 (493/493), build 0, e2e 0 (67/67; HTTP permission map 440 answers), smoke 0 on a fresh production
+  build (control against a port with nothing on it: 1). The branch contains current main (c142ce1).
 
 ## PICK UP HERE
 
-Read the spec, the mockup screens Routines, RoutineEditor and Settings, and the code (lib/playback.ts, lib/hub.ts,
-lib/permissions.ts, migrations/004). Next: step 1, migration 005 and lib/routines.ts.
+Step 7: the one deliberate CI run (push with ALLOW_CI=1). If green, record the run, the check numbers and land per
+CLAUDE.md section 3 ("[Merge] PP5 ("). If red, classify it from the log before any re-run.
