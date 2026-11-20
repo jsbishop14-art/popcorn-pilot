@@ -92,9 +92,15 @@ None (spec section 6). Production is the Pi; never touched.
 - Step 3 (9c30b5d): screens (PIN entry, first run, shell, Profiles, editor, Settings, TV, Activity), page guard.
 - Step 4 (632d090): browser tests. e2e 17/17; HTTP permission map 144 answers.
 - Step 5 (7305755): updater with rollback, install script, systemd units, backup, smoke, seed. unit 146/146.
-- Step 6: install guide, CI workflow, status and chain.
+- Step 6 (see git log): install guide, CI workflow, status and chain.
+- Local checks before the CI push (caching off, fresh npm ci, each exit code read on its own line): lint 0,
+  type-check 0, gen-types --check 0, migrate 0 (13 expected objects, 0 missing), shellcheck 0, install dry run 0,
+  unit 0 (146/146), next build 0, e2e 0 (17/17; HTTP permission map 144 answers). Controls that must fail: map
+  entry flipped (2 unit fails), rollback restore removed (1 updater fail), planted shellcheck issue (caught), Settings
+  tab shown to Guest (e2e fails).
+- CI run 1 (deliberate): pushed with ALLOW_CI=1.
 
 ## PICK UP HERE
 
-Run the local checks (lint, type-check, unit, build, e2e; each exit code read on its own line), then the one CI push
-with ALLOW_CI=1.
+Read the result of CI run 1 on pp1-foundation (gh run list --branch pp1-foundation). Green: land per CLAUDE.md
+section 3. Red: classify from the log (infrastructure re-run, or fix with a test that goes red first).
