@@ -492,23 +492,32 @@ function localDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** Turn TVs off whose timer is due. */
+/**
+ * Turn TVs off whose timer is due. A timer missed by more than the schedule grace (the hub was not running then) is
+ * dropped, so a hub coming back hours later does not turn off a TV someone is watching. Returns the TVs turned off.
+ */
 async function runTimers(at: number): Promise<number> {
   const due = db().prepare('SELECT * FROM routine_runs WHERE timer_done_at IS NULL AND timer_off_at IS NOT NULL AND timer_off_at <= ?').all(at) as RoutineRunsRow[];
+  let off = 0;
   for (const r of due) {
+    if (at - (r.timer_off_at as number) > SCHEDULE_GRACE_MS) {
+      db().prepare("UPDATE routine_runs SET timer_done_at = ?, timer_note = 'missed: the hub was not running at that time' WHERE id = ?").run(at, r.id);
+      continue;
+    }
     // Marked first, so a TV that does not answer is not tried again on every tick.
     db().prepare("UPDATE routine_runs SET timer_done_at = ?, timer_note = 'turning off' WHERE id = ?").run(at, r.id);
     let note: string;
     try {
       await turnOff({ pinType: 'hub', device: 'Hub' }, r.tv_id, `Timer from ${r.name}`);
       note = 'turned the TV off';
+      off++;
     } catch (err) {
       note = `the TV did not turn off: ${err instanceof Error ? err.message : 'error'}`;
       logActivity({ pinType: 'hub', device: 'Hub', action: 'routine.timer_failed', summary: `Timer from ${r.name}: ${note}` });
     }
     db().prepare('UPDATE routine_runs SET timer_note = ? WHERE id = ?').run(note, r.id);
   }
-  return due.length;
+  return off;
 }
 
 async function runSchedules(at: number): Promise<number> {

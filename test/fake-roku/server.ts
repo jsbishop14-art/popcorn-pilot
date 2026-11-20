@@ -25,7 +25,7 @@ export interface FakeRoku {
   ssdpPort: number | null;
   calls: FakeRokuCall[];
   /** failChannels: launches (direct or search) of these channel ids answer 500, like a title that will not start. */
-  state: { power: 'on' | 'standby'; activeApp: { id: string | null; name: string }; player: 'play' | 'pause' | 'close'; failChannels: string[] };
+  state: { power: 'on' | 'standby'; activeApp: { id: string | null; name: string }; player: 'play' | 'pause' | 'close'; failChannels: string[]; volume: number };
   close(): Promise<void>;
 }
 
@@ -38,7 +38,8 @@ function esc(s: string): string {
 export async function startFakeRoku(opts: FakeRokuOptions = {}): Promise<FakeRoku> {
   const name = opts.name ?? 'Fake Roku';
   const calls: FakeRokuCall[] = [];
-  const state: FakeRoku['state'] = { power: 'on', activeApp: { id: null, name: 'Roku' }, player: 'close', failChannels: [] };
+  // volume: 0 to 100, like a Roku TV; Volume up and down move it one step (PP5 routines set it).
+  const state: FakeRoku['state'] = { power: 'on', activeApp: { id: null, name: 'Roku' }, player: 'close', failChannels: [], volume: 30 };
 
   const server = http.createServer((req, res) => {
     const url = new URL(req.url ?? '/', 'http://fake');
@@ -83,6 +84,8 @@ export async function startFakeRoku(opts: FakeRokuOptions = {}): Promise<FakeRok
       if (key === 'PowerOff') state.power = 'standby';
       if (key === 'PowerOn') state.power = 'on';
       if (key === 'Home') state.activeApp = { id: null, name: 'Roku' };
+      if (key === 'VolumeUp') state.volume = Math.min(100, state.volume + 1);
+      if (key === 'VolumeDown') state.volume = Math.max(0, state.volume - 1);
       if (key === 'Play' && state.player !== 'close') state.player = state.player === 'play' ? 'pause' : 'play';
       res.writeHead(200);
       res.end();
