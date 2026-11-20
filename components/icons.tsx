@@ -119,6 +119,71 @@ export const BlockIcon = (p: P) => (
     <path d="M5.6 5.6l12.8 12.8" />
   </Svg>
 );
+export const PauseIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M8 5v14M16 5v14" />
+  </Svg>
+);
+export const SkipIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M5 5l10 7-10 7z" />
+    <path d="M19 5v14" />
+  </Svg>
+);
+export const PowerIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M6.3 7a8 8 0 1 0 11.4 0" />
+    <path d="M12 3v9" />
+  </Svg>
+);
+export const MuteIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 9v6h4l5 4V5L8 9z" />
+    <path d="M17 9l4 6M21 9l-4 6" />
+  </Svg>
+);
+export const SendIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 12l16-8-6 16-3-7z" />
+  </Svg>
+);
+export const QueueIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 6h12M4 12h12M4 18h8M18 15v6l4-3z" />
+  </Svg>
+);
+export const LoopIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2" />
+    <path d="M20 4v5h-5M4 20v-5h5" />
+  </Svg>
+);
+export const ShuffleIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3" />
+  </Svg>
+);
+export const CalendarIcon = (p: P) => (
+  <Svg {...p}>
+    <rect x="3" y="5" width="18" height="16" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </Svg>
+);
+export const UpIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M6 15l6-6 6 6" />
+  </Svg>
+);
+export const DownIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M6 9l6 6 6-6" />
+  </Svg>
+);
+export const ArrowIcon = (p: P & { dir: 'up' | 'down' | 'left' | 'right' }) => (
+  <Svg {...p} size={p.size ?? 28}>
+    <path d={{ left: 'M15 18l-6-6 6-6', right: 'M9 6l6 6-6 6', up: 'M6 15l6-6 6 6', down: 'M6 9l6 6 6-6' }[p.dir]} />
+  </Svg>
+);
 export const SparkIcon = (p: P) => (
   <Svg {...p}>
     <path d="M12 3l2 5.5L19.5 10 14 12l-2 6-2-6-5.5-2L10 8.5z" />

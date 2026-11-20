@@ -1,7 +1,9 @@
 'use client';
 // Title details (mockup TitleDetails, and the details panel of mockup Browse): trailer in the app or on a TV, rating,
-// service, seasons, episode length, description, start from, Play on a TV, Add to playlist and Start quick playlist
-// (PP3), More like this, and for the Adult PIN: Tag as calm, Block for kids.
+// service, seasons, episode length, description, start from, Play on a TV, Add to playlist (Adult PIN; PP3), Start
+// quick playlist (PP3), More like this, and for the Adult PIN: Tag as calm, Block for kids.
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import { SERVICE_INFO, profileQuery, type Kind, type Service } from '@/lib/catalog/types';
@@ -73,6 +75,11 @@ export default function TitleDetails({
   const [more, setMore] = useState<CardData[] | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [lists, setLists] = useState<{ id: number; name: string }[] | null>(null);
+  const [newName, setNewName] = useState('');
+  const [hasQuick, setHasQuick] = useState(false);
+  const [quickNote, setQuickNote] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     setT(title);
@@ -92,7 +99,67 @@ export default function TitleDetails({
       .catch(() => setTvs([]));
   }, []);
 
+  useEffect(() => {
+    api<{ quick: { items: unknown[] } | null }>(`/api/quick${profileQuery(profile)}`)
+      .then((r) => setHasQuick(Boolean(r.quick && r.quick.items.length)))
+      .catch(() => undefined);
+  }, [profile]);
+
   const tv = tvs?.find((x) => x.id === tvId) ?? null;
+
+  async function openPlaylists() {
+    if (lists) return setLists(null);
+    try {
+      setLists((await api<{ playlists: { id: number; name: string }[] }>('/api/playlists')).playlists);
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not load the playlists.' });
+    }
+  }
+
+  async function addTo(id: number, name: string) {
+    setMsg(null);
+    try {
+      await api(`/api/playlists/${id}/items`, { method: 'POST', body: { titleKey: t.key, service, startFrom: startFrom || undefined } });
+      setMsg({ ok: true, text: `Added ${t.name} to ${name}` });
+      setLists(null);
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not save.' });
+    }
+  }
+
+  async function addToNew() {
+    setMsg(null);
+    try {
+      const r = await api<{ playlist: { id: number; name: string } }>('/api/playlists', { method: 'POST', body: { name: newName } });
+      setNewName('');
+      await addTo(r.playlist.id, r.playlist.name);
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not save.' });
+    }
+  }
+
+  /** Start quick playlist: the first pick opens the quick playlist, which asks whether to start now; later picks append. */
+  async function quick() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await api<{ first: boolean; playingOn: string[] }>('/api/quick/items', {
+        method: 'POST',
+        body: { titleKey: t.key, service, profile, startFrom: startFrom || undefined },
+      });
+      if (r.first) {
+        router.push(`/playlists/quick${profileQuery(profile)}`);
+        return;
+      }
+      setHasQuick(true);
+      setMsg({ ok: true, text: `Added ${t.name} to the quick playlist${r.playingOn.length ? ` (playing on ${r.playingOn.join(' and ')})` : ''}` });
+      setQuickNote('Open the quick playlist');
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof ApiError ? e.message : 'Could not save.' });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function send(what: 'play' | 'trailer') {
     if (!tv) return;
@@ -219,20 +286,39 @@ export default function TitleDetails({
         <button type="button" className="btn dark wide" onClick={() => void send('play')} disabled={!tv || busy}>
           <PlayIcon size={18} color="#FFFFFF" /> {tv ? `Play on ${tv.name}` : 'Play on a TV'}
         </button>
-        <button type="button" className="btn pri wide" disabled aria-describedby={`pp3-${t.key}`}>
-          <PlusIcon size={18} /> Add to playlist
-        </button>
+        {role === 'adult' && (
+          <button type="button" className="btn pri wide" onClick={() => void openPlaylists()} aria-expanded={lists !== null}>
+            <PlusIcon size={18} /> Add to playlist
+          </button>
+        )}
+        {lists && (
+          <section aria-label="Add to which playlist" className="card" style={{ gap: 8 }}>
+            {lists.map((p) => (
+              <button key={p.id} type="button" className="btn" onClick={() => void addTo(p.id, p.name)}>
+                Add to {p.name}
+              </button>
+            ))}
+            <div className="row">
+              <input className="field" aria-label="New playlist name" placeholder="New playlist name" value={newName} onChange={(e) => setNewName(e.target.value)} maxLength={60} />
+              <button type="button" className="btn" onClick={() => void addToNew()} disabled={!newName.trim()}>
+                Make and add
+              </button>
+            </div>
+          </section>
+        )}
         <div className="btns">
-          <button type="button" className="btn" disabled aria-describedby={`pp3-${t.key}`}>
-            Start quick playlist
+          <button type="button" className="btn" onClick={() => void quick()} disabled={busy}>
+            {hasQuick ? 'Add to quick playlist' : 'Start quick playlist'}
           </button>
           <button type="button" className="btn" onClick={() => void moreLikeThis()} aria-expanded={more !== null}>
             More like this
           </button>
         </div>
-        <span className="s" id={`pp3-${t.key}`}>
-          Add to playlist and Start quick playlist: coming in PP3.
-        </span>
+        {quickNote && (
+          <Link href={`/playlists/quick${profileQuery(profile)}`} className="s">
+            {quickNote}
+          </Link>
+        )}
       </div>
 
       {role === 'adult' && (

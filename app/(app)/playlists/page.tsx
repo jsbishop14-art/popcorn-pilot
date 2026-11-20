@@ -1,17 +1,23 @@
-import Link from 'next/link';
-import { ComingLater, PageTop } from '@/components/Page';
-import { SparkIcon } from '@/components/icons';
+import { PageTop } from '@/components/Page';
+import PlaylistsScreen from '@/components/PlaylistsScreen';
+import { viewerFor } from '@/lib/catalog';
+import { listPlaylists } from '@/lib/playlists';
+import { pickerProfiles, startProfile } from '@/lib/browse-profiles';
+import { pageAuth } from '@/lib/server-auth';
 
-export default function PlaylistsPage() {
+export const dynamic = 'force-dynamic';
+
+export default function PlaylistsPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  const auth = pageAuth();
+  const role = auth.role === 'adult' ? 'adult' : 'guest';
+  const profiles = pickerProfiles(role);
+  const profile = startProfile(role, profiles, searchParams.profile);
+  // The Guest PIN with no kid profile yet sees no playlists (nothing to show for).
+  const list = role === 'guest' && profile === null ? [] : listPlaylists(viewerFor(auth, profile));
   return (
     <>
       <PageTop title="Playlists" />
-      <main className="main">
-        <ComingLater what="Playlists and playback" build="PP3" />
-        <Link href="/browse/suggestions" className="btn wide">
-          <SparkIcon size={20} /> Suggestions
-        </Link>
-      </main>
+      <PlaylistsScreen role={role} initial={list} profiles={profiles} profile={profile} />
     </>
   );
 }
