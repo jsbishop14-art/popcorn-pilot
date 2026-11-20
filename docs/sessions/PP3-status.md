@@ -98,9 +98,23 @@ None (spec section 5). Production is the Pi; never touched.
 - Step 3 (a26d0c4): 19 API routes, 6 pages in the permission map, channel API, engine timer. unit 318/318
   (permissions 217/217, playlists-api 7/7). Controls: unmapped routes failed the coverage test; kid filter off failed
   4 tests.
+- Step 4 (f9f62df): screens: Dashboard on Home (requests placeholder until PP4), Playlists, playlist page with Start,
+  New playlist, editor with Show options, Quick playlist, Live queue, Remote; Browse Add to playlist and Start quick
+  playlist work.
+- Step 5 (this commit): browser tests, test/e2e/playback.spec.ts at phone and desktop width (7 each). PP2's "coming
+  in PP3" assertions inverted (browse.spec, screens.spec). Found and fixed: the app's router showed an earlier copy
+  of the Playlists list and the editor (a playlist just made was missing; the editor could save over newer changes);
+  the playlist screens now load from the hub when they open, and next.config sets staleTimes.dynamic 0.
+  Control: the Remote button shown to the Guest PIN failed the Guest test (1 fail), reverted.
+- Step 6 (this commit): CI branch list (pp3-playback), smoke check covers playlists and playback, install guide step
+  6 (try a playlist), chain.md Waits on hardware (playlists on the real Rokus).
+- Local checks before the CI push (caches removed, fresh npm ci, each exit code read on its own line): npm ci 0,
+  lint 0, typecheck 0, gen-types --check 0, migrate 0 (30 expected objects, 0 missing), shellcheck 0, install dry
+  run 0, unit 0 (318/318), build 0, e2e 0 (45/45; HTTP permission map 296 answers), smoke 0 on a fresh production
+  build (control against a port with nothing on it: 1).
 
 ## PICK UP HERE
 
-Step 4: screens (Dashboard on Home, Playlists, playlist page, editor with Show options, Quick playlist, Live queue,
-Remote; Browse Add to playlist and Start quick playlist). Then step 5 browser tests (invert the PP2 "coming in PP3"
-assertions in test/e2e/browse.spec.ts and screens.spec.ts), step 6 CI list, smoke, docs, then CI and landing.
+The CI run (the one deliberate run) is pushed with this commit. Read its result: green on both jobs → record it
+here, merge to main with "[Merge] PP3 (", record the landing in chain.md and here. Red → classify from the log
+(docs/process.md section 7) before any re-run.

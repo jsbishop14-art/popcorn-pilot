@@ -71,6 +71,20 @@ Until this is done, Browse shows a built-in sample catalog with invented titles.
    then says "Titles, cover art and trailers come from TMDB", and Browse shows real titles on Netflix, Prime Video
    and Hulu. The first Browse after this takes a little longer while the hub saves the titles and cover art.
 
+## 6. Try a playlist on the TVs
+
+1. **Playlists > New playlist**, give it a name, then **Add title**: in Browse, open a title on each of Netflix,
+   Prime Video and Hulu and press **Add to playlist**.
+2. Open the playlist, pick **Living room**, and press **Start**. The TV should open the first title. **Home** shows
+   what is playing; **Remote** and **Queue** are on each TV's card.
+3. Press **Skip** to move to the next title, and check each service opens its title. If one does not, the Home
+   screen says so and moves on; note which service it was.
+4. With both TVs on, press **Send to…** on the Living room card and pick **Guest room**: the Living room pauses and
+   the Guest room starts the same title.
+
+Popcorn Pilot counts the time each title plays itself (the streaming apps do not report it), so the move to the next
+title can be a minute or two off the real end of an episode.
+
 ## Later steps (other builds)
 
 - Router DNS pointing at the Pi, for ad blocking (PP5).

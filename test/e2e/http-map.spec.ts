@@ -27,6 +27,9 @@ test('every API route and page answers per the map, for every role', async () =>
   expect(tvs.length).toBeGreaterThan(0);
   expect(profiles.length).toBeGreaterThan(0);
   const tvId = tvs[0].id;
+  // A playlist made by the playback tests (PP3), for the /playlists/[id] pages; 999 when there is none.
+  const playlists = (await (await admin.get('/api/playlists')).json()).playlists as { id: number }[];
+  const playlistId = playlists[0]?.id ?? 999;
   const freshToken = async () => (await (await admin.post(`/api/tvs/${tvId}/channel-token`)).json()).token as string;
 
   const lines: string[] = [];
@@ -61,7 +64,9 @@ test('every API route and page answers per the map, for every role', async () =>
     const path = pattern
       .replace('/profiles/[id]', `/profiles/${profiles[0].id}`)
       .replace('/settings/tvs/[id]', `/settings/tvs/${tvId}`)
-      .replace('/browse/[id]', '/browse/tv-9001');
+      .replace('/browse/[id]', '/browse/tv-9001')
+      .replace('/playlists/[id]', `/playlists/${playlistId}`)
+      .replace('/tvs/[id]', `/tvs/${tvId}`);
     for (const role of ROLES) {
       const ctx = await contextFor(role, await freshToken());
       const res = await ctx.get(path, { maxRedirects: 0 });

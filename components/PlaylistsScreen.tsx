@@ -33,12 +33,14 @@ export default function PlaylistsScreen({
   const [list, setList] = useState(initial);
   const q = profile === null ? '' : `?profile=${profile}`;
 
+  // Load the list as the hub has it now (the page the router shows may be an earlier copy), and again when the
+  // "Showing for" profile changes.
   useEffect(() => {
-    if (profile === startProfile) return;
+    if (role === 'guest' && profile === null) return;
     api<{ playlists: Playlist[] }>(`/api/playlists${q}`)
       .then((r) => setList(r.playlists))
       .catch(() => undefined);
-  }, [profile, q, startProfile]);
+  }, [role, profile, q]);
 
   return (
     <main className="main">

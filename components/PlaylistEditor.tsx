@@ -4,7 +4,7 @@
 // who can see it; Delete and Save.
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import type { Item, Playlist } from '@/lib/playlists';
 import type { PickerProfile } from '@/lib/browse-profiles';
@@ -54,6 +54,19 @@ export default function PlaylistEditor({ playlist, tvs, profiles }: { playlist: 
   const [editing, setEditing] = useState<Item | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // Load the playlist as the hub has it now (the page the router shows may be an earlier copy).
+  useEffect(() => {
+    api<{ playlist: Playlist }>(`/api/playlists/${playlist.id}`)
+      .then(({ playlist: p }) => {
+        setName(p.name);
+        setItems(p.items);
+        setLoop(p.loop);
+        setShuffle(p.shuffle);
+        setSch({ on: p.schedule.on, days: p.schedule.days, time: p.schedule.time ?? '08:00', tvId: p.schedule.tvId ?? tvs[0]?.id ?? null, profileId: p.schedule.profileId });
+      })
+      .catch(() => undefined);
+  }, [playlist.id, tvs]);
 
   const move = (i: number, d: -1 | 1) =>
     setItems((cur) => {

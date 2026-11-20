@@ -27,11 +27,16 @@ async function main() {
       const browse = await get('/api/catalog/browse');
       if (browse.status !== 401) throw new Error(`catalog answered ${browse.status} without a PIN (want 401)`);
       if (!fs.existsSync(new URL('../catalog-stub/titles.json', import.meta.url))) throw new Error('sample catalog missing');
+      // Playlists and playback (PP3) answer and still ask for a PIN.
+      for (const p of ['/api/playlists', '/api/playback']) {
+        const r = await get(p);
+        if (r.status !== 401) throw new Error(`${p} answered ${r.status} without a PIN (want 401)`);
+      }
       const db = new Database(dbFile(), { readonly: true });
       const { checked, missing } = verify(db, migrationsDir());
       db.close();
       if (missing.length) throw new Error(`database missing ${missing.join(', ')}`);
-      console.log(`smoke ok: app answers, PIN entry loads, catalog asks for a PIN, ${checked} database objects present`);
+      console.log(`smoke ok: app answers, PIN entry loads, catalog, playlists and playback ask for a PIN, ${checked} database objects present`);
       return 0;
     } catch (err) {
       last = err instanceof Error ? err.message : String(err);

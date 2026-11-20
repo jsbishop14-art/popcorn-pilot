@@ -21,7 +21,10 @@ export default defineConfig({
     { name: 'browse-phone', testMatch: /browse\.spec\.ts/, dependencies: ['phone'], use: { ...devices['Pixel 7'] } },
     { name: 'desktop', testMatch: /screens\.spec\.ts/, dependencies: ['browse-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
     { name: 'browse-desktop', testMatch: /browse\.spec\.ts/, dependencies: ['desktop'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
-    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['browse-desktop'] },
+    // Playlists and playback (PP3) after Browse; they add the second fake Roku as "Bedroom".
+    { name: 'playback-phone', testMatch: /playback\.spec\.ts/, dependencies: ['browse-desktop'], use: { ...devices['Pixel 7'] } },
+    { name: 'playback-desktop', testMatch: /playback\.spec\.ts/, dependencies: ['playback-phone'], use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 800 } } },
+    { name: 'http-map', testMatch: /http-map\.spec\.ts/, dependencies: ['playback-desktop'] },
     { name: 'lockout', testMatch: /lockout\.spec\.ts/, dependencies: ['http-map'], use: { ...devices['Pixel 7'] } },
   ],
   webServer: [

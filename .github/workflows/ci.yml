@@ -8,6 +8,7 @@ on:
       - main
       - pp1-foundation
       - pp2-browse
+      - pp3-playback
 
 concurrency:
   group: ci-${{ github.ref }}

@@ -34,6 +34,10 @@ None. Production is the Raspberry Pi; build sessions never touch it or a real TV
 - Check "Trailer on TV" opens the trailer in the YouTube channel on the real Rokus (PP2 sends launch/837 with the
   YouTube video id).
 - Confirm the time warning behavior over streaming apps (handoff 9.5).
+- Playlists on the real Rokus (PP3, docs/install-pi.md step 6): each of Netflix, Prime Video and Hulu opens its title
+  from a playlist (the launch log records direct link or search launch per title); Pause and Resume (the Roku
+  play/pause key) pause the streaming app; Stop (Home key) leaves it; Send to starts the title on the other TV; how
+  far the hub's estimated episode ends are from the real ones.
 
 ## Sources
 

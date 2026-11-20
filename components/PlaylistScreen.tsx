@@ -2,7 +2,7 @@
 // One playlist: its titles with how much of each plays, loop, shuffle, schedule, and Start on one or both TVs for a
 // profile (no profile: each TV's default profile; the Guest PIN starts for a kid profile). Adult: Edit.
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api, ApiError } from '@/lib/client';
 import type { Playlist } from '@/lib/playlists';
 import type { PickerProfile } from '@/lib/browse-profiles';
@@ -37,7 +37,7 @@ export function ItemRow({ i }: { i: Playlist['items'][number] }) {
 
 export default function PlaylistScreen({
   role,
-  playlist: p,
+  playlist: initial,
   tvs,
   profiles,
   profile,
@@ -52,6 +52,14 @@ export default function PlaylistScreen({
   const [who, setWho] = useState<string>(role === 'guest' ? String(profile ?? profiles[0]?.id ?? '') : '');
   const [msg, setMsg] = useState<{ ok: boolean; text: string; tv?: number } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [p, setP] = useState(initial);
+
+  // Load the playlist as the hub has it now (the page the router shows may be an earlier copy).
+  useEffect(() => {
+    api<{ playlist: Playlist }>(`/api/playlists/${initial.id}${profile === null ? '' : `?profile=${profile}`}`)
+      .then((r) => setP(r.playlist))
+      .catch(() => undefined);
+  }, [initial.id, profile]);
 
   async function start() {
     setBusy(true);

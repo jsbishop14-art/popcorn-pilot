@@ -74,9 +74,10 @@ test.describe('Adult PIN', () => {
     await expect(d).toContainText('Netflix · 2 seasons · 22 min episodes');
     await expect(d).toContainText('Three friends build a cardboard rocket');
     await expect(d.getByLabel('Start from')).toHaveValue('Season 1 · Episode 1');
-    await expect(d.getByRole('button', { name: 'Add to playlist' })).toBeDisabled();
-    await expect(d.getByRole('button', { name: 'Start quick playlist' })).toBeDisabled();
-    await expect(d).toContainText('coming in PP3');
+    // PP3: Add to playlist and Start quick playlist work now (inverted from PP2's "coming in PP3").
+    await expect(d.getByRole('button', { name: 'Add to playlist' })).toBeEnabled();
+    await expect(d.getByRole('button', { name: 'Start quick playlist' })).toBeEnabled();
+    await expect(d).not.toContainText('coming in PP3');
 
     await d.getByRole('button', { name: 'Play trailer here' }).click();
     await expect(d.getByText('Trailer playing: Rocket Pals')).toBeVisible();
