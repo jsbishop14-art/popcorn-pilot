@@ -66,6 +66,14 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
 - D-6: No development seed on a real hub. The spec says the install "runs the migrations and seed"; scripts/seed.mjs
   adds placeholder profiles for development, and the Pi install does not run it. The real hub's starting data is the
   migrations plus first run (PINs) and the sample catalog, which ships with the app. Same as the Pi.
+- D-7: Windows install: its own Node 20 copy (and MinGit when Git is not installed) inside C:\ProgramData\PopcornPilot,
+  not a system-wide Node install. Reason: fewer changes to Josh's work PC, nothing breaks if he installs another Node
+  for something else, and the uninstall removes it all. Node is checked against nodejs.org's SHASUMS256.txt.
+- D-8: Windows: the hub runs as the built-in Local Service account (no password to store, few rights) from a
+  scheduled task with two triggers: at startup (before anyone signs in) and every 5 minutes (starts the hub if it
+  is not running; a running one is left alone). No time limit, runs on battery, never wakes the PC. The folder is
+  open only to SYSTEM, administrators and Local Service; the key file is read-only for Local Service.
+- D-9: Port 8765 on Windows and Mac (80 needs extra rights and is often taken on a work PC). -Port changes it.
 
 ## Questions
 
@@ -79,7 +87,11 @@ None (spec section 5). Production is Josh's hub computer (Windows PC for now, Pi
   7/7, channel-api 32/32.
 - Step 2: scripts/hub-service.mjs and scripts/hub-update.mjs, the app's service watchdog. Unit: hub-updater 6/6
   (control: with the database restore removed, the rollback test fails, 1 failed 5 passed), hub-service 4/4.
+- Step 3: scripts/install-windows.ps1, scripts/uninstall-windows.ps1, test/install/windows-check.ps1 (CI: task,
+  account, firewall rule, leftovers), test/install/hub-check.mjs (CI: installed hub's host, address, ad blocking,
+  Guest refused). PSScriptAnalyzer 1.23.0: 0 findings on all three (control snippet: 3 findings). Not run on Windows
+  here (no Windows in the codespace): the CI Windows job runs them.
 
 ## PICK UP HERE
 
-Step 3: scripts/install-windows.ps1 and scripts/uninstall-windows.ps1 (test mode for CI), PSScriptAnalyzer clean.
+Step 4: scripts/install-mac.sh and scripts/uninstall-mac.sh (launchd, test mode for CI), shellcheck clean.
